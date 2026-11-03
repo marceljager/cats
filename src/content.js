@@ -155,8 +155,8 @@ export const stops = [
       'Jenže jednomu z našich lidí se tu začala zhoršovat alergie. Bohužel alergie na nás.',
       'Podle tohohle místa Polly později dostala své jméno.',
     ],
-    photo: null,
-    photoHint: 'Koťata se psy',
+    photo: '/photos/polly-se-psy.jpg',
+    photoHint: 'Polly a za ní pes našich záchranců',
     doodle: 'farm',
   },
   // Příklad další zastávky – stačí odkomentovat a upravit:
@@ -203,7 +203,7 @@ export const gallery = [
   { photo: '/photos/vecer-spolu.jpg', orientation: 'portrait', caption: 'Večer spolu', hint: 'oba spolu' },
   { photo: '/photos/kotata-u-veterinare.jpg', orientation: 'portrait', caption: 'U veterináře v Praze', hint: 'koťata v přepravce u veterináře' },
   { photo: '/photos/kotata-u-okna.jpg', orientation: 'portrait', caption: 'Koukáme z okna', hint: 'koťata na parapetu u okna' },
-  { photo: '/photos/kotata-v-kresle.jpg', orientation: 'portrait', caption: 'Křeslo pro dva', hint: 'koťata spí stočená v křesle' },
+  { photo: '/photos/kotata-v-kresle.jpg', orientation: 'landscape', caption: 'Křeslo pro dva', hint: 'koťata stočená v křesle' },
 ];
 
 // Návštěvy u veterináře, v pořadí, jak proběhly.
