@@ -135,8 +135,8 @@
       <li class="chip">k&nbsp;adopci v&nbsp;Praze a&nbsp;okolí</li>
     </ul>
     <div class="actions">
-      <Button href="#domov">Chci je poznat <Icon name="right" size={24} /></Button>
-      <span class="story"><Button href="#cesta" variant="link">Jak jsme se sem dostali <Icon name="down" size={22} /></Button></span>
+      <Button href="#cesta">Jak jsme se sem dostali <Icon name="down" size={24} /></Button>
+      <span class="meet"><Button href="#kotata" variant="link">Chci je poznat <Icon name="right" size={22} /></Button></span>
     </div>
   </div>
 
@@ -387,10 +387,11 @@
     gap: 14px 24px;
     margin-top: 26px;
   }
-  .story {
+  .meet {
     color: #dce8f5;
   }
-  .story :global(.icon) {
+  /* the arrow nudges down: the story starts just below */
+  .actions :global(.icon.down) {
     animation: nudge 2.2s var(--ease-out) infinite;
   }
   @keyframes nudge {
@@ -505,6 +506,6 @@
     }
   }
   @media (prefers-reduced-motion: reduce) {
-    .stars circle, .lights, .story :global(.icon) { animation: none; }
+    .stars circle, .lights, .actions :global(.icon.down) { animation: none; }
   }
 </style>
