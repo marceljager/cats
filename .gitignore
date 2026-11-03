@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.ssr/
+.env
+.DS_Store
+
+# made from photos/ by scripts/images.js (npm run images, and before every build)
+public/photos/
+src/photos.json
+
+# review screenshots, kept locally only
+screenshots/
+.impeccable/review/

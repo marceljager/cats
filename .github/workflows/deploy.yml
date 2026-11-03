@@ -1,0 +1,54 @@
+# every push to main: build the site and publish dist/ on GitHub Pages
+# (https://marceljager.github.io/cats/). Settings → Pages → Source must be "GitHub Actions".
+# The public address (the CDN domain) goes in Settings → Secrets and variables → Actions →
+# Variables as SITE_URL; without it the build has no og:image, canonical or ai-catalog.json.
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # encoded photos from earlier runs: only new or changed ones get encoded again
+      - uses: actions/cache@v4
+        with:
+          path: |
+            public/photos
+            src/photos.json
+          key: photos-${{ hashFiles('photos/**', 'scripts/images.js') }}
+          restore-keys: photos-
+      - run: npm run build
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

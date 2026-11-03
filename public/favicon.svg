@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#10233a"/>
+  <!-- Polly, the tabby, tucked behind -->
+  <g stroke="#161311" stroke-width="3" stroke-linejoin="round">
+    <path d="M33 30 L36 15 L44 24 Q48 23 52 24 L58 15 L60 31 Q61 50 46 51 Q32 51 33 30 Z" fill="#9b8466"/>
+    <!-- Velík, ginger and white, in front -->
+    <path d="M5 33 L8 13 L18 24 Q24 22 30 24 L40 13 L43 33 Q45 55 24 55 Q3 55 5 33 Z" fill="#e8934a"/>
+  </g>
+  <path d="M24 32 Q19 40 14 45 Q18 52 24 52 Q30 52 34 45 Q29 40 24 32 Z" fill="#fbfaf5"/>
+  <g fill="#161311">
+    <ellipse cx="17" cy="38" rx="2.4" ry="3"/>
+    <ellipse cx="31" cy="38" rx="2.4" ry="3"/>
+    <ellipse cx="49" cy="36" rx="2" ry="2.6"/>
+  </g>
+  <path d="M22 44 h4 l-2 2.4 Z" fill="#e58a7d"/>
+</svg>
