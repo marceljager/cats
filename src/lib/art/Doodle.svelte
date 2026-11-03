@@ -6,6 +6,8 @@
   const uid = $props.id(); // keeps clip-path ids apart between doodles
 
   const items = $derived(layoutPlace(kind, { seed, scale }));
+  // how each piece type is drawn (the snippets below)
+  const PIECES = { tree: roundTree, pine, peak, foot, barn, silo, farmhouse, fence, goat, hay, petrin, hrad, townhouse, nicholas, tyn, oldhall, powder, charles, mound, lake, reed, farmhill, tower, picnic };
 </script>
 
 <!-- a round leafy tree: a lumpy crown of three overlapping puffs on a short trunk that flares at
@@ -92,283 +94,321 @@
   </g>
 {/snippet}
 
+<!-- every other piece, one snippet per piece type (it.t), in the order the places use them -->
+{#snippet foot(it)}
+  <ellipse class="shadow" cx={it.x} cy={it.y} rx={it.rx} ry={it.ry} />
+{/snippet}
+
+{#snippet barn(it)}
+  <!-- a red barn from the front: gambrel roof, a white-trimmed X door, hay showing in the loft;
+       its right side and roof in shade -->
+  <g transform="translate({it.x} {it.y})">
+    <path class="barn-wall" d="M -14 0 V -15 H 14 V 0 Z" />
+    <path class="farm-shade" d="M 9 -15 H 14 V 0 H 9 Z" />
+    <rect class="barn-door" x="-6" y="-11" width="12" height="11" />
+    <path class="barn-x" d="M -6 -11 L 6 0 M 6 -11 L -6 0" />
+    <rect class="barn-x-frame" x="-6" y="-11" width="12" height="11" />
+    <path class="barn-roof" d="M -17 -14 L -12 -24 L 0 -30 L 12 -24 L 17 -14 Z" />
+    <path class="farm-shade" d="M 0 -30 L 12 -24 L 17 -14 H 0 Z" />
+    <path class="roof-line" d="M -17 -14 L -12 -24 L 0 -30 L 12 -24 L 17 -14 Z" />
+    <rect class="loft" x="-3.5" y="-22" width="7" height="5" />
+  </g>
+{/snippet}
+
+{#snippet silo(it)}
+  <g transform="translate({it.x} {it.y})">
+    <rect class="silo" x="-5" y="-28" width="10" height="28" />
+    <path class="farm-shade" d="M 2 -28 H 5 V 0 H 2 Z" />
+    <path class="silo-band" d="M -5 -19 H 5 M -5 -10 H 5" />
+    <path class="silo-top" d="M -5.5 -28 Q 0 -37 5.5 -28 Z" />
+  </g>
+{/snippet}
+
+{#snippet farmhouse(it)}
+  <!-- a small whitewashed farmhouse from the front, its chimney smoking -->
+  <g transform="translate({it.x} {it.y})">
+    <rect class="chimney" x="6.5" y="-24" width="3.5" height="12" />
+    <path class="wall" d="M -9 0 V -11 H 9 V 0 Z" />
+    <path class="farm-shade" d="M 6 -11 H 9 V 0 H 6 Z" />
+    <rect class="door" x="-6" y="-7" width="4" height="7" />
+    <rect class="window" x="1" y="-8" width="4" height="4" />
+    <path class="roof r0" d="M -11.5 -10.5 L 0 -21 L 11.5 -10.5 Z" />
+    <path class="farm-shade" d="M 0 -21 L 11.5 -10.5 H 0 Z" />
+  </g>
+  {@render smoke(it)}
+{/snippet}
+
+{#snippet fence(it)}
+  <!-- a split-rail fence: posts with two rails -->
+  {@const gaps = Math.round((it.to - it.from) / 9)}
+  {@const posts = Array.from({ length: gaps + 1 }, (_, k) => it.from + ((it.to - it.from) * k) / gaps)}
+  <path class="fence" d="M {it.from} {it.y - 3} H {it.to} M {it.from} {it.y - 6.5} H {it.to}" />
+  {#each posts as px}<rect class="post" x={px - 1.1} y={it.y - 9} width="2.2" height="9" rx="0.6" />{/each}
+{/snippet}
+
+{#snippet goat(it)}
+  <!-- a goat from the side: thin legs, a perky tail, curved horns, a little beard; a grazing
+       one has its head down -->
+  <g transform="translate({it.x} {it.y}) scale({it.flip ? -0.8 : 0.8} 0.8)">
+    <path class="leg" d="M -5 0 V -6 M -2.5 0 V -6 M 3.5 0 V -6 M 6 0 V -6" />
+    <path class="goat-line" d="M -7 -10.5 q -2.6 -1.6 -1.8 -4.4" />
+    <rect class="goat g{it.c}" x="-7.5" y="-12" width="15" height="7" rx="3.5" />
+    <g transform={it.graze ? 'rotate(95 6 -10)' : undefined}>
+      <path class="goat g{it.c}" d="M 4.5 -9.5 L 8.5 -15.5 L 10.6 -14.5 L 7.5 -8.6 Z" />
+      <path class="goat-line" d="M 10 -17.4 Q 9 -21 6 -21" />
+      <path class="goat g{it.c}" d="M 8.4 -16.4 Q 10.4 -18.2 12.4 -16.8 L 14.6 -13.6 Q 15 -12.2 13.6 -12 L 11.4 -12.4 Q 9 -12.6 8.4 -16.4 Z" />
+      <path class="goat g{it.c}" d="M 9 -15.6 Q 6.6 -15.2 5.8 -13.6 Q 7.6 -13.6 9.4 -14.4 Z" />
+      <path class="goat-line" d="M 13.4 -12.1 l -0.4 2.4" />
+      <circle class="eye" cx="11.6" cy="-15.4" r="0.65" />
+    </g>
+  </g>
+{/snippet}
+
+{#snippet hay(it)}
+  <!-- a round hay bale from the side, rolled up -->
+  <g transform="translate({it.x} {it.y})">
+    <circle class="hay" cx="0" cy="-6.5" r="6.5" />
+    <path class="hay-line" d="M 0 -6.5 m -1.6 0 a 1.6 1.6 0 1 1 3.2 0 a 3.2 3.2 0 1 1 -6.2 -1 a 4.6 4.6 0 1 1 1.4 5" />
+  </g>
+{/snippet}
+
+{#snippet petrin(it)}
+  <!-- Petřín hill with its lattice lookout tower, its feet planted on the slopes either side of
+       the top -->
+  {@const hill = (x, w, h) => `M ${x - w / 2} 22 C ${x - w * 0.32} 22 ${x - w * 0.26} ${22 - h} ${x} ${22 - h} C ${x + w * 0.26} ${22 - h} ${x + w * 0.32} 22 ${x + w / 2} 22`}
+  <path class="mound-shade" d="{hill(-126, 50, 60)} Z" />
+  <path class="mound" d="{hill(-129, 43, 57)} Z" />
+  <path class="mound-line" d={hill(-126, 50, 60)} />
+  <path class="lattice" d="M -131.6 -33 L -127.6 -69 M -120.4 -33 L -124.4 -69 M -130 -47 H -122 M -129 -56 H -123 M -128.2 -63 H -123.8 M -131 -38 L -123 -47 M -121 -38 L -129 -47 M -130 -47 L -123.3 -56 M -122 -47 L -128.7 -56 M -129 -56 L -124 -63 M -123 -56 L -128 -63" />
+  <rect class="stone" x="-128.6" y="-73" width="5.2" height="4" />
+  <path class="slate" d="M -129.2 -73 L -126 -77.5 L -122.8 -73 Z" />
+{/snippet}
+
+{#snippet hrad(it)}
+  <!-- Prague Castle on its ridge: St. Vitus rising behind the long palace front (twin west spires,
+       the nave with its pinnacles, the slim green crossing spire, the great south tower with its
+       golden clock and green copper domes), a round tower at the east end -->
+  <path class="mound-shade" d="M -116 22 C -113 -16 -106 -30 -98 -30 H -20 C -13 -30 -9 -10 -5 22 Z" />
+  <path class="mound" d="M -116 22 C -113 -16 -106 -30 -98 -30 H -26 C -19 -30 -16 -10 -13 22 Z" />
+  <path class="mound-line" d="M -116 22 C -113 -16 -106 -30 -98 -30 H -20 C -13 -30 -9 -10 -5 22" />
+  <g transform="translate(14 18)">
+    {#each [-105, -96] as sx}
+      <rect class="nave" x={sx} y="-84" width="5" height="26" />
+      <path class="spire dark" d="M {sx - 0.6} -84 L {sx + 2.5} -107 L {sx + 5.6} -84 Z" />
+      <path class="pinnacles" d="M {sx - 0.6} -84 l 0.6 -3.4 l 0.6 3.4 M {sx + 4.4} -84 l 0.6 -3.4 l 0.6 3.4" />
+    {/each}
+    <path class="nave" d="M -100 -58 V -76 L -98 -80 L -96 -76 V -58 Z" />
+    <circle class="pane" cx="-98" cy="-71" r="1.3" />
+    <path class="nave" d="M -91 -58 V -74 H -59 V -58 Z" />
+    <path class="lancets" d={Array.from({ length: 6 }, (_, k) => `M ${-88 + k * 5} -61 v -9`).join(' ')} />
+    <path class="slate" d="M -92 -74 L -86 -84 H -63 L -58 -74 Z" />
+    <path class="pinnacles" d={Array.from({ length: 7 }, (_, k) => `M ${-91.6 + k * 5.4} -74 l 0.8 -4.6 l 0.8 4.6`).join(' ')} />
+    <path class="copper" d="M -77.4 -84 L -76 -99 L -74.6 -84 Z" />
+    <rect class="nave" x="-75" y="-90" width="10" height="32" />
+    <path class="lancets" d="M -71.5 -63 v -8 M -68.5 -63 v -8" />
+    <circle class="clock" cx="-70" cy="-80" r="2.2" />
+    <rect class="nave" x="-76" y="-92" width="12" height="2.4" />
+    <path class="copper" d="M -75 -92 C -75 -98 -72.6 -100 -70 -103 C -67.4 -100 -65 -98 -65 -92 Z" />
+    <rect class="copper" x="-71.6" y="-106" width="3.2" height="3.4" />
+    <path class="copper" d="M -72.6 -106 C -72.6 -108.6 -71 -109.6 -70 -112 C -69 -109.6 -67.4 -108.6 -67.4 -106 Z" />
+    <path class="gold" d="M -70 -112 V -116" />
+    <circle class="gold-dot" cx="-70" cy="-116.6" r="1" />
+    <rect class="castle" x="-112" y="-59" width="68" height="11" />
+    <path class="palace-roof" d="M -114 -59 L -110 -63.5 H -46 L -42 -59 Z" />
+    <path class="pane" d={Array.from({ length: 16 }, (_, k) => [-56.4, -52.4].map((wy) => `M ${-109.4 + k * 4} ${wy} h 1.6 v 2.2 h -1.6 Z`).join(' ')).join(' ')} />
+    <path class="portal" d="M -80.6 -48 V -52.6 Q -78.6 -55.4 -76.6 -52.6 V -48 Z" />
+    <path class="farm-shade" d="M -49 -59 H -44 V -48 H -49 Z" />
+    <rect class="castle" x="-43" y="-62" width="7" height="14" />
+    <path class="slate" d="M -44 -62 L -39.5 -71 L -35 -62 Z" />
+    <path class="farm-shade" d="M -38.5 -62 H -36 V -48 H -38.5 Z" />
+  </g>
+{/snippet}
+
+{#snippet townhouse(it)}
+  <!-- a narrow townhouse from the front: a pastel facade, two windows a floor, the right edge in
+       shade, and a red gable, a hipped roof or a curvy Baroque gable -->
+  {@const L = it.x - it.w / 2}
+  {@const R = it.x + it.w / 2}
+  {@const T = it.y - it.h}
+  <rect class="facade f{it.c}" x={L} y={T} width={it.w} height={it.h} />
+  <path class="pane" d={Array.from({ length: Math.floor((it.h - 3) / 4) }, (_, k) => [L + it.w * 0.2, it.x + it.w * 0.1].map((wx) => `M ${wx} ${T + 2 + k * 4} h 1.6 v 2 h -1.6 Z`).join(' ')).join(' ')} />
+  <path class="farm-shade" d="M {R - 1.8} {T} H {R} V {it.y} H {R - 1.8} Z" />
+  {#if it.roof === 0}
+    <path class="roof" d="M {L - 0.5} {T} L {it.x} {T - it.rh} L {R + 0.5} {T} Z" />
+    <path class="farm-shade" d="M {it.x} {T - it.rh} L {R + 0.5} {T} H {it.x} Z" />
+  {:else if it.roof === 1}
+    <path class="roof" d="M {L - 0.5} {T} L {L + 2} {T - it.rh * 0.8} H {R - 2} L {R + 0.5} {T} Z" />
+    <path class="farm-shade" d="M {R - 2} {T - it.rh * 0.8} L {R + 0.5} {T} H {R - 2} Z" />
+  {:else}
+    {@const a = L + it.w * 0.26}
+    {@const b = R - it.w * 0.26}
+    <path class="facade f{it.c}" d="M {L} {T} C {L} {T - 2.6} {a} {T - 2.2} {a} {T - 5.4} Q {it.x} {T - 8.6} {b} {T - 5.4} C {b} {T - 2.2} {R} {T - 2.6} {R} {T} Z" />
+    <circle class="pane" cx={it.x} cy={T - 4} r="0.9" />
+  {/if}
+{/snippet}
+
+{#snippet nicholas(it)}
+  <!-- St. Nicholas in Malá Strana: a big green dome with its lantern, a bell tower beside it -->
+  <g transform="translate({it.x} {it.y})">
+    <rect class="castle" x="7" y="-24" width="5" height="24" />
+    <path class="copper" d="M 6.6 -24 C 6.6 -28 9.5 -29 9.5 -32 C 9.5 -29 12.4 -28 12.4 -24 Z" />
+    <rect class="castle" x="-8" y="-11" width="15" height="11" />
+    <path class="copper" d="M -6.5 -11 C -6.5 -19 -3 -21.6 -0.5 -21.6 C 2 -21.6 5.5 -19 5.5 -11 Z" />
+    <rect class="copper" x="-1.7" y="-25" width="2.4" height="3.6" />
+    <path class="gold" d="M -0.5 -25 V -28" />
+    <path class="farm-shade" d="M 3 -11 H 7 V 0 H 3 Z" />
+  </g>
+{/snippet}
+
+{#snippet tyn(it)}
+  <!-- Týn Church: twin dark towers, each crowned with a cluster of spires tipped in gold -->
+  <g transform="translate({it.x} {it.y})">
+    <path class="nave" d="M -4 0 V -24 L 0 -30 L 4 -24 V 0 Z" />
+    {#each [-10, 4] as tx}
+      <rect class="nave" x={tx} y="-34" width="6" height="34" />
+      <path class="spire dark" d="M {tx - 0.6} -34 L {tx + 3} -52 L {tx + 6.6} -34 Z" />
+      <path class="spire dark" d="M {tx - 1.6} -34 l 1.4 -7 l 1.4 7 Z M {tx + 4.8} -34 l 1.4 -7 l 1.4 7 Z" />
+      <path class="gold" d="M {tx + 3} -52 v -2.4" />
+      <circle class="gold-dot" cx={tx - 0.2} cy="-41.6" r="0.8" />
+      <circle class="gold-dot" cx={tx + 6.2} cy="-41.6" r="0.8" />
+    {/each}
+    <path class="farm-shade" d="M 8 -34 H 10 V 0 H 8 Z" />
+  </g>
+{/snippet}
+
+{#snippet oldhall(it)}
+  <!-- the Old Town Hall tower: the astronomical clock on its face, a gallery, a steep roof with
+       its four corner turrets -->
+  <g transform="translate({it.x} {it.y})">
+    <rect class="nave" x="-4.5" y="-40" width="9" height="40" />
+    <path class="lancets" d="M -1.6 -36 v -6 M 1.6 -36 v -6" transform="translate(0 6)" />
+    <circle class="clock" cx="0" cy="-17" r="3.4" />
+    <circle class="pane" cx="0" cy="-17" r="2.2" />
+    <path class="clock-hand" d="M 0 -17 L 1.4 -18.4" />
+    <path class="farm-shade" d="M 2.4 -40 H 4.5 V 0 H 2.4 Z" />
+    <rect class="nave" x="-5.8" y="-42" width="11.6" height="2.2" />
+    <path class="slate" d="M -5 -42 L 0 -55 L 5 -42 Z" />
+    <path class="slate" d="M -6.4 -42 l 1.3 -6 l 1.3 6 Z M 3.8 -42 l 1.3 -6 l 1.3 6 Z" />
+    <path class="gold" d="M 0 -55 v -3" />
+  </g>
+{/snippet}
+
+{#snippet powder(it)}
+  <!-- the Powder Tower: a dark Gothic gate tower with a steep spiky roof -->
+  <g transform="translate({it.x} {it.y})">
+    <rect class="stone dark" x="-4.5" y="-30" width="9" height="30" />
+    <path class="portal" d="M -2.2 0 V -5 Q 0 -8 2.2 -5 V 0 Z" />
+    <path class="farm-shade" d="M 2.4 -30 H 4.5 V 0 H 2.4 Z" />
+    <path class="slate" d="M -5 -30 L 0 -44 L 5 -30 Z" />
+    <path class="slate" d="M -5.8 -30 l 1.1 -5 l 1.1 5 Z M 3.6 -30 l 1.1 -5 l 1.1 5 Z" />
+  </g>
+{/snippet}
+
+{#snippet charles(it)}
+  <!-- Charles Bridge from the side: stone arches across the river, its statues along the parapet,
+       the Old Town Bridge Tower on the east bank, the two Malá Strana towers on the west -->
+  {@const P = [-24, -14.4, -4.8, 4.8, 14.4, 24]}
+  {@const by = it.y}
+  <path class="statues" d={Array.from({ length: 7 }, (_, k) => `M ${-20 + k * 6.6} ${by - 4} v -3.4`).join(' ')} />
+  <path class="stone" d="M {P[0]} {by - 4} H {P[5]} V {by + 4} {P.slice(0, 5).map((_, k) => { const i = 4 - k; const r0 = i === 4 ? P[5] : P[i + 1] - 1.4; const l0 = i === 0 ? P[0] : P[i] + 1.4; return `L ${r0} ${by + 4} Q ${(r0 + l0) / 2} ${by - 3.4} ${l0} ${by + 4}`; }).join(' ')} Z" />
+  <path class="farm-shade" d="M {P[0]} {by - 1.6} H {P[5]} V {by - 0.6} H {P[0]} Z" />
+  <!-- Old Town Bridge Tower -->
+  <rect class="stone" x="23" y={by - 22} width="10" height="26" />
+  <path class="portal" d="M 25.6 {by + 4} V {by - 1} Q 28 {by - 4.4} 30.4 {by - 1} V {by + 4} Z" />
+  <path class="slate" d="M 22.4 {by - 22} L 28 {by - 35} L 33.6 {by - 22} Z" />
+  <path class="pinnacles" d="M 22.4 {by - 22} l 0.9 -4 l 0.9 4 M 31.8 {by - 22} l 0.9 -4 l 0.9 4" />
+  <path class="farm-shade" d="M 30.6 {by - 22} H 33 V {by + 4} H 30.6 Z" />
+  <!-- Malá Strana bridge towers: the low Judith tower and the tall one -->
+  <rect class="stone" x="-36" y={by - 14} width="7" height="18" />
+  <path class="slate" d="M -36.6 {by - 14} L -32.5 {by - 21} L -28.4 {by - 14} Z" />
+  <rect class="stone" x="-31" y={by - 26} width="8" height="30" />
+  <path class="portal" d="M -29.2 {by + 4} V {by - 1} Q -27 {by - 4.4} -24.8 {by - 1} V {by + 4} Z" />
+  <path class="slate" d="M -31.6 {by - 26} L -27 {by - 38} L -22.4 {by - 26} Z" />
+  <path class="farm-shade" d="M -25 {by - 26} H -23 V {by + 4} H -25 Z" />
+{/snippet}
+
+{#snippet mound(it)}
+  {@const hill = (x, w, h) => `M ${x - w / 2} ${it.y} C ${x - w * 0.32} ${it.y} ${x - w * 0.26} ${it.y - h} ${x} ${it.y - h} C ${x + w * 0.26} ${it.y - h} ${x + w * 0.32} ${it.y} ${x + w / 2} ${it.y}`}
+  <!-- the hill in shade, then again in light, a little smaller and to the left, so the shade
+       only shows down the right flank; the outline runs over the top and leaves the foot open -->
+  <path class="mound-shade" d="{hill(it.x, it.w, it.h)} Z" />
+  <path class="mound" d="{hill(it.x - it.w * 0.07, it.w * 0.86, it.h * 0.94)} Z" />
+  <path class="mound-grass" d="M {it.x - it.w * 0.22} {it.y - it.h * 0.55} q 3 -2.5 6 -1 M {it.x - it.w * 0.05} {it.y - it.h * 0.3} q 3 -2.5 6 -1" />
+  <path class="mound-line" d={hill(it.x, it.w, it.h)} />
+{/snippet}
+
+{#snippet lake(it)}
+  <!-- shallow at the shore, deeper in the middle; ripples catching the light and a lily pad -->
+  <path class="lake-fill" d="M -60 4 C -62 -20 -22 -28 10 -24 S 64 -10 58 10 S 10 28 -20 25 S -58 22 -60 4 Z" />
+  <path class="lake-deep" d="M -60 4 C -62 -20 -22 -28 10 -24 S 64 -10 58 10 S 10 28 -20 25 S -58 22 -60 4 Z" transform="translate(4 3) scale(0.6)" />
+  <path class="shine" d="M -40 -8 q 6 -4 12 0 M -14 -15 q 4 -2.5 8 0 M 6 6 q 7 -4.5 14 0" />
+  <path class="lily" d="M 24 -8 L 29.5 -11.4 A 6.5 4.6 0 1 1 23 -12.6 Z" />
+{/snippet}
+
+{#snippet reed(it)}
+  <path class="reed" d="M {it.x} {it.y} q -2 -9 -5 -13 M {it.x + 3} {it.y} q 0 -10 1 -17 M {it.x + 6} {it.y} q 3 -8 6 -11" />
+  <!-- a cattail on the middle stalk -->
+  <rect class="cattail" x={it.x + 2.4} y={it.y - 16} width="3.2" height="7" rx="1.6" />
+{/snippet}
+
+{#snippet farmhill(it)}
+  {@const L = it.x - it.w / 2}
+  {@const tp = it.y - it.h}
+  {@const top = `M ${L} ${it.y} C ${L + it.w * 0.25} ${it.y} ${it.x - it.w * 0.3} ${tp} ${it.x} ${tp} C ${it.x + it.w * 0.3} ${tp} ${it.x + it.w / 2 - it.w * 0.25} ${it.y} ${it.x + it.w / 2} ${it.y}`}
+  {@const cid = `${uid}-farm${it.i}`}
+  <!-- a rolling hill of fields: crop bands with slanted edges, furrows following the hill's
+       curve, the right flank in shade; one outline over the top, the foot left open -->
+  <defs><clipPath id={cid}><path d="{top} Z" /></clipPath></defs>
+  <g clip-path="url(#{cid})">
+    {#each it.bands as [f0, c], k}
+      {@const x0 = L + f0 * it.w}
+      {@const x1 = L + (it.bands[k + 1]?.[0] ?? 1.1) * it.w}
+      <path class="c{c}" d="M {x0 - 4} {tp - 2} H {x1 - 4} L {x1 + 4} {it.y + 2} H {x0 + 4} Z" />
+      {#if k}<path class="field-edge" d="M {x0 - 4} {tp - 2} L {x0 + 4} {it.y + 2}" />{/if}
+    {/each}
+    {#each [5, 10, 15, 20] as dy}<path class="furrow" d={top} transform="translate(0 {dy})" />{/each}
+    <path class="farm-shade" d="M {it.x + it.w * 0.16} {tp - 2} H {it.x + it.w} V {it.y + 2} H {it.x + it.w * 0.3} Z" />
+  </g>
+  <path class="mound-line" d={top} />
+{/snippet}
+
+{#snippet tower(it)}
+  <!-- the lookout: two tapered posts (the right one in shade) braced crosswise, a plank deck
+       with a railing, corner posts holding a pitched roof, a flag on top -->
+  <g transform="translate(0 {it.y})">
+    <path class="brace" d="M -8.4 -3 L 6.6 -17 M 8.4 -3 L -6.6 -17 M -6.6 -17 L 5.2 -30 M 6.6 -17 L -5.2 -30 M -7 -17 H 7" />
+    <path class="post" d="M -10.6 0 H -7.4 L -3.8 -32 H -6.6 Z" />
+    <path class="post shade" d="M 7.4 0 H 10.6 L 6.6 -32 H 3.8 Z" />
+    <path class="rail" d="M -9.4 -36 V -46 M 9.4 -36 V -46 M -11 -41 H 11 M -4.5 -36 V -41 M 0 -36 V -41 M 4.5 -36 V -41" />
+    <rect class="deck" x="-12.5" y="-36" width="25" height="4.5" rx="0.8" />
+    <path class="roof r1" d="M -15.5 -45 L 0 -55 L 15.5 -45 Z" />
+    <path class="roof-shade" d="M 0 -55 L 15.5 -45 H 2 Z" />
+    <path class="roof-line" d="M -15.5 -45 L 0 -55 L 15.5 -45 Z" />
+    <path class="flagpole" d="M 0 -55 V -64" />
+    <path class="flag" d="M 0.6 -64 Q 5 -64.5 9 -62 Q 5 -60 0.6 -59.6 Z" />
+  </g>
+{/snippet}
+
+{#snippet picnic(it)}
+  <!-- seen from the side: a table on two A-frame legs with its bench in front, a parasol through
+       its middle (red and white panels, scalloped hem, the right half in shade), and a blue
+       P sign on a post -->
+  <path class="brace" d="M -15 0 L -10 -12 M -5 0 L -10 -12 M 5 0 L 10 -12 M 15 0 L 10 -12" />
+  <path class="flagpole" d="M 0 -12 V -40" />
+  <rect class="plank" x="-17" y="-14" width="34" height="3.2" rx="0.8" />
+  <rect class="plank" x="-19" y="-7" width="38" height="2.8" rx="0.8" />
+  <path class="parasol" d="M -17 -30 Q 0 -50 17 -30 Q 12.75 -27.5 8.5 -30 Q 4.25 -27.5 0 -30 Q -4.25 -27.5 -8.5 -30 Q -12.75 -27.5 -17 -30 Z" />
+  <path class="parasol-stripe" d="M 0 -40 L -8.5 -30 Q -4.25 -27.5 0 -30 Z M 0 -40 L 8.5 -30 Q 12.75 -27.5 17 -30 Z" />
+  <path class="parasol-shade" d="M 0 -40 Q 8.5 -40 17 -30 Q 12.75 -27.5 8.5 -30 Q 4.25 -27.5 0 -30 Z" />
+  <path class="roof-line" d="M -17 -30 Q 0 -50 17 -30 Q 12.75 -27.5 8.5 -30 Q 4.25 -27.5 0 -30 Q -4.25 -27.5 -8.5 -30 Q -12.75 -27.5 -17 -30 Z" />
+  <path class="post" d="M 25.2 0 H 26.8 V -18 H 25.2 Z" />
+  <rect class="sign" x="20" y="-27" width="12" height="10" rx="2" />
+  <path class="sign-p" d="M 24.4 -19.6 V -24.6 H 26.6 Q 28.6 -24.6 28.6 -22.9 Q 28.6 -21.2 26.6 -21.2 H 24.4" />
+{/snippet}
+
 <g class="doodle {kind}" transform="translate({x} {y}) scale({flip ? -scale : scale} {scale})">
   {#each items as it}
-    {#if it.t === 'tree'}
-      {@render roundTree(it)}
-    {:else if it.t === 'pine'}
-      {@render pine(it)}
-    {:else if it.t === 'peak'}
-      {@render peak(it)}
-    {:else if it.t === 'foot'}
-      <ellipse class="shadow" cx={it.x} cy={it.y} rx={it.rx} ry={it.ry} />
-    {:else if it.t === 'barn'}
-      <!-- a red barn from the front: gambrel roof, a white-trimmed X door, hay showing in the loft;
-           its right side and roof in shade -->
-      <g transform="translate({it.x} {it.y})">
-        <path class="barn-wall" d="M -14 0 V -15 H 14 V 0 Z" />
-        <path class="farm-shade" d="M 9 -15 H 14 V 0 H 9 Z" />
-        <rect class="barn-door" x="-6" y="-11" width="12" height="11" />
-        <path class="barn-x" d="M -6 -11 L 6 0 M 6 -11 L -6 0" />
-        <rect class="barn-x-frame" x="-6" y="-11" width="12" height="11" />
-        <path class="barn-roof" d="M -17 -14 L -12 -24 L 0 -30 L 12 -24 L 17 -14 Z" />
-        <path class="farm-shade" d="M 0 -30 L 12 -24 L 17 -14 H 0 Z" />
-        <path class="roof-line" d="M -17 -14 L -12 -24 L 0 -30 L 12 -24 L 17 -14 Z" />
-        <rect class="loft" x="-3.5" y="-22" width="7" height="5" />
-      </g>
-    {:else if it.t === 'silo'}
-      <g transform="translate({it.x} {it.y})">
-        <rect class="silo" x="-5" y="-28" width="10" height="28" />
-        <path class="farm-shade" d="M 2 -28 H 5 V 0 H 2 Z" />
-        <path class="silo-band" d="M -5 -19 H 5 M -5 -10 H 5" />
-        <path class="silo-top" d="M -5.5 -28 Q 0 -37 5.5 -28 Z" />
-      </g>
-    {:else if it.t === 'farmhouse'}
-      <!-- a small whitewashed farmhouse from the front, its chimney smoking -->
-      <g transform="translate({it.x} {it.y})">
-        <rect class="chimney" x="6.5" y="-24" width="3.5" height="12" />
-        <path class="wall" d="M -9 0 V -11 H 9 V 0 Z" />
-        <path class="farm-shade" d="M 6 -11 H 9 V 0 H 6 Z" />
-        <rect class="door" x="-6" y="-7" width="4" height="7" />
-        <rect class="window" x="1" y="-8" width="4" height="4" />
-        <path class="roof r0" d="M -11.5 -10.5 L 0 -21 L 11.5 -10.5 Z" />
-        <path class="farm-shade" d="M 0 -21 L 11.5 -10.5 H 0 Z" />
-      </g>
-      {@render smoke(it)}
-    {:else if it.t === 'fence'}
-      <!-- a split-rail fence: posts with two rails -->
-      {@const posts = Array.from({ length: Math.round((it.to - it.from) / 9) + 1 }, (_, k) => it.from + ((it.to - it.from) * k) / Math.round((it.to - it.from) / 9))}
-      <path class="fence" d="M {it.from} {it.y - 3} H {it.to} M {it.from} {it.y - 6.5} H {it.to}" />
-      {#each posts as px}<rect class="post" x={px - 1.1} y={it.y - 9} width="2.2" height="9" rx="0.6" />{/each}
-    {:else if it.t === 'goat'}
-      <!-- a goat from the side: thin legs, a perky tail, curved horns, a little beard; a grazing
-           one has its head down -->
-      <g transform="translate({it.x} {it.y}) scale({it.flip ? -0.8 : 0.8} 0.8)">
-        <path class="leg" d="M -5 0 V -6 M -2.5 0 V -6 M 3.5 0 V -6 M 6 0 V -6" />
-        <path class="goat-line" d="M -7 -10.5 q -2.6 -1.6 -1.8 -4.4" />
-        <rect class="goat g{it.c}" x="-7.5" y="-12" width="15" height="7" rx="3.5" />
-        <g transform={it.graze ? 'rotate(95 6 -10)' : undefined}>
-          <path class="goat g{it.c}" d="M 4.5 -9.5 L 8.5 -15.5 L 10.6 -14.5 L 7.5 -8.6 Z" />
-          <path class="goat-line" d="M 10 -17.4 Q 9 -21 6 -21" />
-          <path class="goat g{it.c}" d="M 8.4 -16.4 Q 10.4 -18.2 12.4 -16.8 L 14.6 -13.6 Q 15 -12.2 13.6 -12 L 11.4 -12.4 Q 9 -12.6 8.4 -16.4 Z" />
-          <path class="goat g{it.c}" d="M 9 -15.6 Q 6.6 -15.2 5.8 -13.6 Q 7.6 -13.6 9.4 -14.4 Z" />
-          <path class="goat-line" d="M 13.4 -12.1 l -0.4 2.4" />
-          <circle class="eye" cx="11.6" cy="-15.4" r="0.65" />
-        </g>
-      </g>
-    {:else if it.t === 'hay'}
-      <!-- a round hay bale from the side, rolled up -->
-      <g transform="translate({it.x} {it.y})">
-        <circle class="hay" cx="0" cy="-6.5" r="6.5" />
-        <path class="hay-line" d="M 0 -6.5 m -1.6 0 a 1.6 1.6 0 1 1 3.2 0 a 3.2 3.2 0 1 1 -6.2 -1 a 4.6 4.6 0 1 1 1.4 5" />
-      </g>
-    {:else if it.t === 'petrin'}
-      <!-- Petřín hill with its lattice lookout tower, its feet planted on the slopes either side of
-           the top -->
-      {@const hill = (x, w, h) => `M ${x - w / 2} 22 C ${x - w * 0.32} 22 ${x - w * 0.26} ${22 - h} ${x} ${22 - h} C ${x + w * 0.26} ${22 - h} ${x + w * 0.32} 22 ${x + w / 2} 22`}
-      <path class="mound-shade" d="{hill(-126, 50, 60)} Z" />
-      <path class="mound" d="{hill(-129, 43, 57)} Z" />
-      <path class="mound-line" d={hill(-126, 50, 60)} />
-      <path class="lattice" d="M -131.6 -33 L -127.6 -69 M -120.4 -33 L -124.4 -69 M -130 -47 H -122 M -129 -56 H -123 M -128.2 -63 H -123.8 M -131 -38 L -123 -47 M -121 -38 L -129 -47 M -130 -47 L -123.3 -56 M -122 -47 L -128.7 -56 M -129 -56 L -124 -63 M -123 -56 L -128 -63" />
-      <rect class="stone" x="-128.6" y="-73" width="5.2" height="4" />
-      <path class="slate" d="M -129.2 -73 L -126 -77.5 L -122.8 -73 Z" />
-    {:else if it.t === 'hrad'}
-      <!-- Prague Castle on its ridge: St. Vitus rising behind the long palace front (twin west spires,
-           the nave with its pinnacles, the slim green crossing spire, the great south tower with its
-           golden clock and green copper domes), a round tower at the east end -->
-      <path class="mound-shade" d="M -116 22 C -113 -16 -106 -30 -98 -30 H -20 C -13 -30 -9 -10 -5 22 Z" />
-      <path class="mound" d="M -116 22 C -113 -16 -106 -30 -98 -30 H -26 C -19 -30 -16 -10 -13 22 Z" />
-      <path class="mound-line" d="M -116 22 C -113 -16 -106 -30 -98 -30 H -20 C -13 -30 -9 -10 -5 22" />
-      <g transform="translate(14 18)">
-        {#each [-105, -96] as sx}
-          <rect class="nave" x={sx} y="-84" width="5" height="26" />
-          <path class="spire dark" d="M {sx - 0.6} -84 L {sx + 2.5} -107 L {sx + 5.6} -84 Z" />
-          <path class="pinnacles" d="M {sx - 0.6} -84 l 0.6 -3.4 l 0.6 3.4 M {sx + 4.4} -84 l 0.6 -3.4 l 0.6 3.4" />
-        {/each}
-        <path class="nave" d="M -100 -58 V -76 L -98 -80 L -96 -76 V -58 Z" />
-        <circle class="pane" cx="-98" cy="-71" r="1.3" />
-        <path class="nave" d="M -91 -58 V -74 H -59 V -58 Z" />
-        <path class="lancets" d={Array.from({ length: 6 }, (_, k) => `M ${-88 + k * 5} -61 v -9`).join(' ')} />
-        <path class="slate" d="M -92 -74 L -86 -84 H -63 L -58 -74 Z" />
-        <path class="pinnacles" d={Array.from({ length: 7 }, (_, k) => `M ${-91.6 + k * 5.4} -74 l 0.8 -4.6 l 0.8 4.6`).join(' ')} />
-        <path class="copper" d="M -77.4 -84 L -76 -99 L -74.6 -84 Z" />
-        <rect class="nave" x="-75" y="-90" width="10" height="32" />
-        <path class="lancets" d="M -71.5 -63 v -8 M -68.5 -63 v -8" />
-        <circle class="clock" cx="-70" cy="-80" r="2.2" />
-        <rect class="nave" x="-76" y="-92" width="12" height="2.4" />
-        <path class="copper" d="M -75 -92 C -75 -98 -72.6 -100 -70 -103 C -67.4 -100 -65 -98 -65 -92 Z" />
-        <rect class="copper" x="-71.6" y="-106" width="3.2" height="3.4" />
-        <path class="copper" d="M -72.6 -106 C -72.6 -108.6 -71 -109.6 -70 -112 C -69 -109.6 -67.4 -108.6 -67.4 -106 Z" />
-        <path class="gold" d="M -70 -112 V -116" />
-        <circle class="gold-dot" cx="-70" cy="-116.6" r="1" />
-        <rect class="castle" x="-112" y="-59" width="68" height="11" />
-        <path class="palace-roof" d="M -114 -59 L -110 -63.5 H -46 L -42 -59 Z" />
-        <path class="pane" d={Array.from({ length: 16 }, (_, k) => [-56.4, -52.4].map((wy) => `M ${-109.4 + k * 4} ${wy} h 1.6 v 2.2 h -1.6 Z`).join(' ')).join(' ')} />
-        <path class="portal" d="M -80.6 -48 V -52.6 Q -78.6 -55.4 -76.6 -52.6 V -48 Z" />
-        <path class="farm-shade" d="M -49 -59 H -44 V -48 H -49 Z" />
-        <rect class="castle" x="-43" y="-62" width="7" height="14" />
-        <path class="slate" d="M -44 -62 L -39.5 -71 L -35 -62 Z" />
-        <path class="farm-shade" d="M -38.5 -62 H -36 V -48 H -38.5 Z" />
-      </g>
-    {:else if it.t === 'townhouse'}
-      <!-- a narrow townhouse from the front: a pastel facade, two windows a floor, the right edge in
-           shade, and a red gable, a hipped roof or a curvy Baroque gable -->
-      {@const L = it.x - it.w / 2}
-      {@const R = it.x + it.w / 2}
-      {@const T = it.y - it.h}
-      <rect class="facade f{it.c}" x={L} y={T} width={it.w} height={it.h} />
-      <path class="pane" d={Array.from({ length: Math.floor((it.h - 3) / 4) }, (_, k) => [L + it.w * 0.2, it.x + it.w * 0.1].map((wx) => `M ${wx} ${T + 2 + k * 4} h 1.6 v 2 h -1.6 Z`).join(' ')).join(' ')} />
-      <path class="farm-shade" d="M {R - 1.8} {T} H {R} V {it.y} H {R - 1.8} Z" />
-      {#if it.roof === 0}
-        <path class="roof" d="M {L - 0.5} {T} L {it.x} {T - it.rh} L {R + 0.5} {T} Z" />
-        <path class="farm-shade" d="M {it.x} {T - it.rh} L {R + 0.5} {T} H {it.x} Z" />
-      {:else if it.roof === 1}
-        <path class="roof" d="M {L - 0.5} {T} L {L + 2} {T - it.rh * 0.8} H {R - 2} L {R + 0.5} {T} Z" />
-        <path class="farm-shade" d="M {R - 2} {T - it.rh * 0.8} L {R + 0.5} {T} H {R - 2} Z" />
-      {:else}
-        {@const a = L + it.w * 0.26}
-        {@const b = R - it.w * 0.26}
-        <path class="facade f{it.c}" d="M {L} {T} C {L} {T - 2.6} {a} {T - 2.2} {a} {T - 5.4} Q {it.x} {T - 8.6} {b} {T - 5.4} C {b} {T - 2.2} {R} {T - 2.6} {R} {T} Z" />
-        <circle class="pane" cx={it.x} cy={T - 4} r="0.9" />
-      {/if}
-    {:else if it.t === 'nicholas'}
-      <!-- St. Nicholas in Malá Strana: a big green dome with its lantern, a bell tower beside it -->
-      <g transform="translate({it.x} {it.y})">
-        <rect class="castle" x="7" y="-24" width="5" height="24" />
-        <path class="copper" d="M 6.6 -24 C 6.6 -28 9.5 -29 9.5 -32 C 9.5 -29 12.4 -28 12.4 -24 Z" />
-        <rect class="castle" x="-8" y="-11" width="15" height="11" />
-        <path class="copper" d="M -6.5 -11 C -6.5 -19 -3 -21.6 -0.5 -21.6 C 2 -21.6 5.5 -19 5.5 -11 Z" />
-        <rect class="copper" x="-1.7" y="-25" width="2.4" height="3.6" />
-        <path class="gold" d="M -0.5 -25 V -28" />
-        <path class="farm-shade" d="M 3 -11 H 7 V 0 H 3 Z" />
-      </g>
-    {:else if it.t === 'tyn'}
-      <!-- Týn Church: twin dark towers, each crowned with a cluster of spires tipped in gold -->
-      <g transform="translate({it.x} {it.y})">
-        <path class="nave" d="M -4 0 V -24 L 0 -30 L 4 -24 V 0 Z" />
-        {#each [-10, 4] as tx}
-          <rect class="nave" x={tx} y="-34" width="6" height="34" />
-          <path class="spire dark" d="M {tx - 0.6} -34 L {tx + 3} -52 L {tx + 6.6} -34 Z" />
-          <path class="spire dark" d="M {tx - 1.6} -34 l 1.4 -7 l 1.4 7 Z M {tx + 4.8} -34 l 1.4 -7 l 1.4 7 Z" />
-          <path class="gold" d="M {tx + 3} -52 v -2.4" />
-          <circle class="gold-dot" cx={tx - 0.2} cy="-41.6" r="0.8" />
-          <circle class="gold-dot" cx={tx + 6.2} cy="-41.6" r="0.8" />
-        {/each}
-        <path class="farm-shade" d="M 8 -34 H 10 V 0 H 8 Z" />
-      </g>
-    {:else if it.t === 'oldhall'}
-      <!-- the Old Town Hall tower: the astronomical clock on its face, a gallery, a steep roof with
-           its four corner turrets -->
-      <g transform="translate({it.x} {it.y})">
-        <rect class="nave" x="-4.5" y="-40" width="9" height="40" />
-        <path class="lancets" d="M -1.6 -36 v -6 M 1.6 -36 v -6" transform="translate(0 6)" />
-        <circle class="clock" cx="0" cy="-17" r="3.4" />
-        <circle class="pane" cx="0" cy="-17" r="2.2" />
-        <path class="clock-hand" d="M 0 -17 L 1.4 -18.4" />
-        <path class="farm-shade" d="M 2.4 -40 H 4.5 V 0 H 2.4 Z" />
-        <rect class="nave" x="-5.8" y="-42" width="11.6" height="2.2" />
-        <path class="slate" d="M -5 -42 L 0 -55 L 5 -42 Z" />
-        <path class="slate" d="M -6.4 -42 l 1.3 -6 l 1.3 6 Z M 3.8 -42 l 1.3 -6 l 1.3 6 Z" />
-        <path class="gold" d="M 0 -55 v -3" />
-      </g>
-    {:else if it.t === 'powder'}
-      <!-- the Powder Tower: a dark Gothic gate tower with a steep spiky roof -->
-      <g transform="translate({it.x} {it.y})">
-        <rect class="stone dark" x="-4.5" y="-30" width="9" height="30" />
-        <path class="portal" d="M -2.2 0 V -5 Q 0 -8 2.2 -5 V 0 Z" />
-        <path class="farm-shade" d="M 2.4 -30 H 4.5 V 0 H 2.4 Z" />
-        <path class="slate" d="M -5 -30 L 0 -44 L 5 -30 Z" />
-        <path class="slate" d="M -5.8 -30 l 1.1 -5 l 1.1 5 Z M 3.6 -30 l 1.1 -5 l 1.1 5 Z" />
-      </g>
-    {:else if it.t === 'charles'}
-      <!-- Charles Bridge from the side: stone arches across the river, its statues along the parapet,
-           the Old Town Bridge Tower on the east bank, the two Malá Strana towers on the west -->
-      {@const P = [-24, -14.4, -4.8, 4.8, 14.4, 24]}
-      {@const by = it.y}
-      <path class="statues" d={Array.from({ length: 7 }, (_, k) => `M ${-20 + k * 6.6} ${by - 4} v -3.4`).join(' ')} />
-      <path class="stone" d="M {P[0]} {by - 4} H {P[5]} V {by + 4} {P.slice(0, 5).map((_, k) => { const i = 4 - k; const r0 = i === 4 ? P[5] : P[i + 1] - 1.4; const l0 = i === 0 ? P[0] : P[i] + 1.4; return `L ${r0} ${by + 4} Q ${(r0 + l0) / 2} ${by - 3.4} ${l0} ${by + 4}`; }).join(' ')} Z" />
-      <path class="farm-shade" d="M {P[0]} {by - 1.6} H {P[5]} V {by - 0.6} H {P[0]} Z" />
-      <!-- Old Town Bridge Tower -->
-      <rect class="stone" x="23" y={by - 22} width="10" height="26" />
-      <path class="portal" d="M 25.6 {by + 4} V {by - 1} Q 28 {by - 4.4} 30.4 {by - 1} V {by + 4} Z" />
-      <path class="slate" d="M 22.4 {by - 22} L 28 {by - 35} L 33.6 {by - 22} Z" />
-      <path class="pinnacles" d="M 22.4 {by - 22} l 0.9 -4 l 0.9 4 M 31.8 {by - 22} l 0.9 -4 l 0.9 4" />
-      <path class="farm-shade" d="M 30.6 {by - 22} H 33 V {by + 4} H 30.6 Z" />
-      <!-- Malá Strana bridge towers: the low Judith tower and the tall one -->
-      <rect class="stone" x="-36" y={by - 14} width="7" height="18" />
-      <path class="slate" d="M -36.6 {by - 14} L -32.5 {by - 21} L -28.4 {by - 14} Z" />
-      <rect class="stone" x="-31" y={by - 26} width="8" height="30" />
-      <path class="portal" d="M -29.2 {by + 4} V {by - 1} Q -27 {by - 4.4} -24.8 {by - 1} V {by + 4} Z" />
-      <path class="slate" d="M -31.6 {by - 26} L -27 {by - 38} L -22.4 {by - 26} Z" />
-      <path class="farm-shade" d="M -25 {by - 26} H -23 V {by + 4} H -25 Z" />
-    {:else if it.t === 'mound'}
-      {@const hill = (x, w, h) => `M ${x - w / 2} ${it.y} C ${x - w * 0.32} ${it.y} ${x - w * 0.26} ${it.y - h} ${x} ${it.y - h} C ${x + w * 0.26} ${it.y - h} ${x + w * 0.32} ${it.y} ${x + w / 2} ${it.y}`}
-      <!-- the hill in shade, then again in light, a little smaller and to the left, so the shade
-           only shows down the right flank; the outline runs over the top and leaves the foot open -->
-      <path class="mound-shade" d="{hill(it.x, it.w, it.h)} Z" />
-      <path class="mound" d="{hill(it.x - it.w * 0.07, it.w * 0.86, it.h * 0.94)} Z" />
-      <path class="mound-grass" d="M {it.x - it.w * 0.22} {it.y - it.h * 0.55} q 3 -2.5 6 -1 M {it.x - it.w * 0.05} {it.y - it.h * 0.3} q 3 -2.5 6 -1" />
-      <path class="mound-line" d={hill(it.x, it.w, it.h)} />
-    {:else if it.t === 'lake'}
-      <!-- shallow at the shore, deeper in the middle; ripples catching the light and a lily pad -->
-      <path class="lake-fill" d="M -60 4 C -62 -20 -22 -28 10 -24 S 64 -10 58 10 S 10 28 -20 25 S -58 22 -60 4 Z" />
-      <path class="lake-deep" d="M -60 4 C -62 -20 -22 -28 10 -24 S 64 -10 58 10 S 10 28 -20 25 S -58 22 -60 4 Z" transform="translate(4 3) scale(0.6)" />
-      <path class="shine" d="M -40 -8 q 6 -4 12 0 M -14 -15 q 4 -2.5 8 0 M 6 6 q 7 -4.5 14 0" />
-      <path class="lily" d="M 24 -8 L 29.5 -11.4 A 6.5 4.6 0 1 1 23 -12.6 Z" />
-    {:else if it.t === 'reed'}
-      <path class="reed" d="M {it.x} {it.y} q -2 -9 -5 -13 M {it.x + 3} {it.y} q 0 -10 1 -17 M {it.x + 6} {it.y} q 3 -8 6 -11" />
-      <!-- a cattail on the middle stalk -->
-      <rect class="cattail" x={it.x + 2.4} y={it.y - 16} width="3.2" height="7" rx="1.6" />
-    {:else if it.t === 'farmhill'}
-      {@const L = it.x - it.w / 2}
-      {@const tp = it.y - it.h}
-      {@const top = `M ${L} ${it.y} C ${L + it.w * 0.25} ${it.y} ${it.x - it.w * 0.3} ${tp} ${it.x} ${tp} C ${it.x + it.w * 0.3} ${tp} ${it.x + it.w / 2 - it.w * 0.25} ${it.y} ${it.x + it.w / 2} ${it.y}`}
-      {@const cid = `${uid}-farm${it.i}`}
-      <!-- a rolling hill of fields: crop bands with slanted edges, furrows following the hill's
-           curve, the right flank in shade; one outline over the top, the foot left open -->
-      <defs><clipPath id={cid}><path d="{top} Z" /></clipPath></defs>
-      <g clip-path="url(#{cid})">
-        {#each it.bands as [f0, c], k}
-          {@const x0 = L + f0 * it.w}
-          {@const x1 = L + (it.bands[k + 1]?.[0] ?? 1.1) * it.w}
-          <path class="c{c}" d="M {x0 - 4} {tp - 2} H {x1 - 4} L {x1 + 4} {it.y + 2} H {x0 + 4} Z" />
-          {#if k}<path class="field-edge" d="M {x0 - 4} {tp - 2} L {x0 + 4} {it.y + 2}" />{/if}
-        {/each}
-        {#each [5, 10, 15, 20] as dy}<path class="furrow" d={top} transform="translate(0 {dy})" />{/each}
-        <path class="farm-shade" d="M {it.x + it.w * 0.16} {tp - 2} H {it.x + it.w} V {it.y + 2} H {it.x + it.w * 0.3} Z" />
-      </g>
-      <path class="mound-line" d={top} />
-    {:else if it.t === 'tower'}
-      <!-- the lookout: two tapered posts (the right one in shade) braced crosswise, a plank deck
-           with a railing, corner posts holding a pitched roof, a flag on top -->
-      <g transform="translate(0 {it.y})">
-        <path class="brace" d="M -8.4 -3 L 6.6 -17 M 8.4 -3 L -6.6 -17 M -6.6 -17 L 5.2 -30 M 6.6 -17 L -5.2 -30 M -7 -17 H 7" />
-        <path class="post" d="M -10.6 0 H -7.4 L -3.8 -32 H -6.6 Z" />
-        <path class="post shade" d="M 7.4 0 H 10.6 L 6.6 -32 H 3.8 Z" />
-        <path class="rail" d="M -9.4 -36 V -46 M 9.4 -36 V -46 M -11 -41 H 11 M -4.5 -36 V -41 M 0 -36 V -41 M 4.5 -36 V -41" />
-        <rect class="deck" x="-12.5" y="-36" width="25" height="4.5" rx="0.8" />
-        <path class="roof r1" d="M -15.5 -45 L 0 -55 L 15.5 -45 Z" />
-        <path class="roof-shade" d="M 0 -55 L 15.5 -45 H 2 Z" />
-        <path class="roof-line" d="M -15.5 -45 L 0 -55 L 15.5 -45 Z" />
-        <path class="flagpole" d="M 0 -55 V -64" />
-        <path class="flag" d="M 0.6 -64 Q 5 -64.5 9 -62 Q 5 -60 0.6 -59.6 Z" />
-      </g>
-    {:else if it.t === 'picnic'}
-      <!-- seen from the side: a table on two A-frame legs with its bench in front, a parasol through
-           its middle (red and white panels, scalloped hem, the right half in shade), and a blue
-           P sign on a post -->
-      <path class="brace" d="M -15 0 L -10 -12 M -5 0 L -10 -12 M 5 0 L 10 -12 M 15 0 L 10 -12" />
-      <path class="flagpole" d="M 0 -12 V -40" />
-      <rect class="plank" x="-17" y="-14" width="34" height="3.2" rx="0.8" />
-      <rect class="plank" x="-19" y="-7" width="38" height="2.8" rx="0.8" />
-      <path class="parasol" d="M -17 -30 Q 0 -50 17 -30 Q 12.75 -27.5 8.5 -30 Q 4.25 -27.5 0 -30 Q -4.25 -27.5 -8.5 -30 Q -12.75 -27.5 -17 -30 Z" />
-      <path class="parasol-stripe" d="M 0 -40 L -8.5 -30 Q -4.25 -27.5 0 -30 Z M 0 -40 L 8.5 -30 Q 12.75 -27.5 17 -30 Z" />
-      <path class="parasol-shade" d="M 0 -40 Q 8.5 -40 17 -30 Q 12.75 -27.5 8.5 -30 Q 4.25 -27.5 0 -30 Z" />
-      <path class="roof-line" d="M -17 -30 Q 0 -50 17 -30 Q 12.75 -27.5 8.5 -30 Q 4.25 -27.5 0 -30 Q -4.25 -27.5 -8.5 -30 Q -12.75 -27.5 -17 -30 Z" />
-      <path class="post" d="M 25.2 0 H 26.8 V -18 H 25.2 Z" />
-      <rect class="sign" x="20" y="-27" width="12" height="10" rx="2" />
-      <path class="sign-p" d="M 24.4 -19.6 V -24.6 H 26.6 Q 28.6 -24.6 28.6 -22.9 Q 28.6 -21.2 26.6 -21.2 H 24.4" />
-    {/if}
+    {@render PIECES[it.t](it)}
   {/each}
   {#if label}
     <text class="name" x="0" y={kind === 'mountains' ? 28 : 22} text-anchor="middle" transform={flip ? 'scale(-1 1)' : undefined}>{label}</text>

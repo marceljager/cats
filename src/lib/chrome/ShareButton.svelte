@@ -55,7 +55,7 @@
   </Button>
 
   {#if open}
-    <div class="note" id="share-menu" bind:this={menu}>
+    <div class="note paper-sheet" id="share-menu" bind:this={menu}>
       <Text variant="subheading" as="p" class="note-title">{site.share.heading}</Text>
       <Text variant="small" class="note-text">Pošlete nás někomu, kdo by nám mohl dát domov.</Text>
       <ul>
@@ -98,12 +98,9 @@
     width: min(300px, calc(100vw - 32px));
     padding: 18px 16px 12px;
     color: var(--ink);
-    background: var(--paper);
-    border: 3px solid var(--ink);
-    border-radius: 8px;
-    box-shadow:
-      inset -4px -5px 0 var(--paper-shade),
-      0 16px 22px -12px rgba(0, 0, 0, 0.55);
+    --sheet-radius: 8px;
+    --sheet-shade: -4px -5px;
+    --sheet-drop: 0 16px 22px -12px rgba(0, 0, 0, 0.55);
     transform-origin: 85% 0;
     rotate: 1.5deg;
     animation: drop 0.32s var(--ease-back);

@@ -47,43 +47,48 @@ export async function optimizeImages({ log = console.log } = {}) {
   let made = 0;
 
   for (const file of sources) {
-    const src = fileURLToPath(new URL(file, SRC));
-    const bytes = await readFile(src);
-    const hash = createHash('sha1').update(bytes).update(SETTINGS).digest('hex').slice(0, 16);
-    const same = old[`/photos/${file}`]?.hash === hash;
-    const meta = await sharp(bytes).metadata();
-    // phone photos carry their rotation in EXIF; the encoded copies are turned upright
-    const turned = (meta.orientation ?? 1) >= 5;
-    const w = turned ? meta.height : meta.width;
-    const h = turned ? meta.width : meta.height;
-    const alpha = Boolean(meta.hasAlpha);
-    const fallback = alpha ? 'png' : 'jpg';
-    const widths = WIDTHS.filter((x) => x < w);
-    if (!widths.length || w / widths.at(-1) > 1.15) widths.push(w);
-    const name = base(file);
+    // a photo that can't be read or encoded is named in the error, whichever step failed
+    try {
+      const src = fileURLToPath(new URL(file, SRC));
+      const bytes = await readFile(src);
+      const hash = createHash('sha1').update(bytes).update(SETTINGS).digest('hex').slice(0, 16);
+      const same = old[`/photos/${file}`]?.hash === hash;
+      const meta = await sharp(bytes).metadata();
+      // phone photos carry their rotation in EXIF; the encoded copies are turned upright
+      const turned = (meta.orientation ?? 1) >= 5;
+      const w = turned ? meta.height : meta.width;
+      const h = turned ? meta.width : meta.height;
+      const alpha = Boolean(meta.hasAlpha);
+      const fallback = alpha ? 'png' : 'jpg';
+      const widths = WIDTHS.filter((x) => x < w);
+      if (!widths.length || w / widths.at(-1) > 1.15) widths.push(w);
+      const name = base(file);
 
-    const fallbackWidths = widths.filter((x) => FALLBACK_WIDTHS[fallback].includes(x));
-    if (fallback === 'jpg' && !fallbackWidths.length) fallbackWidths.push(widths.at(-1));
-    const jobs = [];
-    for (const width of widths) {
-      for (const fmt of ['avif', 'webp']) jobs.push({ out: `${name}-${width}.${fmt}`, width, fmt });
+      const fallbackWidths = widths.filter((x) => FALLBACK_WIDTHS[fallback].includes(x));
+      if (fallback === 'jpg' && !fallbackWidths.length) fallbackWidths.push(widths.at(-1));
+      const jobs = [];
+      for (const width of widths) {
+        for (const fmt of ['avif', 'webp']) jobs.push({ out: `${name}-${width}.${fmt}`, width, fmt });
+      }
+      for (const width of fallbackWidths) jobs.push({ out: `${name}-${width}.${fallback}`, width, fmt: fallback });
+      jobs.push({ out: `${name}.${fallback}`, width: Math.min(FALLBACK, w), fmt: fallback });
+      // the address content.js uses (/photos/velik.jpg) keeps working for a .webp/.png original too
+      if (`${name}.${fallback}` !== file) jobs.push({ out: file, width: Math.min(FALLBACK, w), fmt: file.split('.').pop().toLowerCase() });
+
+      for (const job of jobs) {
+        keep.add(job.out);
+        const out = fileURLToPath(new URL(job.out, OUT));
+        if (same && (await exists(out))) continue;
+        const fmt = job.fmt === 'jpg' ? 'jpeg' : job.fmt;
+        // .rotate() turns the photo upright and the encoder drops the rest of the metadata (GPS included)
+        await sharp(src).rotate().resize({ width: job.width, withoutEnlargement: true })[fmt](QUALITY[fmt] ?? {}).toFile(out);
+        made++;
+      }
+
+      manifest[`/photos/${file}`] = { w, h, alpha, widths, fallbackWidths, name: `/photos/${name}`, fallback, hash };
+    } catch (err) {
+      throw new Error(`photos: ${file}: ${err.message}`, { cause: err });
     }
-    for (const width of fallbackWidths) jobs.push({ out: `${name}-${width}.${fallback}`, width, fmt: fallback });
-    jobs.push({ out: `${name}.${fallback}`, width: Math.min(FALLBACK, w), fmt: fallback });
-    // the address content.js uses (/photos/velik.jpg) keeps working for a .webp/.png original too
-    if (`${name}.${fallback}` !== file) jobs.push({ out: file, width: Math.min(FALLBACK, w), fmt: file.split('.').pop().toLowerCase() });
-
-    for (const job of jobs) {
-      keep.add(job.out);
-      const out = fileURLToPath(new URL(job.out, OUT));
-      if (same && (await exists(out))) continue;
-      const fmt = job.fmt === 'jpg' ? 'jpeg' : job.fmt;
-      // .rotate() turns the photo upright and the encoder drops the rest of the metadata (GPS included)
-      await sharp(src).rotate().resize({ width: job.width, withoutEnlargement: true })[fmt](QUALITY[fmt] ?? {}).toFile(out);
-      made++;
-    }
-
-    manifest[`/photos/${file}`] = { w, h, alpha, widths, fallbackWidths, name: `/photos/${name}`, fallback, hash };
   }
 
   // whatever is left in public/photos from a photo that's gone

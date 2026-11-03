@@ -1,7 +1,7 @@
 <script>
   // Review sheet: every general building block of the site, numbered, so changes can be asked
-  // for by number ("make C4 like C1"). Real components are rendered as they are; scoped styles
-  // that live inside a section component are copied here 1:1 (marked "kopie").
+  // for by number ("make C4 like C1"). Real components are rendered as they are; pieces that live
+  // inside a section are shown live from the page (Crop), never copied, so they can't drift.
   import Icon from '../lib/ui/Icon.svelte';
   import Button from '../lib/ui/Button.svelte';
   import Card from '../lib/ui/Card.svelte';
@@ -16,9 +16,6 @@
   import { KINDS } from '../lib/art/scenery.js';
   import LuggageTags from '../lib/sections/cats/LuggageTags.svelte';
   import { cats } from '../content.js';
-
-  // the pin icon's drop (Icon.svelte), tip at (16, 29) in its 32-unit box
-  const PIN = 'M16 29s-9-8-9-15a9 9 0 0 1 18 0c0 7-9 15-9 15Z';
 
   const colors = [
     ['--land', 'Země (pozadí)'],
@@ -164,66 +161,26 @@
     <div class="grid">
       <div class="item">
         <span class="no">D1</span>
-        <div class="row"><span class="chip"><Icon name="check" size={18} /> Očkovaní</span><span class="chip">6–7 měsíců</span></div>
+        <div class="row"><span class="chip"><Icon name="check" size={18} /> Odčervení</span><span class="chip">6–7 měsíců</span></div>
         <small class="src">.chip · app.css (úvod, mapa)</small>
       </div>
       <div class="item">
         <span class="no">D2</span>
-        <span class="plaque">Praha</span>
-        <small class="src">Cedule zastávky · Stop.svelte (kopie)</small>
+        <Crop sel=".stop .plaque" pick={0} />
+        <small class="src">Cedule zastávky · Stop.svelte</small>
       </div>
       <div class="item">
         <span class="no">D3</span>
-        <div class="who-wrap">
-          <span class="who"
-            ><svg viewBox="-24 -32 48 56" width="26" height="26" aria-hidden="true"><CatHead catId="velik" r={18} mood="happy" wobble={false} /></svg
-            >Velík</span
-          >
-        </div>
-        <small class="src">Jmenovka bubliny · Cats.svelte (kopie)</small>
+        <Crop sel="#domov .prompts" />
+        <small class="src">Ikony u bodů · Contact.svelte</small>
       </div>
       <div class="item">
         <span class="no">D4</span>
-        <ul class="prompts">
-          <li><Icon name="home" size={28} /> kde a&nbsp;jak bydlíte</li>
-          <li><Icon name="heart" size={28} /> kdo u&nbsp;vás žije</li>
-          <li><Icon name="cats" size={28} /> oba, nebo jednoho</li>
-        </ul>
-        <small class="src">Ikony u bodů · Contact.svelte (kopie)</small>
-      </div>
-      <div class="item">
-        <span class="no">D5</span>
-        <div class="row">
-          <Icon name="check" size={26} />
-          <span class="hearts">{#each Array(5) as _}<Icon name="heart" size={26} />{/each}</span>
-        </div>
-        <small class="src">Odškrtnuto a hodnocení · Vet.svelte (kopie)</small>
-      </div>
-      <div class="item">
-        <span class="no">D6</span>
-        <span class="dogs">
-          <svg viewBox="0 0 64 40">
-            {#each [[18, 22, -8], [44, 20, 6]] as [cx, cy, r]}
-              <g transform="rotate({r} {cx} {cy})">
-                <ellipse class="ear" cx={cx - 10} cy={cy - 2} rx="5" ry="10" transform="rotate(18 {cx - 10} {cy - 2})" />
-                <ellipse class="ear" cx={cx + 10} cy={cy - 2} rx="5" ry="10" transform="rotate(-18 {cx + 10} {cy - 2})" />
-                <circle class="dog" cx={cx} cy={cy} r="11" />
-                <ellipse class="muzzle" cx={cx} cy={cy + 4.5} rx="5.5" ry="4.2" />
-                <circle class="eye-w" cx={cx - 4.2} cy={cy - 2.5} r="2.6" />
-                <circle class="eye-w" cx={cx + 4.2} cy={cy - 2.5} r="2.6" />
-                <circle class="dot" cx={cx - 3.8} cy={cy - 2.2} r="1.3" />
-                <circle class="dot" cx={cx + 4.6} cy={cy - 2.2} r="1.3" />
-                <ellipse class="dot" cx={cx} cy={cy + 3} rx="2.6" ry="1.9" />
-                <path class="tongue" d="M{cx - 1.6} {cy + 7} q1.6 3.4 3.2 0 Z" />
-              </g>
-            {/each}
-          </svg>
-          <b>2 psi</b>
-        </span>
-        <small class="src">Odznak „2 psi“ · Family.svelte (kopie)</small>
+        <Crop sel=".vet .score" />
+        <small class="src">Hodnocení · Vet.svelte</small>
       </div>
       <div class="item wide">
-        <span class="no">D7</span>
+        <span class="no">D5</span>
         <div class="tags-host"><LuggageTags cat={cats[0]} /></div>
         <small class="src">Visačky na kufr · LuggageTags.svelte</small>
       </div>
@@ -258,10 +215,6 @@
         <span class="no">E4</span>
         <div class="says">
           <Card variant="bubble">
-            <span class="who"
-              ><svg viewBox="-24 -32 48 56" width="26" height="26" aria-hidden="true"><CatHead catId="polly" r={18} mood="happy" wobble={false} /></svg
-              >Polly</span
-            >
             <p>Jsem Polly, holka, je mi 6–7 měsíců a&nbsp;jmenuju se po Poljaně.</p>
           </Card>
         </div>
@@ -346,84 +299,24 @@
     </div>
     <p class="note">Doodle.svelte</p>
 
-    <div class="grid map-bits">
+    <div class="grid map-bits crops">
       <figure class="item">
-        <span class="no">H11</span>
-        <svg class="bit" viewBox="0 0 240 90" aria-hidden="true">
-          <path class="ahead" d="M10 70 C70 70 80 20 130 20 S 200 60 230 30" />
-          <path class="done" d="M10 70 C70 70 80 20 130 20" />
-        </svg>
-        <figcaption>Trasa: projetá (červená) a ještě čeká (tečky) · Journey.svelte</figcaption>
+        <span class="no">H{KINDS.length + 1}</span>
+        <Crop sel=".journey .pin" pick={1} />
+        <figcaption>Špendlík zastávky · Journey.svelte</figcaption>
       </figure>
       <figure class="item">
-        <span class="no">H12</span>
-        <svg class="bit" viewBox="0 0 240 90" aria-hidden="true">
-          <path class="road-edge" d="M10 75 C80 75 120 15 230 20" />
-          <path class="road" d="M10 75 C80 75 120 15 230 20" />
-        </svg>
-        <figcaption>Silnice · Journey.svelte</figcaption>
-      </figure>
-      <figure class="item">
-        <span class="no">H13</span>
-        <svg class="bit" viewBox="0 0 240 90" aria-hidden="true">
-          <path class="river-bank" d="M10 20 C70 20 90 70 150 65 S 210 30 230 40" />
-          <path class="river" d="M10 20 C70 20 90 70 150 65 S 210 30 230 40" />
-        </svg>
-        <figcaption>Řeka · Journey.svelte</figcaption>
-      </figure>
-      <figure class="item">
-        <span class="no">H14</span>
-        <svg class="bit" viewBox="0 0 240 90" aria-hidden="true">
-          <g class="border">
-            <path d="M 0 48 C 72 34, 144 62, 240 44" />
-            <text x="8" y="34">Chorvatsko</text>
-            <text x="8" y="74">Slovinsko</text>
-          </g>
-        </svg>
-        <figcaption>Hranice se jmény zemí · Journey.svelte</figcaption>
-      </figure>
-      <figure class="item">
-        <span class="no">H15</span>
-        <svg class="bit" viewBox="0 0 240 90" aria-hidden="true">
-          <path class="tufts" d="M40 50 l-3 -7 M40 50 l0 -8 M40 50 l3 -7 M120 30 l-3 -7 M120 30 l0 -8 M120 30 l3 -7 M190 64 l-3 -7 M190 64 l0 -8 M190 64 l3 -7 M80 74 l-3 -7 M80 74 l0 -8 M80 74 l3 -7" />
-        </svg>
-        <figcaption>Trsy trávy · Journey.svelte</figcaption>
-      </figure>
-      <figure class="item">
-        <span class="no">H16</span>
-        <svg class="bit" viewBox="-5 0 210 100" aria-hidden="true">
-          <g class="cloud">
-            <path class="puff" d="M30 82 C8 82 4 56 26 52 C22 28 52 20 66 36 C72 12 112 8 122 32 C134 18 162 24 164 46 C188 44 198 74 174 82 Z" />
-            <path class="puff-shade" d="M24 74 C40 78 150 80 176 74 C182 78 178 82 174 82 H30 C26 82 22 79 24 74 Z" />
-          </g>
-        </svg>
+        <span class="no">H{KINDS.length + 2}</span>
+        <Crop sel=".journey .cloud" pick={0} />
         <figcaption>Mrak nad mapou · Journey.svelte</figcaption>
       </figure>
       <figure class="item">
-        <span class="no">H17</span>
-        <svg class="bit" viewBox="-40 -50 200 62" aria-hidden="true">
-          {#each ['upcoming', 'current'] as st, k}
-            <g class="pin {st}" transform="translate({k * 80} 0)">
-              <ellipse class="pin-ground" cx="0" cy="1" rx="10" ry="3.5" />
-              <!-- the site's pin icon at map size, as on the map (Journey.svelte) -->
-              <g transform="scale(1.75) translate(-16 -29)">
-                <clipPath id="kit-pin-clip-{k}"><path d={PIN} /></clipPath>
-                <path class="pin-shade" d={PIN} />
-                <g clip-path="url(#kit-pin-clip-{k})"><path class="pin-fill" d={PIN} transform="translate(-2.2 -2.2)" /></g>
-                <path class="pin-line" d={PIN} />
-                <path class="pin-shine" d="M10.3 12 a6.2 6.2 0 0 1 3 -3.8" />
-                <!-- the cream centre, shaded like the icon's -->
-                <clipPath id="kit-pin-eye-clip-{k}"><path d="M12.4 14 a3.6 3.6 0 1 0 7.2 0 a3.6 3.6 0 1 0 -7.2 0 Z" /></clipPath>
-                <path class="pin-eye-shade" d="M12.4 14 a3.6 3.6 0 1 0 7.2 0 a3.6 3.6 0 1 0 -7.2 0 Z" />
-                <g clip-path="url(#kit-pin-eye-clip-{k})"><path class="pin-eye-fill" d="M12.4 14 a3.6 3.6 0 1 0 7.2 0 a3.6 3.6 0 1 0 -7.2 0 Z" transform="translate(-2.2 -2.2)" /></g>
-                <path class="pin-eye" d="M12.4 14 a3.6 3.6 0 1 0 7.2 0 a3.6 3.6 0 1 0 -7.2 0 Z" />
-              </g>
-            </g>
-          {/each}
-        </svg>
-        <figcaption>Špendlík zastávky: čeká / dojeto · Journey.svelte</figcaption>
+        <span class="no">H{KINDS.length + 3}</span>
+        <Crop sel=".journey .border" pick={0} />
+        <figcaption>Hranice se jmény zemí · Journey.svelte</figcaption>
       </figure>
     </div>
+    <p class="note">Trasa, řeky a tráva jsou vidět na celé mapě (I9).</p>
   </section>
   <!-- I · drawings that live inside one section, shown live from the page -->
   <section id="i">
@@ -468,6 +361,11 @@
         <span class="no">I8</span>
         <Crop sel=".cats .booth" />
         <figcaption>Pásek z fotobudky · Cats.svelte</figcaption>
+      </figure>
+      <figure class="item wide">
+        <span class="no">I9</span>
+        <Crop sel=".journey .route" view={1300} />
+        <figcaption>Mapa: trasa, řeky, hranice, tráva a auto · Journey.svelte</figcaption>
       </figure>
     </div>
     <p class="note">Živé výřezy ze skutečné stránky: ukazují přesně to, co je na webu, a reagují na myš.</p>
@@ -637,103 +535,6 @@
     text-decoration: underline wavy;
     text-underline-offset: 5px;
   }
-  /* D · tags */
-  .plaque {
-    display: inline-block;
-    padding: 8px 20px 10px;
-    background: var(--sun);
-    color: var(--ink);
-    border: 3px solid var(--ink);
-    border-radius: 8px;
-    /* a place-name sign: flat, with a thin frame line just inside the edge */
-    box-shadow:
-      inset 0 0 0 3px var(--sun),
-      inset 0 0 0 5px var(--ink),
-      0 10px 12px -9px rgba(40, 60, 15, 0.55);
-    font-weight: 800;
-    font-variation-settings: 'INFM' 100, 'BNCE' 40;
-    line-height: 1.02;
-    font-size: clamp(2rem, 8.6vw, 3rem);
-    transform: rotate(-2.5deg);
-  }
-  .who-wrap {
-    position: relative;
-    height: 34px;
-    width: 120px;
-  }
-  .who {
-    position: absolute;
-    top: -16px;
-    right: 18px;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 3px 12px 4px 6px;
-    background: var(--ink);
-    color: var(--paper);
-    border: 2.5px solid var(--ink);
-    border-radius: 999px;
-    font-weight: 800;
-    font-size: 0.95rem;
-    rotate: 2deg;
-  }
-  .who-wrap .who {
-    top: 0;
-    right: auto;
-    left: 0;
-  }
-  .who svg {
-    overflow: visible;
-  }
-  .prompts {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    gap: 10px;
-    font-size: 1.1rem;
-  }
-  .prompts li {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    line-height: 1.3;
-  }
-  .hearts {
-    display: flex;
-    gap: 4px;
-  }
-  .dogs {
-    display: grid;
-    place-items: center;
-    align-content: center;
-    width: 96px;
-    aspect-ratio: 1;
-    background: var(--sea);
-    color: var(--paper);
-    border: 3px solid #fff;
-    outline: 2.5px solid var(--ink);
-    border-radius: 50%;
-    box-shadow:
-      inset -3px -4px 0 rgba(0, 0, 0, 0.18),
-      0 9px 10px -6px rgba(40, 60, 15, 0.55);
-    rotate: 8deg;
-  }
-  .dogs svg {
-    width: 60px;
-    overflow: visible;
-  }
-  .dogs b {
-    font-weight: 800;
-    font-size: 1.15rem;
-    line-height: 1;
-  }
-  .dog { fill: #2a2522; stroke: var(--ink); stroke-width: 2; }
-  .ear { fill: #161311; stroke: var(--ink); stroke-width: 2; }
-  .muzzle { fill: #4a423c; }
-  .eye-w { fill: var(--paper); }
-  .tongue { fill: #e58a7d; }
-  .dot { fill: var(--ink); }
   .tags-host {
     width: 100%;
     max-width: 640px;
@@ -813,68 +614,7 @@
     align-items: stretch;
   }
 
-  /* H · map pieces drawn by Journey.svelte (kopie) */
   .map-bits {
     margin-top: 16px;
   }
-  .bit {
-    width: 100%;
-    height: 100px;
-    overflow: visible;
-  }
-  .ahead,
-  .done {
-    fill: none;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-  }
-  .ahead {
-    stroke: var(--ink);
-    stroke-width: 2.5;
-    stroke-dasharray: 1 10;
-    opacity: 0.45;
-  }
-  .done {
-    stroke: var(--route);
-    stroke-width: 6;
-    stroke-dasharray: 16 11;
-  }
-  .river-bank { fill: none; stroke: #3b6f9e; stroke-width: 15; stroke-linecap: round; }
-  .river { fill: none; stroke: #7fb6e4; stroke-width: 10; stroke-linecap: round; }
-  .tufts { fill: none; stroke: #6f9a4a; stroke-width: 1.8; stroke-linecap: round; }
-  .road-edge { fill: none; stroke: var(--ink); stroke-width: 8; stroke-linecap: round; opacity: 0.75; }
-  .road { fill: none; stroke: var(--paper); stroke-width: 4.5; stroke-linecap: round; }
-  .border path {
-    fill: none;
-    stroke: var(--ink);
-    stroke-width: 2;
-    stroke-dasharray: 2 6 10 6;
-    opacity: 0.55;
-  }
-  .border text {
-    font-family: var(--f-label);
-    font-variation-settings: 'wdth' 70;
-    font-weight: 800;
-    font-size: 12px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    opacity: 0.75;
-  }
-  .cloud {
-    filter: drop-shadow(0 22px 5px rgba(40, 60, 15, 0.13));
-  }
-  .puff { fill: #fdfcf6; stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; }
-  .puff-shade { fill: #e4e7dc; }
-  .pin-ground { fill: rgba(22, 19, 17, 0.25); }
-  .pin-shade { fill: #e3d9bf; }
-  .pin-fill { fill: var(--paper); }
-  .pin-line { fill: none; stroke: var(--ink); stroke-width: 1.8; stroke-linejoin: round; stroke-dasharray: 3 2.4; }
-  .pin-shine { fill: none; stroke: #fff; stroke-width: 1.8; stroke-linecap: round; opacity: 0; }
-  .pin-eye-shade { fill: #e3d9bf; }
-  .pin-eye-fill { fill: var(--paper); }
-  .pin-eye { fill: none; stroke: var(--ink); stroke-width: 1.8; }
-  .pin.current .pin-shade { fill: #b3281f; }
-  .pin.current .pin-fill { fill: #e2483d; }
-  .pin.current .pin-line { stroke-dasharray: none; }
-  .pin.current .pin-shine { opacity: 0.8; }
 </style>

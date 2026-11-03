@@ -1,4 +1,6 @@
-// Veškerý text a fotky webu. Fotky (originály) dejte do složky photos/ v kořeni projektu a u položky
+// Fakta a fotky webu: koťata, zastávky, galerie, veterinář, kontakt a texty pro vyhledávače a sdílení.
+// Texty jednotlivých sekcí (nadpisy, úvody, popisky) jsou přímo v jejich komponentách v
+// src/lib/sections/. Fotky (originály) dejte do složky photos/ v kořeni projektu a u položky
 // nastavte photo: '/photos/nazev.jpg'. Zmenšené verze (AVIF, WebP, JPEG) se vyrobí samy při
 // npm run dev / npm run build. Dokud je photo null, ukáže se zástupný rámeček.
 
@@ -6,7 +8,7 @@
 // Tvar dat (kontroluje ho npm run check a npm test):
 /**
  * @typedef {{ x: number, y: number, w: number, ratio: number }} HeadFrame
- * @typedef {{ id: string, name: string, sex: string, age: string, namedAfter: string,
+ * @typedef {{ id: string, name: string, sex: 'kluk' | 'holka', age: string, namedAfter: string,
  *   namedIcon: 'mountains' | 'pin', neutered?: string, photo: string | null, photoHint: string,
  *   head: string | null, headFrame?: HeadFrame, fur?: string, says: string }} Cat
  * @typedef {{ label: string, icon: 'lookout' | 'rest' }} Detour
@@ -25,6 +27,18 @@ export const site = {
   title: 'Velík a Polly – koťata zdarma k adopci v Praze',
   description: 'Dvě koťata (kluk a holka, 6–7 měsíců) zachráněná v Chorvatsku hledají domov v Praze a okolí. Mazlivá, zvyklá na psy, odčervená, zdarma do dobrých rukou.',
   story: 'Dvě koťata (kluk a holka, 6–7 měsíců) z chorvatského pohoří Velebit hledají domov. Jsou mazlivá, pořád u lidí a nebojí se ani psů. Odčervená, odblešená, po veterinární kontrole, kocourek je vykastrovaný. Aktuálně jsou v Praze 6 – zdarma do dobrých rukou (ideálně oba spolu).',
+  // llms.txt: jak web shrne strojům (úvod a věta pod koťaty); ai-catalog.json: otázky, na které web odpovídá
+  llms: {
+    intro: 'Jednostránkový web, kde dvě zachráněná koťata (sourozenci, kluk a holka) hledají nový domov v Česku. Vyprávějí sama za sebe.',
+    together: 'Ideálně spolu, odděleně je to ale taky možné.',
+  },
+  queries: {
+    page: ['Která koťata v Praze hledají domov?', 'Jak adoptovat Velíka a Polly?'],
+    llms: ['Kolik je Velíkovi a Polly let a jsou zdraví?', 'Odkud koťata Velík a Polly pocházejí?'],
+  },
+  // obrázek náhledu odkazu (public/og.png, npm run og): popisek pro čtečky a řádek pod nadpisem
+  image: { alt: 'Velík a Polly, dvě koťata, která hledají domov' },
+  tagline: 'zdarma v Praze',
   share: {
     heading: 'Pomozte nám najít domov',
     text: 'Velík a Polly hledají domov – koťata zdarma k darování v Praze a okolí. Nevíte o někom?',
@@ -60,8 +74,9 @@ export const cats = [
     neutered: 'vykastrován',
     photo: '/photos/velik.jpg',
     photoHint: 'Velík zblízka',
-    // fotka hlavy pro kreslené postavičky (hero, auto, obývák…). Nejlépe PNG/WebP s průhledným
-    // pozadím, jen hlava s ušima, např. '/photos/velik-hlava.png'. Jiná fotka se ořízne do kruhu.
+    // fotka hlavy pro kreslené postavičky (hero, auto, obývák…). Nejlépe PNG nebo WebP s průhledným
+    // pozadím, jen hlava s ušima, jako '/photos/velik-hlava-3.webp'. Fotka bez průhlednosti se
+    // ořízne do kruhu.
     // headFrame říká, kde na fotce je obličej, aby seděl na místo kresleného:
     //   x, y = střed obličeje (0–1 zleva a shora), w = šířka obličeje (0–1 šířky fotky),
     //   ratio = šířka / výška celé fotky

@@ -21,7 +21,11 @@ export const font = (f) => fileURLToPath(new URL(`node_modules/@fontsource-varia
 
 // the square of the photo the polaroid shows, as a JPEG
 export async function cropPhoto() {
-  return sharp(fileURLToPath(new URL(PHOTO, root))).rotate().extract(CROP).resize(840, 840).jpeg({ quality: 88 }).toBuffer();
+  try {
+    return await sharp(fileURLToPath(new URL(PHOTO, root))).rotate().extract(CROP).resize(840, 840).jpeg({ quality: 88 }).toBuffer();
+  } catch (err) {
+    throw new Error(`og: can't crop ${PHOTO} to ${JSON.stringify(CROP)}: ${err.message}`, { cause: err });
+  }
 }
 
 // the page Chrome photographs, with the photo (a JPEG buffer) inlined
@@ -60,7 +64,7 @@ export function ogPage(photo) {
 </style>
 <div class="words">
   <h1>${headline}</h1>
-  <p>zdarma v Praze</p>
+  <p>${site.tagline}</p>
 </div>
 <figure class="print">
   <span class="tape"></span>
@@ -77,7 +81,7 @@ export async function shoot(html, out) {
     try {
       execFileSync(CHROME, ['--headless=new', '--disable-gpu', '--hide-scrollbars', '--force-device-scale-factor=1', '--window-size=1200,630', '--virtual-time-budget=3000', `--screenshot=${shot}`, `file://${page}`], { stdio: ['ignore', 'ignore', 'pipe'] });
     } catch (err) {
-      throw new Error(`og: Chrome couldn't take the screenshot (${CHROME})\n${err.stderr ?? err.message}`);
+      throw new Error(`og: Chrome couldn't take the screenshot (${CHROME})\n${String(err.stderr || '').trim() || err.message}`, { cause: err });
     }
     // Chrome adds no bottom bar in headless, but trim to the exact size anyway, then squeeze the PNG
     await sharp(await readFile(shot)).extract({ left: 0, top: 0, width: 1200, height: 630 }).png({ compressionLevel: 9, palette: true, quality: 90 }).toFile(out);

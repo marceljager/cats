@@ -25,7 +25,7 @@
       use:scrollLinked={{ keyframes: { y: [14, 0, -14], rotate: [2.5, 0.8, -2.5] }, rest: { y: 0, rotate: 0 }, media: WIDE }}
     >
       <div class="clip" aria-hidden="true" bind:this={clip}><span></span></div>
-      <article class="report">
+      <article class="report paper-sheet">
         <header class="head">
           <span class="cross" aria-hidden="true"></span>
           <div>
@@ -121,10 +121,6 @@
   .report {
     position: relative;
     padding: 18px 16px 18px;
-    background: var(--paper);
-    border: 3px solid var(--ink);
-    border-radius: 10px;
-    box-shadow: inset -5px -6px 0 var(--paper-shade);
     font-family: var(--f-marker);
   }
   .head {

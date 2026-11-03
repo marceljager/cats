@@ -10,7 +10,7 @@
   //   tilt  resting lean in degrees; delay staggers the bobble
   import { cats } from '../../content.js';
   import { rub } from '../motion/springs.js';
-  import { photoFile } from '../services/photos.js';
+  import { photoFile, photoInfo } from '../services/photos.js';
 
   let { catId, cx = 0, cy = 0, r = 30, mood = 'calm', look = 0, tilt = 0, delay = 0, wobble = true } = $props();
 
@@ -19,8 +19,8 @@
   const photo = $derived(data?.head ?? null);
   // an SVG <image> has no srcset: one WebP big enough for the largest head on a sharp screen
   const file = $derived(photo && photoFile(photo, 480, 'webp'));
-  // a transparent PNG cut-out of just the head sits as it is; any other photo is cropped to a circle
-  const cutout = $derived(photo ? /\.(png|webp)$/i.test(photo) : false);
+  // a head photo with transparency (the manifest says so) sits as it is; any other is cropped to a circle
+  const cutout = $derived(Boolean(photoInfo(photo)?.alpha));
   // a cut-out is sized so its face is as wide as the drawn face (2r) and centred where it sits;
   // without headFrame the whole image is fitted to the head's box
   const fit = $derived.by(() => {

@@ -66,7 +66,7 @@
     <!-- a three-panel comic strip: the people who found us, the dogs, the sneezing -->
     <ol class="strip">
       <li class="frame">
-        <div class="panel one">
+        <div class="panel one paper-sheet">
           <svg viewBox="0 0 200 160" aria-hidden="true">
             <rect class="wall" width="200" height="160" />
             <path class="ray" d="M100 70 L0 0 H60 Z M100 70 L140 0 H200 V40 Z" />
@@ -86,7 +86,7 @@
       </li>
 
       <li class="frame">
-        <div class="panel two">
+        <div class="panel two paper-sheet">
           <svg viewBox="0 0 200 160" aria-hidden="true">
             <rect class="wall" width="200" height="160" />
             <rect class="floor" y="140" width="200" height="20" />
@@ -111,7 +111,7 @@
       </li>
 
       <li class="frame">
-        <div class="panel three">
+        <div class="panel three paper-sheet">
           <svg viewBox="0 0 200 160" aria-hidden="true">
             <rect class="wall" width="200" height="160" />
             <path class="burst" d="M146 6 L154 22 L172 12 L169 30 L192 28 L177 42 L194 54 L172 57 L177 76 L158 66 L148 82 L141 66 L121 78 L125 59 L102 58 L118 44 L100 30 L123 31 L120 12 L137 23 Z" />
@@ -178,13 +178,9 @@
   .frame:nth-child(3) { rotate: -0.6deg; }
   .panel {
     position: relative;
-    background: var(--paper);
-    border: 3px solid var(--ink);
-    border-radius: 10px;
     padding: 8px;
-    box-shadow:
-      inset -4px -5px 0 var(--paper-shade),
-      0 12px 14px -10px rgba(40, 60, 15, 0.55);
+    --sheet-shade: -4px -5px;
+    --sheet-drop: 0 12px 14px -10px rgba(40, 60, 15, 0.55);
   }
   .panel svg {
     display: block;

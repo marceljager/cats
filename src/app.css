@@ -107,6 +107,16 @@ p {
   white-space: nowrap;
 }
 
+/* a sheet of the page's paper: ink outline, a cel shade along the lower-right edge and, if given,
+   a shadow on the ground. --sheet-radius, --sheet-shade (the shade's offset) and --sheet-drop tune
+   it; Card.svelte's surfaces are the same paper with a highlight added */
+.paper-sheet {
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: var(--sheet-radius, 10px);
+  box-shadow: inset var(--sheet-shade, -5px -6px) 0 var(--paper-shade), var(--sheet-drop, 0 0 transparent);
+}
+
 /* small outlined tag, like the map's signs */
 .chip {
   display: inline-flex;
