@@ -33,6 +33,63 @@ function startInMountains(g0, w, wide) {
   return { places, source, stream };
 }
 
+// a detour off the road to a labelled spot (to the side s), starting at height ay: the waypoints
+// out round the spot in a loop (over its top, its far side, under it) and back, and the spot itself.
+// Coming from the spot's side already (fromX), the road heads straight into the loop instead of
+// doubling back past the turn-off.
+function detourLoop({ detour, fromX, ay, s, w, wide }) {
+  const R = wide ? 46 : 34;
+  const ax = w * (0.5 + 0.06 * s);
+  const tx = ax + s * R * (wide ? 3.6 : 2.5);
+  const ty = ay + R;
+  const bx = ax + s * R * 0.25;
+  const by = ay + R * 2.1;
+  const pts = (fromX - ax) * s <= 0 ? [[ax, ay]] : [];
+  pts.push([tx - s * R * 0.6, ty - R * 0.85], [tx, ty], [tx - s * R * 0.6, ty + R * 0.85], [bx, by]);
+  /** @type {Place} */
+  const spot = { kind: detour.icon, x: tx + s * (wide ? 34 : 26), y: ty + 10, label: detour.label, scale: wide ? 1.2 : 0.95 };
+  return { pts, spot };
+}
+
+// the place of a stop's own (its doodle) next to its pin n: a city is drawn around the pin (which
+// sits on its Old Town square) with the map's river running through it as the Vltava, under
+// Charles Bridge (river); anything else stands at (x, y), the farm a size up as the whole little
+// scene it is. A stop without a place has neither.
+function placeOfStop({ kind, n, i, x, y, wide }) {
+  if (!kind) return { place: null, river: null };
+  if (kind === 'city') {
+    const cs = wide ? 1.6 : 1;
+    const cx = n.x - 46 * cs;
+    const cy = n.pinY - 12 * cs;
+    const river = [[2, -110], [-6, -40], [2, 2], [10, 40], [26, 90]].map(([lx, ly]) => [cx + lx * cs, cy + ly * cs]);
+    return { place: { kind, x: cx, y: cy, scale: cs, seed: i + 4 }, river };
+  }
+  return { place: { kind, x, y, scale: (wide ? 1.2 : 0.85) * (kind === 'farm' ? 1.35 : 1), seed: i + 4 }, river: null };
+}
+
+// a leg's river comes in from one side, meanders across, swinging round the places on its banks,
+// and leaves by the other side; into a city it runs straight on to the line it takes through the
+// streets (cityRiver)
+function legRiver({ r, s, w, at, cityRiver }) {
+  const edge = (side) => (side > 0 ? w + 60 : -60);
+  const river = [[edge(s), at(0.12)], [w * (0.5 + s * (0.25 + r() * 0.15)), at(0.3 + r() * 0.1)]];
+  const swing = [w * (0.5 - s * (0.3 + r() * 0.15)), at(cityRiver ? 0.45 : 0.62 + r() * 0.1)];
+  if (cityRiver) river.push(...cityRiver);
+  else river.push(swing, [edge(-s), at(0.92)]);
+  return river;
+}
+
+// the border lines on a leg, with any countries driven through on the way
+function bordersCrossed({ from, to, s, at }) {
+  const lands = [from.country, ...(to.via ?? []), to.country];
+  const borders = [];
+  for (let c = 0; c < lands.length - 1; c++) {
+    if (lands[c] === lands[c + 1]) continue;
+    borders.push({ y: at((c + 1) / lands.length), from: lands[c], to: lands[c + 1], side: s < 0 ? 'right' : 'left' });
+  }
+  return borders;
+}
+
 // leg i of the trip, from stop `from` (where the route meets it: g) to stop `to` (n): the
 // waypoints after g's pin (pts[exit] is where it leaves g's story), the scenery along the way,
 // the leg's river (into a city it runs on through the streets: city) and the borders it crosses
@@ -40,12 +97,10 @@ function planLeg({ g, n, i, from, to, w, wide }) {
   const pts = [];
   /** @type {Place[]} */
   const places = [];
-  const borders = [];
   // down past the stop's story, wavering a touch
   for (let y = g.pinY + 110, k = i * 7 + 3; y < g.exitY - 40; y += 110, k++) pts.push([g.x + Math.sin(k * 12.9898) * 2.6, y]);
   pts.push([g.x, g.exitY]);
   const exit = pts.length - 1;
-  const r = rng(i * 131 + 7);
   const s = i % 2 ? 1 : -1; // side the detour swings out to
 
   // leaving the mountains: the road runs straight on down to Gospić, between a few peaks
@@ -57,20 +112,9 @@ function planLeg({ g, n, i, from, to, w, wide }) {
   const at = (f) => g.exitY + (n.pinY - g.exitY) * f;
 
   if (to.detour) {
-    // pull off the road to look at something, round the spot and come back
-    const R = wide ? 46 : 34;
-    const ax = w * (0.5 + 0.06 * s);
-    const ay = at(0.36);
-    const tx = ax + s * R * (wide ? 3.6 : 2.5);
-    const ty = ay + R;
-    const bx = ax + s * R * 0.25;
-    const by = ay + R * 2.1;
-    // out to the spot and round it in a loop (over its top, its far side, under it) and back;
-    // coming from the spot's side already, we head straight into the loop instead of doubling
-    // back past the turn-off
-    if ((g.x - ax) * s <= 0) pts.push([ax, ay]);
-    pts.push([tx - s * R * 0.6, ty - R * 0.85], [tx, ty], [tx - s * R * 0.6, ty + R * 0.85], [bx, by]);
-    places.push({ kind: to.detour.icon, x: tx + s * (wide ? 34 : 26), y: ty + 10, label: to.detour.label, scale: wide ? 1.2 : 0.95 });
+    const loop = detourLoop({ detour: to.detour, fromX: g.x, ay: at(0.36), s, w, wide });
+    pts.push(...loop.pts);
+    places.push(loop.spot);
   }
   pts.push([n.x, n.pinY]);
 
@@ -78,22 +122,9 @@ function planLeg({ g, n, i, from, to, w, wide }) {
   const far = (f) => w * (0.5 - s * f);
   const near = (f) => w * (0.5 + s * f);
   // the stop's own place sits just before we arrive
-  const kind = to.doodle;
-  let cityRiver = null;
-  if (!kind) {
-    // a stop without a place of its own: just the fields and woods around it
-  } else if (kind === 'city') {
-    // the city is drawn around the stop: its pin sits on the Old Town square
-    const cs = wide ? 1.6 : 1;
-    const cx = n.x - 46 * cs;
-    const cy = n.pinY - 12 * cs;
-    places.push({ kind, x: cx, y: cy, scale: cs, seed: i + 4 });
-    // the map's river runs through it as the Vltava, under Charles Bridge
-    cityRiver = [[2, -110], [-6, -40], [2, 2], [10, 40], [26, 90]].map(([lx, ly]) => [cx + lx * cs, cy + ly * cs]);
-  } else {
-    // the farm is a whole little scene (barn, goats, farmhouse), so it gets drawn a size up
-    places.push({ kind, x: far(wide ? 0.32 : 0.26), y: at(0.8), scale: (wide ? 1.2 : 0.85) * (kind === 'farm' ? 1.35 : 1), seed: i + 4 });
-  }
+  const own = placeOfStop({ kind: to.doodle, n, i, x: far(wide ? 0.32 : 0.26), y: at(0.8), wide });
+  if (own.place) places.push(own.place);
+  const cityRiver = own.river;
   places.push({ kind: 'field', x: far(wide ? 0.2 : 0.14), y: at(0.5), scale: wide ? 1 : 0.7, seed: i + 2 });
   if (i > 0) {
     places.push({ kind: 'forest', x: near(wide ? 0.3 : 0.26), y: at(0.12), scale: wide ? 1.2 : 0.75, seed: i + 11 });
@@ -101,21 +132,8 @@ function planLeg({ g, n, i, from, to, w, wide }) {
   }
   if (!cityRiver) places.push({ kind: 'forest', x: near(wide ? 0.36 : 0.3), y: at(0.9), scale: wide ? 0.9 : 0.6, seed: i + 31 });
 
-  // the leg's river comes in from one side, meanders across, swinging round the places on its
-  // banks, and leaves by the other side; into a city it runs straight on to the line it takes
-  // through the streets
-  const edge = (side) => (side > 0 ? w + 60 : -60);
-  const river = [[edge(s), at(0.12)], [w * (0.5 + s * (0.25 + r() * 0.15)), at(0.3 + r() * 0.1)]];
-  const swing = [w * (0.5 - s * (0.3 + r() * 0.15)), at(cityRiver ? 0.45 : 0.62 + r() * 0.1)];
-  if (cityRiver) river.push(...cityRiver);
-  else river.push(swing, [edge(-s), at(0.92)]);
-
-  // border crossings, with any countries driven through on the way
-  const lands = [from.country, ...(to.via ?? []), to.country];
-  for (let c = 0; c < lands.length - 1; c++) {
-    if (lands[c] === lands[c + 1]) continue;
-    borders.push({ y: at((c + 1) / lands.length), from: lands[c], to: lands[c + 1], side: s < 0 ? 'right' : 'left' });
-  }
+  const river = legRiver({ r: rng(i * 131 + 7), s, w, at, cityRiver });
+  const borders = bordersCrossed({ from, to, s, at });
   return { pts, exit, places, river, city: Boolean(cityRiver), borders };
 }
 
