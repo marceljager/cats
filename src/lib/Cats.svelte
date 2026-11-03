@@ -33,6 +33,9 @@
   // a staggered grid of little hearts
   const SPOTS = [0, 1, 2, 3].flatMap((row) => [0, 1, 2, 3, 4].map((col) => [12 + col * 34 + (row % 2) * 17, 12 + row * 30]));
 
+  // each cat's photo leans its own way, and flies back into the lightbox at the same angle
+  const PHOTO_TILT = [-1.5, 1.5];
+
   let meow = $state({});
 
   function poke(id) {
@@ -51,9 +54,9 @@
   }
 
   // a click opens the photo big (the cat already said hello on hover); with no photo yet, it meows
-  function tap(cat, e) {
-    const figure = e.currentTarget.querySelector('.photo');
-    if (cat.photo) zoomPhoto(figure, { photo: cat.photo, alt: cat.name, hint: cat.photoHint, tape: true }, e.currentTarget);
+  function tap(cat, i, e) {
+    const el = e.currentTarget.querySelector('.photo');
+    if (cat.photo) zoomPhoto({ el, photo: cat.photo, alt: cat.name, hint: cat.photoHint, tilt: PHOTO_TILT[i], tape: true, opener: e.currentTarget });
     else poke(cat.id);
   }
 
@@ -77,8 +80,8 @@
       <div class="pair">
         {#each cats as cat, i (cat.id)}
           <article class="cat {i ? 'b' : 'a'}" aria-labelledby="cat-{cat.id}">
-            <button class="snap" type="button" onclick={(e) => tap(cat, e)} onmouseenter={() => hover(cat.id)} aria-label={cat.photo ? `${cat.name}: zvětšit fotku` : `Pohladit: ${cat.name}`}>
-              <Photo src={cat.photo} hint={cat.photoHint} alt={cat.name} tilt={i ? 1.5 : -1.5} zoom={false} sizes="300px" />
+            <button class="snap" type="button" onclick={(e) => tap(cat, i, e)} onmouseenter={() => hover(cat.id)} aria-label={cat.photo ? `${cat.name}: zvětšit fotku` : `Pohladit: ${cat.name}`}>
+              <Photo src={cat.photo} hint={cat.photoHint} alt={cat.name} tilt={PHOTO_TILT[i]} zoom={false} sizes="300px" />
               {#if meow[cat.id]}
                 <span class="meow" use:meowPop={cat.id}>Mňau!</span>
               {/if}

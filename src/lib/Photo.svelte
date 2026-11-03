@@ -63,7 +63,7 @@
       class="frame zoom"
       type="button"
       aria-label="{alt || hint}: zvětšit fotku"
-      onclick={(e) => zoomPhoto(figure, { photo: src, alt, hint, tape }, e.currentTarget)}
+      onclick={(e) => zoomPhoto({ el: figure, photo: src, alt, hint, ratio, tilt, tape, opener: e.currentTarget })}
     >
       {@render picture()}
     </button>

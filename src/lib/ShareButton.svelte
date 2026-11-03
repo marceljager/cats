@@ -5,24 +5,25 @@
   import Button from './Button.svelte';
   import Icon from './Icon.svelte';
   import Text from './Text.svelte';
-  import { options, canShare, shareNative, copyLink } from './share.js';
+  import { options, canShare, shareNative, linkCopier } from './share.svelte.js';
 
   let root;
   let menu = $state();
   let open = $state(false);
-  let copied = $state(false);
   let list = $state.raw([]);
   let native = false;
-  let timer;
+  const link = linkCopier();
 
+  // the button itself opens the phone's share sheet, so the note never lists it
   onMount(() => {
     native = canShare();
-    list = options().filter((o) => o.id !== 'native');
-    return () => clearTimeout(timer);
+    list = options({ native: false });
+    return link.stop;
   });
 
   async function toggle() {
-    if (native && (await shareNative())) return;
+    // a share sheet that fails to open (some desktop browsers) drops the note instead
+    if (native && (await shareNative()) !== 'failed') return;
     open = !open;
     if (open) {
       await tick();
@@ -33,21 +34,16 @@
     open = false;
     if (refocus) root?.querySelector('.button')?.focus();
   }
-  async function copy() {
-    copied = await copyLink();
-    clearTimeout(timer);
-    timer = setTimeout(() => (copied = false), 2400);
-  }
   // a click anywhere else or Esc puts the note away
-  function outside(e) {
+  function closeOnOutsideClick(e) {
     if (open && !root.contains(e.target)) shut();
   }
-  function keys(e) {
+  function closeOnEscape(e) {
     if (open && e.key === 'Escape') shut(true);
   }
 </script>
 
-<svelte:window onclick={outside} onkeydown={keys} />
+<svelte:window onclick={closeOnOutsideClick} onkeydown={closeOnEscape} />
 
 <div class="share" bind:this={root}>
   <Button theme="paper" onclick={toggle} aria-expanded={open} aria-controls="share-menu" bounce={{ over: { scale: 1.06, rotate: -2 } }}>
@@ -67,14 +63,14 @@
                 <Icon name={o.icon} size={26} />{o.long}
               </a>
             {:else}
-              <button type="button" onclick={copy} class:done={copied}>
-                <Icon name={copied ? 'check' : o.icon} size={26} />{copied ? 'Odkaz je zkopírovaný' : o.long}
+              <button type="button" onclick={link.copy} class:done={link.copied}>
+                <Icon name={link.copied ? 'check' : o.icon} size={26} />{link.copied ? 'Odkaz je zkopírovaný' : link.failed ? 'Odkaz se nepovedlo zkopírovat' : o.long}
               </button>
             {/if}
           </li>
         {/each}
       </ul>
-      <span class="sr" role="status">{copied ? 'Odkaz je zkopírovaný.' : ''}</span>
+      <span class="sr" role="status">{#if link.copied}Odkaz je zkopírovaný.{:else if link.failed}Odkaz se nepovedlo zkopírovat. Zkopírujte ho prosím z&nbsp;adresního řádku.{/if}</span>
     </div>
   {/if}
 </div>

@@ -17,14 +17,14 @@
   let dlg;
   let frameEl = $state();
   let items = $state.raw([]);
-  let open = $state(-1);
+  let index = $state(-1); // the photo showing, -1 while closed
   let ready = $state(false);
   let lit = $state(false);
   let busy = false;
   let source = null;
   let opener = null;
   let hidden = null;
-  const current = $derived(open >= 0 ? items[open] : null);
+  const current = $derived(index >= 0 ? items[index] : null);
   const many = $derived(items.length > 1);
   // the frame's width on this screen (see .frame), so srcset fetches a file that fits it, not the page
   const sizes = $derived.by(() => {
@@ -64,23 +64,25 @@
   }
 
   async function show(req) {
-    if (busy || open >= 0) return;
+    if (busy || index >= 0) return;
+    // busy from the start, so a close can't slip in while the dialog is still being set up
+    busy = true;
     items = req.items;
     source = req.source;
     opener = req.opener ?? document.activeElement;
-    open = req.index;
+    index = req.index;
     ready = false;
     dlg.showModal();
     document.documentElement.style.overflow = 'hidden';
     await tick();
     requestAnimationFrame(() => (lit = true));
-    const from = onPage(open);
+    const from = onPage(index);
     lift(from.el);
     if (reducedMotion()) {
+      busy = false;
       ready = true;
       return;
     }
-    busy = true;
     const to = frameEl.offsetWidth;
     // pin the big frame onto the small photo before the browser paints, so the very first
     // frame on screen is still the photo on the page, not the big one
@@ -109,12 +111,12 @@
 
   // ...and shrinks back into that same photo on the page
   async function close() {
-    if (busy || open < 0) return;
+    if (busy || index < 0) return;
     ready = false;
     lit = false;
     if (!reducedMotion()) {
       busy = true;
-      const to = onPage(open);
+      const to = onPage(index);
       await animate(
         frameEl,
         { width: to.width, x: to.x, y: to.y, rotate: to.rotate, filter: SMALL },
@@ -128,7 +130,7 @@
     dlg.close();
   }
   async function closed() {
-    open = -1;
+    index = -1;
     ready = false;
     lit = false;
     document.documentElement.style.overflow = '';
@@ -139,31 +141,31 @@
   }
   const step = (d) => {
     if (busy || !many) return;
-    open = (open + d + items.length) % items.length;
-    lift(source(open).el);
+    index = (index + d + items.length) % items.length;
+    lift(source(index).el);
   };
 
-  function keys(e) {
+  function stepWithArrows(e) {
     if (e.key === 'ArrowRight') step(1);
     else if (e.key === 'ArrowLeft') step(-1);
   }
   // Esc flies the photo back instead of snapping shut
-  function cancel(e) {
+  function flyBackOnEscape(e) {
     e.preventDefault();
     close();
   }
   // a click anywhere outside the photo closes it (the backdrop is there, just invisible)
-  function backdrop(e) {
+  function closeOnBackdrop(e) {
     if (e.target === dlg) close();
   }
   // swipe left / right on touch screens
   let sx = 0;
   let sy = 0;
-  const down = (e) => {
+  const swipeStart = (e) => {
     sx = e.clientX;
     sy = e.clientY;
   };
-  const up = (e) => {
+  const swipeEnd = (e) => {
     const dx = e.clientX - sx;
     if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(e.clientY - sy)) step(dx < 0 ? 1 : -1);
   };
@@ -175,17 +177,17 @@
   bind:this={dlg}
   class="lightbox"
   class:lit
-  aria-label={current ? (many ? `Fotka ${open + 1} z ${items.length}: ` : '') + (current.caption || current.alt || current.hint) : 'Fotka'}
+  aria-label={current ? (many ? `Fotka ${index + 1} z ${items.length}: ` : '') + (current.caption || current.alt || current.hint) : 'Fotka'}
   onclose={closed}
-  oncancel={cancel}
-  onclick={backdrop}
-  onkeydown={keys}
+  oncancel={flyBackOnEscape}
+  onclick={closeOnBackdrop}
+  onkeydown={stepWithArrows}
 >
   {#if current}
-    <div class="frame" class:ready bind:this={frameEl} style="--r:{num(current.ratio)}" onpointerdown={down} onpointerup={up}>
-      {#key open}
+    <div class="frame" class:ready bind:this={frameEl} style="--r:{num(current.ratio)}" onpointerdown={swipeStart} onpointerup={swipeEnd}>
+      {#key index}
         <div class="pic" class:captioned={current.caption}>
-          <Photo src={current.photo} hint={current.hint} alt={current.alt || current.caption} ratio={current.ratio} tape={current.tape ?? false} zoom={false} {sizes} eager preview={current.photo ? previewOf(open) : null} />
+          <Photo src={current.photo} hint={current.hint} alt={current.alt || current.caption} ratio={current.ratio} tape={current.tape ?? false} zoom={false} {sizes} eager preview={current.photo ? previewOf(index) : null} />
           {#if current.caption}
             <Text variant="small" as="span" class="caption" aria-hidden="true">{current.caption}</Text>
           {/if}

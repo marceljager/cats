@@ -7,14 +7,11 @@
   import Icon from './Icon.svelte';
   import Tape from './Tape.svelte';
   import CatHead from './CatHead.svelte';
-  import { options, canShare, shareNative, copyLink } from './share.js';
+  import { options, shareNative, linkCopier } from './share.svelte.js';
   import { reducedMotion } from './viewport.js';
 
-  let native = $state(false);
   let list = $state.raw([]);
-  let copied = $state(false);
-  let failed = $state(false);
-  let timer;
+  const link = linkCopier();
   // a torn-off strip leaves an empty slot for a moment, until a new one slides in
   const AWAY = 1600;
   let gone = $state({});
@@ -22,10 +19,9 @@
 
   // the share sheet and the page's address are only known in the browser, not at prerender
   onMount(() => {
-    native = canShare();
-    list = options().filter((o) => o.id !== 'native' || native);
+    list = options();
     return () => {
-      clearTimeout(timer);
+      link.stop();
       regrow.forEach(clearTimeout);
     };
   });
@@ -160,18 +156,12 @@
     pose?.stretch.jump(1);
   }
 
-  async function act(o) {
+  // the strips without a link: the phone's share sheet, or copying the address
+  async function shareVia(o) {
     if (o.id === 'native') {
       // a share sheet that fails (some desktop browsers) still leaves the link to copy
-      if (!(await shareNative())) copy();
-    } else if (o.id === 'copy') copy();
-  }
-  async function copy() {
-    const ok = await copyLink();
-    copied = ok;
-    failed = !ok;
-    clearTimeout(timer);
-    timer = setTimeout(() => (copied = failed = false), 2400);
+      if ((await shareNative()) === 'failed') link.copy();
+    } else if (o.id === 'copy') link.copy();
   }
 </script>
 
@@ -220,7 +210,7 @@
             aria-label={o.long}
             onclick={(e) => {
               tear(e.currentTarget, i, o.id);
-              act(o);
+              shareVia(o);
             }}
             draggable="false"
             use:hold
@@ -233,7 +223,7 @@
     {/each}
   </ul>
   <p class="status" role="status">
-    {#if copied}Odkaz je zkopírovaný, stačí ho vložit do zprávy.{:else if failed}Odkaz se nepovedlo zkopírovat. Zkopírujte ho prosím z&nbsp;adresního řádku.{/if}
+    {#if link.copied}Odkaz je zkopírovaný, stačí ho vložit do zprávy.{:else if link.failed}Odkaz se nepovedlo zkopírovat. Zkopírujte ho prosím z&nbsp;adresního řádku.{/if}
   </p>
 </aside>
 
