@@ -10,9 +10,9 @@ import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 
 const root = new URL('../', import.meta.url);
-const SRC = new URL('photos/', root);
-const OUT = new URL('public/photos/', root);
-const MANIFEST = new URL('src/photos.json', root);
+// where the originals are, where the encoded files go and where the manifest is written (the
+// tests point them at a folder of their own)
+const DIRS = { src: new URL('photos/', root), out: new URL('public/photos/', root), manifest: new URL('src/photos.json', root) };
 
 // widths to make, never larger than the original; the original's own width is added when the
 // largest step below it is noticeably smaller
@@ -31,7 +31,7 @@ const exists = (path) => access(path).then(() => true, () => false);
 // fresh git checkout resets): the hash is kept in src/photos.json
 const SETTINGS = JSON.stringify({ WIDTHS, FALLBACK, FALLBACK_WIDTHS, QUALITY, v: 1 });
 
-export async function optimizeImages({ log = console.log } = {}) {
+export async function optimizeImages({ log = console.log, src: SRC = DIRS.src, out: OUT = DIRS.out, manifest: MANIFEST = DIRS.manifest } = {}) {
   await mkdir(OUT, { recursive: true });
   const sources = (await readdir(SRC)).filter((f) => IMAGE.test(f)).sort();
   let old = {};

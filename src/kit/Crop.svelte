@@ -58,11 +58,17 @@
 
   // the page keeps reflowing after load (fonts, the map laying itself out), so measure again
   // whenever it changes size, and a few more times while its entrance animations settle
+  // Each load starts a run; a run that is no longer the latest (the frame loaded again, or the
+  // crop went away) while it waited for the fonts sets nothing up.
   let stop = () => {};
+  let runs = 0;
+  let gone = false;
   async function measure() {
     stop();
+    const run = ++runs;
     const doc = frame.contentDocument;
     await doc.fonts.ready;
+    if (run !== runs || gone) return;
     const ro = new ResizeObserver(measureCrop);
     ro.observe(doc.body);
     const timers = [0, 300, 800, 1500, 2500].map((t) => setTimeout(measureCrop, t));
@@ -71,7 +77,10 @@
       timers.forEach(clearTimeout);
     };
   }
-  $effect(() => () => stop());
+  $effect(() => () => {
+    gone = true;
+    stop();
+  });
 
   $effect(() => {
     if (!box) return;

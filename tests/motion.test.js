@@ -114,4 +114,52 @@ describe('springs', () => {
     expect(animate).not.toHaveBeenCalled();
     vi.doUnmock('motion');
   });
+  const motion = (extra = {}) => {
+    const animate = vi.fn(() => Promise.resolve());
+    const scroll = vi.fn(() => () => {});
+    vi.doMock('motion', () => ({ animate, hover: () => () => {}, press: () => () => {}, scroll, motionValue: () => ({}), ...extra }));
+    return { animate, scroll };
+  };
+  test('springTo lands the first target at once, ignores a repeat and springs to a new one', async () => {
+    const { animate } = motion();
+    const { springTo } = await import('../src/lib/motion/springs.js');
+    const el = element();
+    const action = springTo(el, { to: { y: 0 } });
+    expect(animate.mock.calls[0][2]).toEqual({ duration: 0 });
+    action.update({ to: { y: 0 } });
+    expect(animate).toHaveBeenCalledTimes(1);
+    action.update({ to: { y: 10 }, bounce: 0.5 });
+    expect(animate.mock.calls[1][1]).toEqual({ y: 10 });
+    expect(animate.mock.calls[1][2]).toMatchObject({ type: 'spring', bounce: 0.5 });
+    vi.doUnmock('motion');
+  });
+  test('scrollLinked follows the scroll only where its media query matches, and rests elsewhere', async () => {
+    const { animate, scroll } = motion();
+    const { scrollLinked } = await import('../src/lib/motion/springs.js');
+    const opts = { keyframes: { y: [10, -10] }, rest: { y: 0 } };
+    scrollLinked(element(), { ...opts, media: '(min-width: 760px)' }); // matchMedia matches here
+    expect(scroll).toHaveBeenCalledOnce();
+    vi.stubGlobal('matchMedia', () => ({ matches: false, addEventListener() {}, removeEventListener() {} }));
+    scrollLinked(element(), { ...opts, media: '(min-width: 760px)' });
+    expect(scroll).toHaveBeenCalledOnce();
+    expect(animate).toHaveBeenLastCalledWith(expect.anything(), { y: 0 }, { duration: 0 });
+    vi.doUnmock('motion');
+  });
+  test('rub pushes on a tap, but not further once it leans past its limit', async () => {
+    let angle = 0;
+    const rot = { get: () => angle, getVelocity: () => 0, on: () => () => {}, stop() {} };
+    const { animate } = motion({ motionValue: () => rot });
+    const { rub } = await import('../src/lib/motion/springs.js');
+    const el = element();
+    el.getBoundingClientRect = () => ({ left: 0, width: 100 });
+    rub(el, { lean: 20, base: 150 });
+    el.on.pointerdown({ pointerType: 'touch', clientX: 20 }); // left half: pushes to the right
+    expect(animate).toHaveBeenCalledOnce();
+    expect(animate.mock.calls[0][2]).toMatchObject({ velocity: 150 });
+    angle = 25; // already leaning that way past 20
+    el.on.pointerdown({ pointerType: 'touch', clientX: 20 });
+    expect(animate).toHaveBeenCalledOnce();
+    vi.doUnmock('motion');
+  });
 });
+

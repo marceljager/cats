@@ -1,9 +1,20 @@
 // @ts-check
 // what scripts/encode-photos.js made of each photo (src/photos.json): the widths that exist in AVIF, WebP
 // and a JPEG (or PNG) fallback, so <picture> can offer them all and the browser picks one
-import photos from '../../photos.json';
 
-// what the manifest knows of one photo ('/photos/velik.jpg'): its size and the widths made of it
+/**
+ * @typedef {{ w: number, h: number, alpha: boolean, widths: number[], fallbackWidths: number[],
+ *   name: string, fallback: 'jpg' | 'png', hash: string }} PhotoInfo
+ *   one photo in the manifest: its size, whether it has transparency, the widths made in AVIF and
+ *   WebP and in the fallback format, and the files' common path without width and extension
+ */
+
+// the manifest, when scripts/encode-photos.js has made it; before that (a fresh checkout) every
+// photo is simply served as it is
+const photos = /** @type {Record<string, PhotoInfo>} */ (Object.values(import.meta.glob('../../photos.json', { eager: true, import: 'default' }))[0] ?? {});
+
+// what the manifest knows of one photo ('/photos/velik.jpg')
+/** @param {string | null | undefined} src @returns {PhotoInfo | undefined} */
 export const photoInfo = (src) => (src ? photos[src] : undefined);
 
 // '/photos/x.jpg' → 'photos/x.jpg', relative to the page (the site is one page at its folder's root),
