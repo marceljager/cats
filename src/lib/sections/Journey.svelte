@@ -8,7 +8,10 @@
   import CarCard from './CarCard.svelte';
   import Doodle from '../art/Doodle.svelte';
   import { parallax } from '../motion/parallax.js';
-  import { curve, driftClouds, keepDry, kmAt, lengthAt, planRoute, scatterGrass, sideOf, smooth } from '../art/route.js';
+  import { keepDry, planRoute, sideOf } from '../art/route.js';
+  import { curve, smooth } from '../art/spline.js';
+  import { driftClouds, scatterGrass } from '../art/meadow.js';
+  import { kmAt, lengthAt } from '../art/odometer.js';
   import { springTo } from '../motion/springs.js';
   import { stops } from '../../content.js';
   import { onScreen, onScrollFrame, reducedMotion } from '../motion/viewport.js';

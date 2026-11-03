@@ -1,6 +1,9 @@
-// the map's geometry (route.js), which Journey.svelte draws
+// the map's geometry (route.js, spline.js, meadow.js, odometer.js), which Journey.svelte draws
 import { describe, expect, test } from 'vitest';
-import { curve, driftClouds, keepDry, kmAt, lengthAt, planRoute, scatterGrass, smooth } from '../src/lib/art/route.js';
+import { keepDry, planRoute } from '../src/lib/art/route.js';
+import { curve, smooth } from '../src/lib/art/spline.js';
+import { driftClouds, scatterGrass } from '../src/lib/art/meadow.js';
+import { kmAt, lengthAt } from '../src/lib/art/odometer.js';
 import { KINDS, SCENERY } from '../src/lib/art/scenery.js';
 import { stops } from '../src/content.js';
 

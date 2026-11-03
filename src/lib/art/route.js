@@ -1,7 +1,6 @@
 // @ts-check
-// The map's geometry, worked out without the page: the route through the stops, the scenery and
-// rivers around it, the grass and clouds, and how far along the route the car is. Journey.svelte
-// measures the page, draws what this returns and moves the car.
+// The route through the stops and the scenery and rivers around it, worked out without the page:
+// Journey.svelte measures where the stories sit and draws what planRoute returns.
 import { rng } from './random.js';
 import { SCENERY } from './scenery.js';
 
@@ -9,33 +8,6 @@ import { SCENERY } from './scenery.js';
 
 // which side of the route each story sits on, alternating from the right
 export const sideOf = (i) => (i % 2 === 0 ? 'right' : 'left');
-
-// a smooth hand-drawn line through waypoints, for the rivers: a centripetal Catmull-Rom
-// spline, which never overshoots into a loop or a hairpin however unevenly the points are spaced
-export function smooth(pts) {
-  return `M ${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}` + curve(pts).join('');
-}
-
-// the same spline as a list of pieces, piece i running from point i to point i + 1
-export function curve(pts) {
-  const f = (n) => n.toFixed(1);
-  const dist = (a, b) => Math.max(Math.hypot(b[0] - a[0], b[1] - a[1]) ** 0.5, 1e-3);
-  const out = [];
-  for (let i = 0; i < pts.length - 1; i++) {
-    const p1 = pts[i];
-    const p2 = pts[i + 1];
-    // past either end, extend the line straight on
-    const p0 = pts[i - 1] ?? [2 * p1[0] - p2[0], 2 * p1[1] - p2[1]];
-    const p3 = pts[i + 2] ?? [2 * p2[0] - p1[0], 2 * p2[1] - p1[1]];
-    const d1 = dist(p0, p1);
-    const d2 = dist(p1, p2);
-    const d3 = dist(p2, p3);
-    const c1 = [0, 1].map((k) => (d1 * d1 * p2[k] - d2 * d2 * p0[k] + (2 * d1 * d1 + 3 * d1 * d2 + d2 * d2) * p1[k]) / (3 * d1 * (d1 + d2)));
-    const c2 = [0, 1].map((k) => (d3 * d3 * p1[k] - d2 * d2 * p3[k] + (2 * d3 * d3 + 3 * d3 * d2 + d2 * d2) * p2[k]) / (3 * d3 * (d3 + d2)));
-    out.push(` C ${f(c1[0])} ${f(c1[1])}, ${f(c2[0])} ${f(c2[1])}, ${f(p2[0])} ${f(p2[1])}`);
-  }
-  return out;
-}
 
 // the trip starts on the Velebit pin, up in the mountains: the range around it, and the little
 // lake (source) the first river springs from, a mountain stream running off west toward the sea
@@ -158,7 +130,7 @@ function besideStories(geo, w) {
 
 // Everything the map draws, worked out from where the route meets each story (geo, measured on the
 // page: per stop { x, top, bottom, pinY, exitY }) and the map's width:
-//   pts      the route's waypoints, from the first pin to the last (joined by curve(), so the
+//   pts      the route's waypoints, from the first pin to the last (joined by curve() in spline.js, so the
 //            route bends in round curves everywhere and still runs exactly through every pin)
 //   marks    { y, i, pin? }: the route at waypoint i reaches y, an exit or (pin) a stop's pin
 //   places   the scenery, as Doodle props ({ kind, x, y, scale, seed, label? })
@@ -240,84 +212,4 @@ export function keepDry(dood, streams, source, { w, sample }) {
       }
     }
   }
-}
-
-// grass tufts and pebbles scattered over the land, as path data by colour: each tuft a few tapered
-// blades fanning out, its own height and lean, some a darker green, now and then a tiny flower
-// on the tallest blade
-export function scatterGrass(w, h) {
-  const rt = rng(99);
-  const f = (n) => n.toFixed(1);
-  const dot = (x, y, rx, ry = rx) => ` M ${f(x - rx)} ${f(y)} a ${f(rx)} ${f(ry)} 0 1 0 ${f(rx * 2)} 0 a ${f(rx)} ${f(ry)} 0 1 0 ${f(-rx * 2)} 0 Z`;
-  const grass = { light: '', dark: '', flowers: '', hearts: '', pebbles: '' };
-  for (let n = 0; n < Math.round(h / 22); n++) {
-    const tx = rt() * w;
-    const ty = rt() * h;
-    const blades = 3 + Math.floor(rt() * 3);
-    const tall = 9 + rt() * 5;
-    let d = '';
-    let top = null;
-    for (let b = 0; b < blades; b++) {
-      const u = (b / (blades - 1)) * 2 - 1; // -1 left .. 1 right (blades is 3 to 5)
-      const bx = tx + u * 5;
-      const bh = tall * (1 - Math.abs(u) * 0.35) * (0.85 + rt() * 0.3);
-      const lean = u * 5 + (rt() - 0.5) * 2;
-      const tipX = bx + lean;
-      const tipY = ty - bh;
-      d += ` M ${f(bx - 1.5)} ${f(ty)} Q ${f(bx + lean * 0.2 - 0.4)} ${f(ty - bh * 0.6)} ${f(tipX)} ${f(tipY)} Q ${f(bx + lean * 0.3 + 1.3)} ${f(ty - bh * 0.5)} ${f(bx + 1.5)} ${f(ty)} Z`;
-      if (!top || tipY < top[1]) top = [tipX, tipY];
-    }
-    grass[rt() < 0.3 ? 'dark' : 'light'] += d;
-    if (rt() < 0.16) {
-      grass.flowers += dot(top[0], top[1] - 0.6, 2.1);
-      grass.hearts += dot(top[0], top[1] - 0.6, 0.85);
-    }
-    if (rt() < 0.12) grass.pebbles += dot(tx + 12 + rt() * 6, ty - 1, 2.6 + rt() * 1.4, 1.8);
-  }
-  return grass;
-}
-
-// clouds drifting high above the map, along its edges: { x, y, w, flip, dur, puffs }
-export function driftClouds(w, h, wide) {
-  const rc = rng(7);
-  const cl = [];
-  for (let cy = 260, n = 0; cy < h - 200; cy += wide ? 620 : 560, n++) {
-    const left = n % 2 === 0;
-    const cw = (wide ? 180 : 120) + rc() * (wide ? 90 : 40);
-    const cx = left ? -cw * 0.3 + rc() * w * (wide ? 0.08 : 0.05) : w - cw * 0.7 - rc() * w * (wide ? 0.08 : 0.05);
-    // round puffs on a flat base (in the 200 x 92 cloud box), each cloud a little different
-    const puffs = [[40, 62, 19], [74, 46, 26], [114, 40, 29], [150, 54, 22], [172, 66, 14]].map(([px, py, pr]) => {
-      const k = 0.88 + rc() * 0.24;
-      return [px, py + pr * (1 - k), pr * k];
-    });
-    cl.push({ x: cx, y: cy + rc() * 160, w: cw, flip: !left, dur: 18 + rc() * 10, puffs });
-  }
-  return cl;
-}
-
-// how far along the route the reading line at y is: piecewise between keypoints ([{ y, len }],
-// the route's length where it reaches each), and the whole length past the last one
-export function lengthAt(keys, y, total) {
-  for (let i = 1; i < keys.length; i++) {
-    const a = keys[i - 1];
-    const b = keys[i];
-    if (y <= b.y) {
-      const f = b.y === a.y ? 1 : Math.max(0, (y - a.y) / (b.y - a.y));
-      return a.len + (b.len - a.len) * f;
-    }
-  }
-  return total;
-}
-
-// kilometres from the forest at length L along the route, interpolated between the stops' pins
-// (pinLens: the route's length at each pin)
-export function kmAt(pinLens, stops, L) {
-  if (!pinLens.length || L <= pinLens[0]) return stops[0].km;
-  for (let i = 1; i < pinLens.length; i++) {
-    if (L <= pinLens[i]) {
-      const f = (L - pinLens[i - 1]) / (pinLens[i] - pinLens[i - 1] || 1);
-      return Math.round(stops[i - 1].km + (stops[i].km - stops[i - 1].km) * f);
-    }
-  }
-  return stops[stops.length - 1].km;
 }
