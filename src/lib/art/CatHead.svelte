@@ -8,9 +8,9 @@
   //   mood  'cold' (wide eyes) | 'happy' (smiling, blushing) | 'calm'
   //   look  -1…1, where the eyes glance (placeholder only)
   //   tilt  resting lean in degrees; delay staggers the bobble
-  import { cats } from '../content.js';
-  import { rub } from './springs.js';
-  import { photoFile } from './images.js';
+  import { cats } from '../../content.js';
+  import { rub } from '../motion/springs.js';
+  import { photoFile } from '../services/images.js';
 
   let { catId, cx = 0, cy = 0, r = 30, mood = 'calm', look = 0, tilt = 0, delay = 0, wobble = true } = $props();
 

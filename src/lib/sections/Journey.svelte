@@ -3,15 +3,15 @@
   // scrolls and each story comes up as the car reaches its pin. The geometry is in route.js; this
   // measures where the stories sit on the page, draws the result and moves the car.
   import { onMount, tick } from 'svelte';
-  import Text from './Text.svelte';
+  import Text from '../ui/Text.svelte';
   import Stop from './Stop.svelte';
   import CarCard from './CarCard.svelte';
-  import Doodle from './Doodle.svelte';
-  import { parallax } from './parallax.js';
-  import { curve, driftClouds, keepDry, kmAt, lengthAt, planRoute, scatterGrass, sideOf, smooth } from './route.js';
-  import { springTo } from './springs.js';
-  import { stops } from '../content.js';
-  import { onScreen, onScrollFrame, reducedMotion } from './viewport.js';
+  import Doodle from '../art/Doodle.svelte';
+  import { parallax } from '../motion/parallax.js';
+  import { curve, driftClouds, keepDry, kmAt, lengthAt, planRoute, scatterGrass, sideOf, smooth } from '../art/route.js';
+  import { springTo } from '../motion/springs.js';
+  import { stops } from '../../content.js';
+  import { onScreen, onScrollFrame, reducedMotion } from '../motion/viewport.js';
 
   let root;
   let routePath = $state();

@@ -7,9 +7,9 @@
   import Photo from './Photo.svelte';
   import Icon from './Icon.svelte';
   import Button from './Button.svelte';
-  import { setLightbox } from './lightbox.js';
-  import { photoFile } from './images.js';
-  import { reducedMotion } from './viewport.js';
+  import { setLightbox } from '../services/lightbox.js';
+  import { photoFile } from '../services/images.js';
+  import { reducedMotion } from '../motion/viewport.js';
 
   const SMALL = 'drop-shadow(0 6px 5px rgba(40, 60, 15, 0.3))';
   const BIG = 'drop-shadow(0 30px 34px rgba(20, 30, 15, 0.45))';

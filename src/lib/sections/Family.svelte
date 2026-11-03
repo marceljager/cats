@@ -1,8 +1,8 @@
 <script>
-  import Text from './Text.svelte';
-  import Button from './Button.svelte';
-  import CatHead from './CatHead.svelte';
-  import Icon from './Icon.svelte';
+  import Text from '../ui/Text.svelte';
+  import Button from '../ui/Button.svelte';
+  import CatHead from '../art/CatHead.svelte';
+  import Icon from '../ui/Icon.svelte';
 
 </script>
 

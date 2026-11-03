@@ -1,11 +1,11 @@
 <script>
   // photos pegged on clotheslines; any of them flies up big into the page's lightbox
   import { onMount } from 'svelte';
-  import Text from './Text.svelte';
-  import { swing } from './springs.js';
-  import Photo from './Photo.svelte';
-  import { zoom } from './lightbox.js';
-  import { gallery } from '../content.js';
+  import Text from '../ui/Text.svelte';
+  import { swing } from '../motion/springs.js';
+  import Photo from '../ui/Photo.svelte';
+  import { zoom } from '../services/lightbox.js';
+  import { gallery } from '../../content.js';
 
   const RATIO = { portrait: '4 / 5', landscape: '5 / 4', square: '1 / 1' };
   const TILT = [-3, 2, -1.5, 3, -2.5, 1.5, -2, 2.5];

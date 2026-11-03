@@ -6,8 +6,8 @@
   import { onMount } from 'svelte';
   import Button from './Button.svelte';
   import Icon from './Icon.svelte';
-  import CatHead from './CatHead.svelte';
-  import { onScreen, onScrollFrame } from './viewport.js';
+  import CatHead from '../art/CatHead.svelte';
+  import { onScreen, onScrollFrame } from '../motion/viewport.js';
 
   let shown = $state(false);
 

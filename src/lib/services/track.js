@@ -1,7 +1,7 @@
 // counting visits on GoatCounter (the script in index.html; no cookies, so no consent banner).
 // Page views count themselves; these are the clicks worth knowing about, as GoatCounter events.
 // It skips localhost by itself, so the dev server counts nothing.
-import { contact } from '../content.js';
+import { contact } from '../../content.js';
 
 export function track(name) {
   window.goatcounter?.count?.({ path: name, event: true });

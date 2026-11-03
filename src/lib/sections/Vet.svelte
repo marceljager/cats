@@ -1,9 +1,9 @@
 <script>
-  import Icon from './Icon.svelte';
-  import Text from './Text.svelte';
-  import Card from './Card.svelte';
-  import { vet, catNames } from '../content.js';
-  import { bouncy, scrollLinked } from './springs.js';
+  import Icon from '../ui/Icon.svelte';
+  import Text from '../ui/Text.svelte';
+  import Card from '../ui/Card.svelte';
+  import { vet, catNames } from '../../content.js';
+  import { bouncy, scrollLinked } from '../motion/springs.js';
   import { animate } from 'motion';
 
   // the clipboard's clip snaps shut with a little clack when you point at the report

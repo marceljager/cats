@@ -1,6 +1,6 @@
 // what scripts/images.js made of each photo (src/photos.json): the widths that exist in AVIF, WebP
 // and a JPEG (or PNG) fallback, so <picture> can offer them all and the browser picks one
-import photos from '../photos.json';
+import photos from '../../photos.json';
 
 // what the manifest knows of one photo ('/photos/velik.jpg'): its size and the widths made of it
 export const photoInfo = (src) => (src ? photos[src] : undefined);

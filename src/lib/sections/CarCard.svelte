@@ -1,6 +1,6 @@
 <script>
   // the car: a little cartoon van body on two wheels; the two big heads ride on top
-  import CatHead from './CatHead.svelte';
+  import CatHead from '../art/CatHead.svelte';
   let { x = 0, y = 0, tilt = 0, bump = 0, km = 0, moving = false } = $props();
 </script>
 

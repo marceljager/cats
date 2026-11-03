@@ -5,8 +5,8 @@
   import Button from './Button.svelte';
   import Icon from './Icon.svelte';
   import Text from './Text.svelte';
-  import { options, canShare, shareNative, linkCopier } from './share.svelte.js';
-  import { site } from '../content.js';
+  import { options, canShare, shareNative, linkCopier } from '../services/share.svelte.js';
+  import { site } from '../../content.js';
 
   let root;
   let menu = $state();

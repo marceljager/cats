@@ -1,6 +1,6 @@
 // photos/ (the originals) → public/photos/ (what the site loads): every photo resized to a few widths
 // in AVIF, WebP and a JPEG fallback (PNG for cut-outs with transparency), plus src/photos.json, which
-// src/lib/images.js reads to tell the browser which widths exist, so it can pick the smallest one
+// src/lib/services/images.js reads to tell the browser which widths exist, so it can pick the smallest one
 // that looks sharp. Runs on its own (`npm run images`), first in `npm run build` (package.json), and
 // in the dev server at start and whenever a photo changes (the images plugin, scripts/vite-plugins.js).
 // Only photos that are new or changed get encoded again; outputs of deleted photos are removed.

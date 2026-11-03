@@ -1,15 +1,15 @@
 <script>
   import LuggageTags from './LuggageTags.svelte';
-  import Text from './Text.svelte';
-  import Photo from './Photo.svelte';
-  import Tape from './Tape.svelte';
-  import Card from './Card.svelte';
-  import CatHead from './CatHead.svelte';
-  import Icon from './Icon.svelte';
+  import Text from '../ui/Text.svelte';
+  import Photo from '../ui/Photo.svelte';
+  import Tape from '../ui/Tape.svelte';
+  import Card from '../ui/Card.svelte';
+  import CatHead from '../art/CatHead.svelte';
+  import Icon from '../ui/Icon.svelte';
   import { animate } from 'motion';
-  import { cats } from '../content.js';
-  import { bouncy } from './springs.js';
-  import { zoomPhoto } from './lightbox.js';
+  import { cats } from '../../content.js';
+  import { bouncy } from '../motion/springs.js';
+  import { zoomPhoto } from '../services/lightbox.js';
 
   // photo-booth frames: the two of them pulling a different face in each shot
   const HEART = 'M0 10 C0 10 -9 4.5 -9 -1 A4.6 4.6 0 0 1 0 -3.4 A4.6 4.6 0 0 1 9 -1 C9 4.5 0 10 0 10 Z';

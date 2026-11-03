@@ -76,7 +76,7 @@ export const catNames = ((names) => (names.length > 1 ? `${names.slice(0, -1).jo
 // trasa s kličkami se překreslí sama.
 // km = přibližná vzdálenost od Velebitu.
 // doodle = místo na mapě před zastávkou: farm, city, forest, hills, lake, field, mountains (všechny
-// druhy míst jsou v SCENERY v src/lib/scenery.js). Bez něj jsou kolem zastávky jen pole a lesy.
+// druhy míst jsou v SCENERY v src/lib/art/scenery.js). Bez něj jsou kolem zastávky jen pole a lesy.
 // via = státy, kterými se cestou k zastávce projíždí (kvůli hranicím na mapě).
 // detour = místo, kam jsme cestou odbočili (oblouk na mapě): { label, icon: 'lookout' | 'rest' }.
 // Bez něj jede trasa jen v mírném oblouku.

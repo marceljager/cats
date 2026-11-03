@@ -3,13 +3,13 @@
   // bottom; here each strip is a way to send us on to someone who might have room
   import { onMount } from 'svelte';
   import { animate, motionValue } from 'motion';
-  import Text from './Text.svelte';
-  import Icon from './Icon.svelte';
-  import Tape from './Tape.svelte';
-  import CatHead from './CatHead.svelte';
-  import { options, shareNative, linkCopier } from './share.svelte.js';
-  import { reducedMotion } from './viewport.js';
-  import { site } from '../content.js';
+  import Text from '../ui/Text.svelte';
+  import Icon from '../ui/Icon.svelte';
+  import Tape from '../ui/Tape.svelte';
+  import CatHead from '../art/CatHead.svelte';
+  import { options, shareNative, linkCopier } from '../services/share.svelte.js';
+  import { reducedMotion } from '../motion/viewport.js';
+  import { site } from '../../content.js';
 
   let list = $state.raw([]);
   const link = linkCopier();

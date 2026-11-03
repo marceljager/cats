@@ -6,7 +6,7 @@
   //           | 'link'  (no box: text with a wavy underline, in the surrounding colour)
   //   theme   'red' | 'paper'
   //   bounce  options for use:bouncy, e.g. { rest: { rotate: -2 } }
-  import { bouncy } from './springs.js';
+  import { bouncy } from '../motion/springs.js';
 
   let { href = undefined, variant = 'default', theme = 'red', bounce = {}, children, ...rest } = $props();
 </script>

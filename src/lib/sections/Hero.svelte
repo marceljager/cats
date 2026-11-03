@@ -1,12 +1,12 @@
 <script>
   import { onMount } from 'svelte';
-  import Text from './Text.svelte';
-  import Icon from './Icon.svelte';
-  import Kittens from './Kittens.svelte';
-  import Button from './Button.svelte';
-  import ShareButton from './ShareButton.svelte';
-  import { cats, catNames } from '../content.js';
-  import { layer } from './forest.js';
+  import Text from '../ui/Text.svelte';
+  import Icon from '../ui/Icon.svelte';
+  import Kittens from '../art/Kittens.svelte';
+  import Button from '../ui/Button.svelte';
+  import ShareButton from '../ui/ShareButton.svelte';
+  import { cats, catNames } from '../../content.js';
+  import { layer } from '../art/forest.js';
 
   // the hero's loops (stars, flicker, the kittens) stop while it's off screen. The parallax itself
   // is CSS (scroll-driven animations, see .layer): the browser moves the layers in step with the

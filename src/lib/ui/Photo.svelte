@@ -7,8 +7,8 @@
   import Icon from './Icon.svelte';
   import Text from './Text.svelte';
   import Tape from './Tape.svelte';
-  import { zoomPhoto } from './lightbox.js';
-  import { photoInfo, srcset, photoFile } from './images.js';
+  import { zoomPhoto } from '../services/lightbox.js';
+  import { photoInfo, srcset, photoFile } from '../services/images.js';
   let { src = null, hint = '', alt = '', ratio = '4 / 5', tilt = 0, tape = true, zoom = true, sizes = '300px', eager = false, preview = null, class: cls = '' } = $props();
   let figure;
   let img = $state();

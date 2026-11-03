@@ -2,19 +2,19 @@
   // Review sheet: every general building block of the site, numbered, so changes can be asked
   // for by number ("make C4 like C1"). Real components are rendered as they are; scoped styles
   // that live inside a section component are copied here 1:1 (marked "kopie").
-  import Icon from '../lib/Icon.svelte';
-  import Button from '../lib/Button.svelte';
-  import Card from '../lib/Card.svelte';
-  import Text from '../lib/Text.svelte';
+  import Icon from '../lib/ui/Icon.svelte';
+  import Button from '../lib/ui/Button.svelte';
+  import Card from '../lib/ui/Card.svelte';
+  import Text from '../lib/ui/Text.svelte';
   import Crop from './Crop.svelte';
-  import Photo from '../lib/Photo.svelte';
-  import Tape from '../lib/Tape.svelte';
-  import CatHead from '../lib/CatHead.svelte';
-  import Kittens from '../lib/Kittens.svelte';
-  import CarCard from '../lib/CarCard.svelte';
-  import Doodle from '../lib/Doodle.svelte';
-  import { KINDS } from '../lib/scenery.js';
-  import LuggageTags from '../lib/LuggageTags.svelte';
+  import Photo from '../lib/ui/Photo.svelte';
+  import Tape from '../lib/ui/Tape.svelte';
+  import CatHead from '../lib/art/CatHead.svelte';
+  import Kittens from '../lib/art/Kittens.svelte';
+  import CarCard from '../lib/sections/CarCard.svelte';
+  import Doodle from '../lib/art/Doodle.svelte';
+  import { KINDS } from '../lib/art/scenery.js';
+  import LuggageTags from '../lib/sections/LuggageTags.svelte';
   import { cats } from '../content.js';
 
   // the pin icon's drop (Icon.svelte), tip at (16, 29) in its 32-unit box

@@ -1,6 +1,6 @@
 // sending the page on to friends: the phone's own share sheet where there is one, otherwise
 // WhatsApp, Facebook, an e-mail or a copied link
-import { site } from '../content.js';
+import { site } from '../../content.js';
 import { track } from './track.js';
 
 const { name: title, share } = site;

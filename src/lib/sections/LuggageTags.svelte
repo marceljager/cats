@@ -1,6 +1,6 @@
 <script>
-  import { swing } from './springs.js';
-  import Icon from './Icon.svelte';
+  import { swing } from '../motion/springs.js';
+  import Icon from '../ui/Icon.svelte';
   // a cat's facts as separate luggage tags: sex, age, who it's named after, and neutering when done
   let { cat } = $props();
 
