@@ -45,7 +45,7 @@ Not an adoption listing. The cats narrate their own road trip in first person, s
 
 ## Evidence on Hand
 
-- Health (confirmed by user, updated 2026-11-03): vet-checked, dewormed, deflead, ears cleaned. Not vaccinated yet; don't claim any vaccination.
+- Health (confirmed by user, updated 2026-11-03): vet-checked, dewormed, deflead, ears cleaned. Not vaccinated yet; don't claim any vaccination. Velík (the boy) is neutered (confirmed 2026-11-03); Polly's status isn't known, don't claim it.
 - Money (confirmed by user, 2026-10-30): every vet visit so far is paid by the family, and they want nothing for the cats (no adoption fee or contribution), only a good home.
 - No real photos yet: every image is a labelled placeholder the user will replace.
 - Contact handles are placeholders. Do not invent chipping, neutering, character traits as facts, or dates.

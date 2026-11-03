@@ -5,7 +5,7 @@ import { optimizeImages } from './scripts/images.js';
 
 const name = 'Velík a Polly hledají domov';
 const title = `${name} – koťata zdarma k darování v Praze a okolí`;
-const description = 'Dvě koťata (kluk a holka, 6–7 měsíců) z chorvatského pohoří Velebit hledají domov. Jsou mazlivá, pořád u lidí a nebojí se ani psů. Odčervená, odblešená, po veterinární kontrole. Aktuálně jsou v Praze 6 – zdarma do dobrých rukou (ideálně oba spolu).';
+const description = 'Dvě koťata (kluk a holka, 6–7 měsíců) z chorvatského pohoří Velebit hledají domov. Jsou mazlivá, pořád u lidí a nebojí se ani psů. Odčervená, odblešená, po veterinární kontrole, kocourek je vykastrovaný. Aktuálně jsou v Praze 6 – zdarma do dobrých rukou (ideálně oba spolu).';
 
 // SITE_URL (in .env or the environment, e.g. SITE_URL=https://velikapolly.cz) turns on everything
 // that needs an absolute address: canonical, og:url, og:image and ai-catalog.json
@@ -31,7 +31,7 @@ function seo(site) {
     '',
     '## Koťata',
     '',
-    ...cats.map((c) => `- ${c.name} (${c.namedAfter}): ${c.sex}, ${c.age}. ${c.says}`),
+    ...cats.map((c) => `- ${c.name} (${c.namedAfter}): ${c.sex}, ${c.age}${c.neutered ? ', vykastrovaný' : ''}. ${c.says}`),
     '- Ideálně spolu, odděleně je to ale taky možné.',
     '',
     '## Cesta',

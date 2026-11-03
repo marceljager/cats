@@ -401,8 +401,11 @@
   function update() {
     if (!routeEl || !len) return;
     const rect = root.getBoundingClientRect();
+    // off screen (e.g. still up in the hero): nothing to move
+    if (rect.top > window.innerHeight || rect.bottom < 0) return;
     const target = Math.min(Math.max(window.innerHeight * 0.5 - rect.top, 0), h - 1);
     const L = Math.min(lengthAt(target), len);
+    if (L === travelled && target === anchorY) return;
     const pt = routeEl.getPointAtLength(L);
     const ahead = routeEl.getPointAtLength(Math.min(L + 6, len));
     const lean = Math.atan2(ahead.x - pt.x, Math.max(ahead.y - pt.y, 0.01)) * (180 / Math.PI);
@@ -434,6 +437,8 @@
     let raf = 0;
     const onScroll = () => {
       // the odometer shows while the car is moving and fades once scrolling stops
+      const r = root.getBoundingClientRect();
+      if (r.top > window.innerHeight || r.bottom < 0) return;
       moving = true;
       clearTimeout(still);
       still = setTimeout(() => (moving = false), 900);

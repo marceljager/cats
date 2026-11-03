@@ -151,8 +151,12 @@
     </div>
   </div>
 
-  <!-- morning comes: green hills rising into the map below -->
+  <!-- morning comes: green hills rising into the map below. The land is a strip of the page's own
+       ground cut to the hills' curve and laid over the forest (cheaper on phones than masking the
+       whole moving scene) -->
+  <div class="land" aria-hidden="true"></div>
   <svg class="hills" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
+    <defs><clipPath id="hero-land" clipPathUnits="objectBoundingBox"><path d="M-0.0069 0.5778 C0.0833 0.2000 0.1667 0.1556 0.2500 0.4444 C0.3333 0.7333 0.3889 0.7778 0.4861 0.4222 C0.5833 0.0889 0.6667 0.1111 0.7500 0.4444 C0.8333 0.7778 0.9167 0.7111 1.0069 0.3333 L1.0069 1.1111 L-0.0069 1.1111 Z" /></clipPath></defs>
     <path class="edge" d="M-10 52 C120 18 240 14 360 40 C480 66 560 70 700 38 C840 8 960 10 1080 40 C1200 70 1320 64 1450 30" />
   </svg>
 </header>
@@ -167,9 +171,6 @@
     color: var(--paper);
     background: #10233a;
     --hh: clamp(48px, 7vw, 90px);
-    mask:
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 90' preserveAspectRatio='none'%3E%3Cpath d='M-10 52 C120 18 240 14 360 40 C480 66 560 70 700 38 C840 8 960 10 1080 40 C1200 70 1320 64 1450 30 V-10 H-10 Z'/%3E%3C/svg%3E") 0 calc(100% + 1.5px) / 100% var(--hh) no-repeat,
-      linear-gradient(#000, #000) 0 0 / 100% calc(100% - var(--hh) + 2px) no-repeat;
   }
   /* the scene ends where the hills begin, so nothing hides behind them; its layers are stacked
      SVGs of the same size. The night sky is the box's own background */
@@ -195,12 +196,15 @@
   .fore {
     will-change: auto;
   }
-  /* depth: the farther a layer, the softer it is */
-  .soft {
-    filter: blur(1.2px);
-  }
-  .softer {
-    filter: blur(0.6px);
+  /* depth: the farther a layer, the softer it is. Only with a mouse on a wide screen: Safari blurs
+     on the CPU, and at phone size the softening barely shows */
+  @media (min-width: 760px) and (hover: hover) {
+    .soft {
+      filter: blur(1.2px);
+    }
+    .softer {
+      filter: blur(0.6px);
+    }
   }
   .stars circle {
     fill: #fff;
@@ -316,6 +320,7 @@
   .copy {
     position: relative;
     z-index: 2;
+    will-change: transform, opacity;
     width: 100%;
     padding: clamp(48px, 9vh, 110px) var(--pad) 0;
   }
@@ -358,6 +363,16 @@
     30% { transform: translateY(6px); }
   }
 
+  .land {
+    position: absolute;
+    z-index: 3;
+    left: 0;
+    bottom: -1px;
+    width: 100%;
+    height: calc(var(--hh) + 1px);
+    background: var(--land) var(--grain);
+    clip-path: url(#hero-land);
+  }
   .hills {
     position: absolute;
     left: 0;

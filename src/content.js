@@ -20,6 +20,8 @@ export const cats = [
     // na visačce „Jméno po“: krátký text a ikonka (mountains | pin)
     namedAfter: 'Velebit',
     namedIcon: 'mountains',
+    // čtvrtá visačka „Kastrace“ (u koček, které už jsou vykastrované)
+    neutered: 'vykastrován',
     photo: '/photos/velik.jpg',
     photoHint: 'Velík zblízka',
     // fotka hlavy pro kreslené postavičky (hero, auto, obývák…). Nejlépe PNG/WebP s průhledným
