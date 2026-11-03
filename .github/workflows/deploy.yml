@@ -2,8 +2,9 @@
 # (https://marceljager.github.io/cats/). Settings → Pages → Source must be "GitHub Actions".
 # The public address (the CDN domain) goes in Settings → Secrets and variables → Actions →
 # Variables as SITE_URL; without it the build has no og:image, canonical or ai-catalog.json.
-# Secrets CDN_PURGE_URL (purge-all API address, resource ID included) and CDN_API_TOKEN make every
-# deploy end by clearing the CDN's cache; they stay out of the repo and are masked in the logs.
+# Secrets CDN_PURGE_URL (purge-all API address, resource ID included) and CDN_API_TOKEN, in the
+# "production" environment, make every deploy end by clearing the CDN's cache; they stay out of
+# the repo and are masked in the logs.
 name: Deploy
 
 on:
@@ -51,14 +52,21 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
+
+  # the CDN in front fetches the new files from Pages instead of serving its cached copy. Its own job
+  # in the "production" environment, which holds the secrets; skipped until both exist. The short wait
+  # lets Pages' own cache switch to the new deploy first.
+  purge:
+    needs: deploy
+    runs-on: ubuntu-latest
+    environment: production
     env:
       PURGE_URL: ${{ secrets.CDN_PURGE_URL }}
       API_TOKEN: ${{ secrets.CDN_API_TOKEN }}
     steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
-      # the CDN in front fetches the new files from Pages instead of serving its cached copy; skipped
-      # until both secrets exist. The short wait lets Pages' own cache switch to the new deploy first.
       - name: Purge CDN cache
         if: env.PURGE_URL != '' && env.API_TOKEN != ''
         run: |
