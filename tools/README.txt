@@ -4,4 +4,4 @@ its top what it writes.
 
   npm run og      public/og.png, the picture a shared link shows (drawn in headless Google Chrome;
                   CHROME points at another Chrome than the one in /Applications)
-  npm run icons   public/apple-touch-icon.png, from public/favicon.svg
+  npm run icons   public/favicon.svg, from the cats' head photos, and public/apple-touch-icon.png from it
