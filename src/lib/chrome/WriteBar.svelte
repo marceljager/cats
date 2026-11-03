@@ -36,9 +36,11 @@
     z-index: 20;
     left: 12px;
     right: 12px;
-    bottom: calc(10px + env(safe-area-inset-bottom));
+    /* clear of the very bottom edge: Safari 26 tints its floating bottom bar with the colour of a
+       fixed element sitting on that edge, which painted the whole bottom of the screen red */
+    bottom: calc(28px + env(safe-area-inset-bottom));
     display: none;
-    translate: 0 calc(100% + 40px);
+    translate: 0 calc(100% + 60px);
     visibility: hidden;
     transition:
       translate 0.45s var(--ease-out),
