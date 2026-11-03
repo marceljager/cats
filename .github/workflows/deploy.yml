@@ -56,30 +56,18 @@ jobs:
       - id: deployment
         uses: actions/deploy-pages@v4
 
-  # the CDN in front fetches the new files from Pages instead of serving its cached copy. Its own job
-  # in the "production" environment, which holds the secrets; skipped until both exist. The short wait
-  # lets Pages' own cache switch to the new deploy first.
+  # the CDN in front fetches the new files from Pages instead of its cached copy. The secrets live in
+  # the "production" environment; the wait lets Pages' own cache switch over first. The response is
+  # never printed (it names the resource, and the log is public): a failure shows only its HTTP code.
   purge:
     needs: deploy
     runs-on: ubuntu-latest
     environment: production
-    env:
-      PURGE_URL: ${{ secrets.CDN_PURGE_URL }}
-      API_TOKEN: ${{ secrets.CDN_API_TOKEN }}
     steps:
       - name: Purge CDN cache
-        if: env.PURGE_URL != '' && env.API_TOKEN != ''
+        env:
+          PURGE_URL: ${{ secrets.CDN_PURGE_URL }}
+          API_TOKEN: ${{ secrets.CDN_API_TOKEN }}
         run: |
           sleep 30
-          # always the purge-everything endpoint, whichever purge address the secret holds
-          # (…/job/purge, …/job/purge/paths or …/job/purge-all)
-          url="${PURGE_URL%%/job/*}/job/purge-all"
-          code=$(curl --silent --show-error --retry 3 -X POST "$url" \
-            -H "Authorization: Bearer $API_TOKEN" -o response.json -w "%{http_code}")
-          echo "purge: HTTP $code"
-          if [ "$code" -ge 300 ]; then
-            # the log is public and the API's messages name the resource: long numbers are blanked out
-            jq -r '[.message, .detail, (.errors // empty | tostring)] | map(select(. != null)) | join(" ")' response.json 2>/dev/null \
-              | sed -E 's/[0-9]{5,}/<id>/g' || true
-            exit 1
-          fi
+          curl --fail --silent --show-error --retry 3 -o /dev/null -X POST "$PURGE_URL" -H "Authorization: Bearer $API_TOKEN"
