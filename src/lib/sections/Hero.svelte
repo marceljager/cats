@@ -135,7 +135,7 @@
       <li class="chip">k&nbsp;adopci v&nbsp;Praze a&nbsp;okolí</li>
     </ul>
     <div class="actions">
-      <Button href="#domov">Chci je poznat <Icon name="right" size={24} /></Button>
+      <Button href="#kotata">Chci je poznat <Icon name="right" size={24} /></Button>
       <span class="story"><Button href="#cesta" variant="link">Jak jsme se sem dostali <Icon name="down" size={22} /></Button></span>
     </div>
   </div>
