@@ -1,9 +1,11 @@
+// @ts-check
 // Spring-physics helpers on Motion, shared by every interactive animation on the page,
 // so everything that moves when you touch it moves the same, natural way.
 import { animate, hover, press, scroll, motionValue } from 'motion';
 import { onScrollFrame, reducedMotion } from './viewport.js';
 
 // how a pendulum swings back to hanging straight; stiffness and damping can be tuned per use
+/** @returns {import('motion').ValueAnimationTransition} */
 const pendulum = (opts) => ({ type: 'spring', stiffness: opts.stiffness ?? 160, damping: opts.damping ?? 4.5, mass: 0.9 });
 
 // Scroll sway: while the page scrolls, everything that opted in and is on screen leans with the
@@ -168,6 +170,7 @@ export function bouncy(node, opts = {}) {
     over = { ...rest, scale: 1.04, rotate: (rest.rotate ?? 0) - 1.5, y: -2, ...o.over };
     down = { ...over, scale: 0.95, y: 1, ...o.down };
   };
+  /** @type {import('motion').AnimationOptions} */
   const sp = { type: 'spring', stiffness: 520, damping: 18 };
   configure(opts);
   animate(node, rest, { duration: 0 });

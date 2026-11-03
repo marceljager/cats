@@ -6,6 +6,8 @@ One-page story site (Svelte 5 + Vite, static).
 npm install
 npm run dev      # http://localhost:5173
 npm run build    # static files in dist/
+npm test         # content.js, the map's geometry, sharing and the photo files (tests/)
+npm run check    # type checking (svelte-check)
 ```
 
 ## Where to change things

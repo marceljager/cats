@@ -1,3 +1,4 @@
+// @ts-check
 // shared drawing helpers for the night-forest scenes (hero and the closing section)
 import { rng } from './random.js';
 

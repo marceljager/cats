@@ -13,6 +13,7 @@
   let frame = $state();
   let crop = $state(null); // { x, y, w, h } in page pixels
   // the iframe grows taller when a piece near the end of the page cannot be scrolled up into view
+  // svelte-ignore state_referenced_locally (view is only where it starts)
   let tall = $state(view);
   let fit = $state(0); // width available for the crop
 

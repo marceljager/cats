@@ -1,3 +1,4 @@
+// @ts-check
 // one lightbox for the whole page (Lightbox.svelte, mounted once in App): any photo lifts off the
 // page, springs up big and flies back to where it came from when closed.
 //   zoom({ items, index, source, opener })

@@ -1,3 +1,4 @@
+// @ts-check
 // The window as every moving thing on the page sees it: the reduced-motion setting, whether an
 // element is on screen, and one shared scroll listener.
 

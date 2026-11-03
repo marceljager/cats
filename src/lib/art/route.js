@@ -1,3 +1,4 @@
+// @ts-check
 // The map's geometry, worked out without the page: the route through the stops, the scenery and
 // rivers around it, the grass and clouds, and how far along the route the car is. Journey.svelte
 // measures the page, draws what this returns and moves the car.
@@ -71,6 +72,7 @@ export function planRoute({ geo, stops, w, wide }) {
   // each stretch of the trip has its own river: a mountain stream from the lake under Velebit
   // running off west toward the sea, then one per leg crossing the map from side to side
   const streams = [[[lake[0], lake[1] + 6], [lake[0] + (wide ? 10 : 0), lake[1] + 90], [lake[0] - 10, lake[1] + 260], [-60, lake[1] + 380]]];
+  /** @type {number[][] | null} */
   let vltava = null; // the river that runs on through the city and off the bottom of the map
 
   geo.forEach((g, i) => {

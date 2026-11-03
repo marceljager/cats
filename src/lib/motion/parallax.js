@@ -1,3 +1,4 @@
+// @ts-check
 // Svelte action: drift an element vertically as it passes through the viewport.
 // `speed` is the share of its distance from the viewport centre it moves by
 // (positive lags behind the scroll, negative runs ahead). Pass { speed, media } to limit it to

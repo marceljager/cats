@@ -11,7 +11,7 @@
 
   // the fire is the only light in the room: track where it is so the darkness can fall away from it
   let room;
-  let fireGroup;
+  let fireGroup = $state(); // the flames' group, from LivingRoom
   let light = $state('');
   function place() {
     if (!room || !fireGroup) return;

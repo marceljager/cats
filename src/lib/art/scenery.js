@@ -1,3 +1,4 @@
+// @ts-check
 // The map's scenery: every kind of place Doodle.svelte draws, and how each one is laid out.
 import { rng } from './random.js';
 
@@ -15,7 +16,8 @@ export const SCENERY = {
   lookout: { foot: [-36, 40, -75, 27] },
   rest: { foot: [-42, 43, -40, 27] },
 };
-export const KINDS = Object.keys(SCENERY);
+/** @typedef {keyof typeof SCENERY} PlaceKind */
+export const KINDS = /** @type {PlaceKind[]} */ (Object.keys(SCENERY));
 
 const TREE = 0.85;
 
@@ -58,6 +60,7 @@ export function layoutPlace(kind, { seed = 1, scale = 1 } = {}) {
       out[out.length - 1].z = 2;
     });
     // a terrace of townhouses side by side, each its own height, color and roof
+    /** @param {(x: number) => boolean} [keep] which houses to leave standing, by their x */
     const terrace = (x0, x1, y, h0, h1, z, keep = () => true) => {
       for (let x = x0; x < x1; ) {
         const w = 7 + r() * 3.5;

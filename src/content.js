@@ -2,6 +2,21 @@
 // nastavte photo: '/photos/nazev.jpg'. Zmenšené verze (AVIF, WebP, JPEG) se vyrobí samy při
 // npm run dev / npm run build. Dokud je photo null, ukáže se zástupný rámeček.
 
+// @ts-check
+// Tvar dat (kontroluje ho npm run check a npm test):
+/**
+ * @typedef {{ x: number, y: number, w: number, ratio: number }} HeadFrame
+ * @typedef {{ id: string, name: string, sex: string, age: string, namedAfter: string,
+ *   namedIcon: 'mountains' | 'pin', neutered?: string, photo: string | null, photoHint: string,
+ *   head: string | null, headFrame?: HeadFrame, says: string }} Cat
+ * @typedef {{ label: string, icon: 'lookout' | 'rest' }} Detour
+ * @typedef {{ id: string, place: string, country: string, km: number, title: string, story: string[],
+ *   photo: string | null, photoHint: string, doodle?: import('./lib/art/scenery.js').PlaceKind,
+ *   via?: string[], detour?: Detour }} Stop
+ * @typedef {{ photo: string | null, orientation: 'portrait' | 'landscape' | 'square', caption: string, hint: string }} GalleryPhoto
+ * @typedef {{ place: string, title: string, done: string[], who: string, quote?: { text: string, lang: string } }} VetVisit
+ */
+
 // Jak web vidí vyhledávače a náhledy sdílených odkazů. title a description mají délku pro výsledek
 // vyhledávání (asi 60 a 155 znaků); story je delší verze pro strojová shrnutí (JSON-LD, llms.txt);
 // share je text zprávy, když nás někdo pošle dál (WhatsApp, e-mail, sdílení z telefonu).
@@ -31,6 +46,7 @@ export const contact = {
   },
 };
 
+/** @type {Cat[]} */
 export const cats = [
   {
     id: 'velik',
@@ -80,6 +96,7 @@ export const catNames = ((names) => (names.length > 1 ? `${names.slice(0, -1).jo
 // via = státy, kterými se cestou k zastávce projíždí (kvůli hranicím na mapě).
 // detour = místo, kam jsme cestou odbočili (oblouk na mapě): { label, icon: 'lookout' | 'rest' }.
 // Bez něj jede trasa jen v mírném oblouku.
+/** @type {Stop[]} */
 export const stops = [
   {
     id: 'velebit',
@@ -157,6 +174,7 @@ export const stops = [
 
 // Fotogalerie (fotky na šňůře). orientation: 'portrait' | 'landscape' | 'square'.
 // Fotku dejte do photos/ a nastavte photo: '/photos/nazev.jpg'. Popisky jsou zatím zástupné.
+/** @type {GalleryPhoto[]} */
 export const gallery = [
   { photo: '/photos/kotata-na-terase.jpg', orientation: 'portrait', caption: 'Na terase pod Velebitem', hint: 'koťata u apartmánu' },
   { photo: '/photos/velik-za-oknem.jpg', orientation: 'portrait', caption: 'Tady jsme Velíka našli', hint: 'Velík' },
@@ -172,6 +190,7 @@ export const gallery = [
 ];
 
 // Návštěvy u veterináře, v pořadí, jak proběhly.
+/** @type {{ verdict: string, paid: string, visits: VetVisit[] }} */
 export const vet = {
   verdict: 'Vypadají moc zdravě.',
   // řádek pod hodnocením, u razítka ZAPLACENO

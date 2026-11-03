@@ -1,3 +1,4 @@
+// @ts-check
 // sending the page on to friends: the phone's own share sheet where there is one, otherwise
 // WhatsApp, Facebook, an e-mail or a copied link
 import { site } from '../../content.js';
@@ -37,7 +38,7 @@ async function writeClipboard(value) {
   } catch {
     // no clipboard access (an older browser, an in-app browser, a page that isn't https):
     // the old way, through a hidden text field
-    const back = document.activeElement;
+    const back = /** @type {HTMLElement | null} */ (document.activeElement);
     const field = document.createElement('textarea');
     field.value = value;
     field.setAttribute('readonly', '');
