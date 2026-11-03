@@ -6,6 +6,7 @@
   import Icon from './Icon.svelte';
   import Text from './Text.svelte';
   import { options, canShare, shareNative, linkCopier } from './share.svelte.js';
+  import { site } from '../content.js';
 
   let root;
   let menu = $state();
@@ -53,7 +54,7 @@
 
   {#if open}
     <div class="note" id="share-menu" bind:this={menu}>
-      <Text variant="subheading" as="p" class="note-title">Pomozte nám najít domov</Text>
+      <Text variant="subheading" as="p" class="note-title">{site.share.heading}</Text>
       <Text variant="small" class="note-text">Pošlete nás někomu, kdo by nám mohl dát domov.</Text>
       <ul>
         {#each list as o (o.id)}

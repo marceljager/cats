@@ -4,22 +4,12 @@
   // Velík and Polly, small bodies with big bobbling heads, sitting side by side;
   // `cold` adds the forest shiver and breath
   import CatHead from './CatHead.svelte';
-  import Drawn from './Drawn.svelte';
-  import { drawn } from './drawn.js';
   let { cold = false, x = 0, y = 0, scale = 1 } = $props();
-  // the bodies (with their shadow) under the photo heads: hand-drawn if there is a drawing, else drawn here
-  const art = $derived(cold ? 'F6' : 'O5');
-  const handDrawn = $derived(drawn(art));
 </script>
 
 <g class="kittens" transform="translate({x} {y}) scale({scale})">
-      {#if !handDrawn}
       <ellipse class="cat-shadow" cx="790" cy="858" rx="110" ry="10" />
-      {:else}
-      <g class:shiver={cold}><Drawn id={art} /></g>
-      {/if}
       <g class:shiver={cold}>
-        {#if !handDrawn}
         <!-- Velík: a ginger tabby sitting up, shoulders broad enough to carry his wide face, two
              white front paws -->
         <path class="body ginger" d="M710 856 C704 822 714 794 738 784 C754 778 774 778 790 784 C814 794 824 822 818 856 Z" />
@@ -28,11 +18,9 @@
         <path class="outline" d="M710 856 C704 822 714 794 738 784 C754 778 774 778 790 784 C814 794 824 822 818 856 Z" />
         <path class="paw" d="M736 857 C736 846 744 842 752 842 C760 842 766 846 766 857 Z" />
         <path class="paw" d="M766 857 C766 846 772 842 780 842 C788 842 794 846 794 857 Z" />
-        {/if}
         <CatHead catId="velik" cx={764} cy={774} r={56} mood={cold ? 'cold' : 'happy'} look={cold ? 1 : 0} tilt={cold ? -3 : 6} delay={0} />
       </g>
       <g class:shiver={cold} class="two">
-        {#if !handDrawn}
         <!-- Polly: drawn like her brother, smaller: a grey-brown tabby with darker stripes down her
              sides and two light front paws -->
         <path class="body tabby" d="M800 858 C794 826 806 800 830 798 C856 800 866 826 862 858 Z" />
@@ -41,7 +29,6 @@
         <path class="outline" d="M800 858 C794 826 806 800 830 798 C856 800 866 826 862 858 Z" />
         <path class="paw tabby" d="M812 859 C812 851 817 848 822 848 C827 848 831 851 831 859 Z" />
         <path class="paw tabby" d="M831 859 C831 851 835 848 840 848 C845 848 850 851 850 859 Z" />
-        {/if}
         <CatHead catId="polly" cx={836} cy={784} r={46} mood={cold ? 'cold' : 'happy'} look={cold ? 1 : 0} tilt={cold ? 2 : -7} delay={0.9} />
       </g>
 {#if cold}

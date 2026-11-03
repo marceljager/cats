@@ -2,7 +2,7 @@
   import Icon from './Icon.svelte';
   import Text from './Text.svelte';
   import Card from './Card.svelte';
-  import { vet, cats } from '../content.js';
+  import { vet, catNames } from '../content.js';
   import { bouncy, scrollLinked } from './springs.js';
   import { animate } from 'motion';
 
@@ -30,7 +30,7 @@
           <span class="cross" aria-hidden="true"></span>
           <div>
             <Text variant="heading" as="h2" id="vet-h">Veterinární zpráva</Text>
-            <Text class="patients"><Text variant="label">Pacienti</Text>{cats[0].name} a {cats[1].name}, sourozenci</Text>
+            <Text class="patients"><Text variant="label">Pacienti</Text>{catNames}, sourozenci</Text>
           </div>
         </header>
 

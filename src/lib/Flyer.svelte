@@ -9,6 +9,7 @@
   import CatHead from './CatHead.svelte';
   import { options, shareNative, linkCopier } from './share.svelte.js';
   import { reducedMotion } from './viewport.js';
+  import { site } from '../content.js';
 
   let list = $state.raw([]);
   const link = linkCopier();
@@ -176,7 +177,7 @@
       <CatHead catId="polly" cx={14} cy={4} r={13} mood="happy" tilt={8} delay={0.6} />
     </svg>
     <div>
-      <Text variant="heading" id="sdilet-h" class="flyer-title">Pomozte nám najít domov</Text>
+      <Text variant="heading" id="sdilet-h" class="flyer-title">{site.share.heading}</Text>
       <Text class="flyer-text">
         Nemáte pro nás místo? Nevadí. Pošlete nás dál, třeba je náš domov u&nbsp;někoho z&nbsp;vašich známých.
       </Text>

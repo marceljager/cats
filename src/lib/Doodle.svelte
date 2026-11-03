@@ -1,16 +1,10 @@
 <script>
   // cartoon map scenery: one place (a forest, Prague, the farm…) drawn from its pieces, which
   // scenery.js lays out; the kinds of place are listed there
-  import Drawn from './Drawn.svelte';
-  import { drawn } from './drawn.js';
-  import { SCENERY, layoutPlace } from './scenery.js';
+  import { layoutPlace } from './scenery.js';
   let { kind, x = 0, y = 0, scale = 1, seed = 1, label = '', flip = false } = $props();
   const uid = $props.id(); // keeps clip-path ids apart between doodles
 
-  // hand-drawn (see drawn.js): one drawing for a whole place (all of Prague, the farm, a mountain
-  // range), used for every place of that kind instead of its separate pieces; the label and the
-  // chimney smoke stay in code
-  const whole = $derived(drawn(SCENERY[kind].drawing) ? SCENERY[kind].drawing : null);
   const items = $derived(layoutPlace(kind, { seed, scale }));
 </script>
 
@@ -52,7 +46,7 @@
   </g>
 {/snippet}
 
-<!-- chimney smoke, kept in code (it puffs) even over a hand-drawn place -->
+<!-- chimney smoke, puffing -->
 {#snippet smoke(it)}
   {@const s = it.s}
   {@const w = 16 * s}
@@ -99,10 +93,6 @@
 {/snippet}
 
 <g class="doodle {kind}" transform="translate({x} {y}) scale({flip ? -scale : scale} {scale})">
-  {#if whole}
-    <Drawn id={whole} />
-    {#each items.filter((it) => it.smoke) as it}{@render smoke(it)}{/each}
-  {:else}
   {#each items as it}
     {#if it.t === 'tree'}
       {@render roundTree(it)}
@@ -380,7 +370,6 @@
       <path class="sign-p" d="M 24.4 -19.6 V -24.6 H 26.6 Q 28.6 -24.6 28.6 -22.9 Q 28.6 -21.2 26.6 -21.2 H 24.4" />
     {/if}
   {/each}
-  {/if}
   {#if label}
     <text class="name" x="0" y={kind === 'mountains' ? 28 : 22} text-anchor="middle" transform={flip ? 'scale(-1 1)' : undefined}>{label}</text>
   {/if}

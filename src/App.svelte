@@ -8,12 +8,11 @@
   import Gallery from './lib/Gallery.svelte';
   import Lightbox from './lib/Lightbox.svelte';
   import WriteBar from './lib/WriteBar.svelte';
-  import { stops } from './content.js';
 </script>
 
 <Hero />
 <main>
-  <Journey {stops} />
+  <Journey />
   <Family />
   <Cats />
   <Gallery />

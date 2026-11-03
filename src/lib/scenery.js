@@ -1,20 +1,19 @@
 // The map's scenery: every kind of place Doodle.svelte draws, and how each one is laid out.
 import { rng } from './random.js';
 
-// every kind of place, in the order the kit shows them:
-//   drawing  the hand-drawn picture that replaces the whole place once it exists (see drawn.js)
-//   foot     its footprint around its anchor at scale 1, [left, right, top, bottom], which the map
-//            keeps out of the rivers (Journey.svelte); the city has none, it is drawn around its river
+// every kind of place, in the order the kit shows them, with its footprint around its anchor at
+// scale 1, [left, right, top, bottom], which the map keeps out of the rivers (Journey.svelte); the
+// city has none, it is drawn around its river
 export const SCENERY = {
-  forest: { drawing: 'M4', foot: [-84, 81, -55, 31] },
-  city: { drawing: 'M1' },
-  farm: { drawing: 'M2', foot: [-88, 96, -31, 14] },
-  mountains: { drawing: 'M3', foot: [-140, 160, -127, 36] },
-  hills: { drawing: 'M5', foot: [-68, 72, -57, 15] },
-  lake: { drawing: 'M6', foot: [-60, 75, -47, 27] },
-  field: { drawing: 'M7', foot: [-82, 85, -26, 32] },
-  lookout: { drawing: 'M8', foot: [-36, 40, -75, 27] },
-  rest: { drawing: 'M9', foot: [-42, 43, -40, 27] },
+  forest: { foot: [-84, 81, -55, 31] },
+  city: {},
+  farm: { foot: [-88, 96, -31, 14] },
+  mountains: { foot: [-140, 160, -127, 36] },
+  hills: { foot: [-68, 72, -57, 15] },
+  lake: { foot: [-60, 75, -47, 27] },
+  field: { foot: [-82, 85, -26, 32] },
+  lookout: { foot: [-36, 40, -75, 27] },
+  rest: { foot: [-42, 43, -40, 27] },
 };
 export const KINDS = Object.keys(SCENERY);
 

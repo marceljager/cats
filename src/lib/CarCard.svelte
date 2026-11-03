@@ -1,21 +1,14 @@
 <script>
-  // placeholder for the car: swap this card for an illustration later; the two big heads ride on top
+  // the car: a little cartoon van body on two wheels; the two big heads ride on top
   import CatHead from './CatHead.svelte';
-  import { drawn } from './drawn.js';
   let { x = 0, y = 0, tilt = 0, bump = 0, km = 0, moving = false } = $props();
-  // a hand-drawn car (see drawn.js); its box is in parts of the body's width and height
-  const art = drawn('M12');
 </script>
 
 <div class="car" style="transform: translate3d({x}px, {y}px, 0) translate(-50%, -50%) rotate({tilt}deg)" aria-hidden="true">
   <div class="bounce" style="translate: 0 {bump}px">
-    <div class="body" class:drawn={art}>
-      {#if art}
-        <img class="art" src={art.url} alt="" style="left:{art.x * 100}%; top:{art.y * 100}%; width:{art.w * 100}%; height:{art.h * 100}%" />
-      {:else}
-        <span class="wheel a"></span>
-        <span class="wheel b"></span>
-      {/if}
+    <div class="body">
+      <span class="wheel a"></span>
+      <span class="wheel b"></span>
     </div>
     <!-- heads after the body, so they sit in front of it -->
     <svg class="riders" viewBox="0 0 120 70" aria-hidden="true">
@@ -44,15 +37,6 @@
     border: 3px solid var(--ink);
     border-radius: 11px 17px 8px 8px;
     box-shadow: 0 6px 12px -4px rgba(60, 35, 10, 0.55);
-  }
-  .body.drawn {
-    background: none;
-    border-color: transparent;
-    box-shadow: none;
-  }
-  .art {
-    position: absolute;
-    max-width: none;
   }
   /* the two big heads ride on the car, wider than the car itself */
   .riders {

@@ -7,14 +7,11 @@
   import Stop from './Stop.svelte';
   import CarCard from './CarCard.svelte';
   import Doodle from './Doodle.svelte';
-  import Drawn from './Drawn.svelte';
-  import { drawn } from './drawn.js';
   import { parallax } from './parallax.js';
   import { curve, driftClouds, keepDry, kmAt, lengthAt, planRoute, scatterGrass, sideOf, smooth } from './route.js';
   import { springTo } from './springs.js';
+  import { stops } from '../content.js';
   import { onScreen, onScrollFrame, reducedMotion } from './viewport.js';
-
-  let { stops } = $props();
 
   let root;
   let routePath = $state();
@@ -206,16 +203,12 @@
         <path class="done" bind:this={routePath} {d} mask="url(#driven)" />
 
         {#each pins as pin, i}
-          {@const k = reached[i] ? 1 : 0}
           <!-- the site's pin icon (Icon.svelte) at map size, tip on the route: a cream outline
                waiting, red with its cel shade and shine once the car arrives -->
           <g class="pin" class:reached={reached[i]} transform="translate({pin.x} {pin.y})">
-            {#if !drawn('M11')}<ellipse class="pin-ground" cx="0" cy="1" rx="10" ry="3.5" />{/if}
+            <ellipse class="pin-ground" cx="0" cy="1" rx="10" ry="3.5" />
             <g class="pin-body" use:springTo={{ to: { scale: reached[i] ? 1 : 0.85 }, bounce: 0.55, duration: 0.45 }}>
-              <!-- hand-drawn: one sheet with the waiting pin and, 60 to the right, the reached one -->
-              <g transform="translate({-60 * k} 0)">
-                <Drawn id="M11" part={k}>
-                  <g transform="translate({60 * k} 0) scale(1.75) translate(-16 -29)">
+                  <g transform="scale(1.75) translate(-16 -29)">
                     <clipPath id="pin-clip-{i}"><path d={PIN} /></clipPath>
                     <path class="pin-shade" d={PIN} />
                     <g clip-path="url(#pin-clip-{i})"><path class="pin-fill" d={PIN} transform="translate(-2.2 -2.2)" /></g>
@@ -227,8 +220,6 @@
                     <g clip-path="url(#pin-eye-clip-{i})"><path class="pin-eye-fill" d="M12.4 14 a3.6 3.6 0 1 0 7.2 0 a3.6 3.6 0 1 0 -7.2 0 Z" transform="translate(-2.2 -2.2)" /></g>
                     <path class="pin-eye" d="M12.4 14 a3.6 3.6 0 1 0 7.2 0 a3.6 3.6 0 1 0 -7.2 0 Z" />
                   </g>
-                </Drawn>
-              </g>
             </g>
           </g>
         {/each}
@@ -238,7 +229,6 @@
       {#each clouds as c}
         <div class="cloud" style="left:{c.x}px; top:{c.y}px; width:{c.w}px; --dur:{c.dur}s" use:parallax={0.22}>
           <svg viewBox="0 0 200 92" aria-hidden="true" style={c.flip ? 'scale: -1 1' : ''}>
-            <Drawn id="M10">
               <!-- the outline under everything, so it only shows around the silhouette; then the
                    puffs in shade, and again in light a little smaller and up to the left, so the
                    shade only rims the lower right of each puff and the base -->
@@ -248,7 +238,6 @@
               {#each c.puffs as [px, py, pr]}<circle class="puff-shade" cx={px} cy={py} r={pr} />{/each}
               <rect class="puff" x="22" y="52" width="158" height="22" rx="11" />
               {#each c.puffs as [px, py, pr]}<circle class="puff" cx={px - 3} cy={py - 4} r={pr - 4.5} />{/each}
-            </Drawn>
           </svg>
         </div>
       {/each}

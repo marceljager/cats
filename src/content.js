@@ -11,6 +11,7 @@ export const site = {
   description: 'Dvě koťata (kluk a holka, 6–7 měsíců) zachráněná v Chorvatsku hledají domov v Praze a okolí. Mazlivá, zvyklá na psy, odčervená, zdarma do dobrých rukou.',
   story: 'Dvě koťata (kluk a holka, 6–7 měsíců) z chorvatského pohoří Velebit hledají domov. Jsou mazlivá, pořád u lidí a nebojí se ani psů. Odčervená, odblešená, po veterinární kontrole, kocourek je vykastrovaný. Aktuálně jsou v Praze 6 – zdarma do dobrých rukou (ideálně oba spolu).',
   share: {
+    heading: 'Pomozte nám najít domov',
     text: 'Velík a Polly hledají domov – koťata zdarma k darování v Praze a okolí. Nevíte o někom?',
     subject: 'Víte o domově pro dvě koťata?',
   },
@@ -19,10 +20,15 @@ export const site = {
 // placeholder: true vypne odkaz na Instagram (dokud tam není skutečný účet) a schová web před
 // vyhledávači (noindex). Po vyplnění skutečného e-mailu a Instagramu nastavte false.
 // Po vyplnění skutečných údajů nastavte na false.
+// mail = předvyplněný e-mail, který se otevře po kliknutí na tlačítko.
 export const contact = {
   email: 'kocky.hledaji.domov@example.cz',
   instagram: 'kocky.z.velebitu',
   placeholder: true,
+  mail: {
+    subject: 'Domov pro Velíka a Polly',
+    body: 'Ahoj Velíku a Polly,\n\nrádi bychom vám dali domov (oběma / jednomu z vás).\n\nKde bydlíme:\nKdo u nás žije (lidi i zvířata):\nNěco o nás:\n\n',
+  },
 };
 
 export const cats = [
@@ -61,6 +67,10 @@ export const cats = [
     says: 'Já jsem Polly, podle místa Poljana ve Slovinsku, kde jsme si na cestě poprvé protáhli tlapky. Jsem kočka a je mi taky 6–7 měsíců. Velík je můj bratr. Ale nenechte se zmást, já jsem ta chytřejší. Kam jdou lidi, tam jdu já, ale radši svět pozoruji z bezpečné vzdálenosti nebo z okna. Lidi se mnou začali trénovat i různé triky a to mě moc baví. Jsem sice malá, ale statečná – ani psi si na mě nedovolí.',
   },
 ];
+
+// „Velík a Polly“: jména koťat tak, jak se řeknou ve větě (do nadpisů a textů); za „a“ je pevná
+// mezera, aby jednopísmenná spojka nezůstala na konci řádku
+export const catNames = ((names) => (names.length > 1 ? `${names.slice(0, -1).join(', ')} a\u00a0${names.at(-1)}` : names[0]))(cats.map((c) => c.name));
 
 // Zastávky na cestě. Novou zastávku přidáte jedním objektem na správné místo,
 // trasa s kličkami se překreslí sama.

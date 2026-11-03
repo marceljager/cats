@@ -5,9 +5,7 @@
   import Kittens from './Kittens.svelte';
   import Button from './Button.svelte';
   import ShareButton from './ShareButton.svelte';
-  import Drawn from './Drawn.svelte';
-  import { drawn } from './drawn.js';
-  import { cats } from '../content.js';
+  import { cats, catNames } from '../content.js';
   import { layer } from './forest.js';
 
   // the hero's loops (stars, flicker, the kittens) stop while it's off screen. The parallax itself
@@ -57,7 +55,6 @@
         </radialGradient>
       </defs>
       <circle cx="1190" cy="150" r="150" fill="url(#moonglow)" />
-      <Drawn id="F1">
         <g class="stars">
           {#each STARS as [sx, sy, sr], i}
             <circle cx={sx} cy={sy} r={sr * 1.6} style="--d:{(i % 5) * 0.7}s" />
@@ -67,7 +64,6 @@
         <circle class="crater" cx="1172" cy="138" r="10" />
         <circle class="crater" cx="1206" cy="170" r="7" />
         <circle class="crater" cx="1210" cy="128" r="5" />
-      </Drawn>
     </svg>
 
     <!-- the window's glow and the fire in it, flickering together: the flicker is this one small
@@ -84,14 +80,11 @@
         <rect class="flame" x="902" y="718" width="20" height="16" rx="1.5" />
       </svg>
     {/snippet}
-    <!-- with a hand-drawn forest the glow shows around the house, behind the drawing -->
-    {#if drawn('F2')}{@render lights()}{/if}
     <svg class="layer back" style="--k:0.38" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice">
       <defs>
         <filter id="hero-far-blur" filterUnits="userSpaceOnUse" x="-900" y="0" width="3240" height="1200"><feGaussianBlur stdDeviation="1.2" /></filter>
       </defs>
       <g class="soft">
-      <Drawn id="F2">
         <!-- the distant forest floor: one dark mass the far trees grow out of, no hard edge -->
         <path class="far" d="M-820 1100 V770 C-600 760 -300 778 -40 772 C120 762 260 780 420 770 S760 764 900 774 S1240 762 1480 772 C1760 778 2000 764 2260 772 V1100 Z" />
         {#each far as t}<path class="far-trunk" d={t.trunk} /><g class="far-crown">{#each t.tiers as d}<path {d} />{/each}</g>{/each}
@@ -99,51 +92,44 @@
         <path class="house" d="M872 760 V706 L912 676 L952 706 V760 Z" />
         <rect class="lit" x="900" y="716" width="24" height="20" rx="2" />
         <path class="pane" d="M912 716 V736 M900 726 H924" />
-      </Drawn>
       <ellipse class="fog f1" cx="500" cy="760" rx="520" ry="34" />
       </g>
     </svg>
-    {#if !drawn('F2')}{@render lights()}{/if}
+    {@render lights()}
 
     <svg class="layer middle" style="--k:0.28" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice">
       <defs>
         <filter id="hero-mid-blur" filterUnits="userSpaceOnUse" x="-900" y="0" width="3240" height="1200"><feGaussianBlur stdDeviation="0.6" /></filter>
       </defs>
       <g class="softer">
-      <Drawn id="F3">
         {#each mid as t}<path class="mid-trunk" d={t.trunk} /><g class="mid">{#each t.tiers as d}<path class="outline" {d} />{/each}{#each t.tiers as d}<path {d} />{/each}</g>{/each}
-      </Drawn>
       </g>
     </svg>
 
     <svg class="layer near" style="--k:0.2" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice">
       <!-- the flat forest floor the kittens sit on, running on down behind the hills -->
-      <Drawn id="F4">
         <path class="ground" d="M-820 1100 V826 C-500 816 -240 830 -20 832 C200 812 420 824 640 818 C860 812 1100 826 1460 812 C1760 804 2000 822 2260 816 V1100 Z" />
         <path class="tufts" d="M220 846 l4 -12 l4 12 M236 850 l3 -10 l3 10 M1010 842 l4 -12 l4 12 M1028 846 l3 -9 l3 9 M560 840 l3 -10 l3 10 M1180 846 l4 -11 l4 11" />
-      </Drawn>
       <!-- the kittens, huddled, looking toward the window -->
       <Kittens cold />
       <ellipse class="fog f2" cx="1000" cy="850" rx="560" ry="30" />
     </svg>
 
     <svg class="layer fore" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice">
-      <Drawn id="F5">
         {#each front as t}<path class="front-trunk" d={t.trunk} /><g class="front">{#each t.tiers as d}<path class="outline" {d} />{/each}{#each t.tiers as d}<path {d} />{/each}</g>{/each}
-      </Drawn>
     </svg>
   </div>
 
   <ShareButton />
 
   <div class="wrap copy">
-    <Text variant="display" class="hero-title">Ahoj, jsme {cats[0].name} a&nbsp;{cats[1].name}.</Text>
+    <Text variant="display" class="hero-title">Ahoj, jsme {catNames}.</Text>
     <Text variant="lede" class="hero-sub">
       Náš příběh začal v&nbsp;chorvatském pohoří Velebit, kde nás někdo vyhodil a&nbsp;nechal, ať zamrzneme. Lidi i&nbsp;tak milujeme a&nbsp;nejradši jsme pořád s&nbsp;nimi. Teď už jsme v&nbsp;teple, ale pořád čekáme na to hlavní – na rodinu, která si nás nechá napořád.
     </Text>
     <ul class="facts" aria-label="Kdo jsme">
-      <li class="chip">sourozenci, {cats[0].sex} + {cats[1].sex}</li>
-      <li class="chip">{cats[0].age}</li>
+      <li class="chip">sourozenci, {cats.map((c) => c.sex).join(' + ')}</li>
+      <li class="chip">{[...new Set(cats.map((c) => c.age))].join(' / ')}</li>
       <li class="chip">mazliví, učenliví a&nbsp;stateční</li>
       <li class="chip">k&nbsp;adopci v&nbsp;Praze a&nbsp;okolí</li>
     </ul>

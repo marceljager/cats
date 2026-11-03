@@ -14,8 +14,8 @@ if (!html.includes('<div id="app"></div>')) throw new Error('dist/index.html has
 await writeFile(indexFile, html.replace('</head>', `${head}</head>`).replace('<div id="app"></div>', `<div id="app">${body}</div>`));
 await rm(ssrDir, { recursive: true });
 
-// the site is the landing page alone: no other page (the dev-only kit.html / drawings.html
-// review pages included) may end up in the upload
+// the site is the landing page alone: no other page (the dev-only kit.html review page
+// included) may end up in the upload
 const pages = (await readdir(new URL('../dist/', import.meta.url), { recursive: true })).filter((f) => /\.html?$/i.test(f));
 if (pages.join() !== 'index.html') throw new Error(`dist/ must hold only index.html, found: ${pages.join(', ')}`);
 console.log('prerendered dist/index.html');

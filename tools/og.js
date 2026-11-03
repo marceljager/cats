@@ -8,9 +8,10 @@ import { fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import sharp from 'sharp';
-import { CHROME } from './chrome.js';
 
 const root = new URL('../', import.meta.url);
+// CHROME points at another Chrome than the one in /Applications
+const CHROME = process.env.CHROME ?? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const PHOTO = 'photos/kotata-na-dece.jpg';
 // a square of the (portrait) photo centred between the two faces, so neither cat gets more of it
 const CROP = { left: 250, top: 760, width: 800, height: 800 };
