@@ -220,8 +220,13 @@
       </li>
     {/each}
   </ul>
+  <!-- what the copy strip did: a little ink tag that pops up under the strips for a moment -->
   <p class="status" role="status">
-    {#if link.copied}Odkaz je zkopírovaný, stačí ho vložit do zprávy.{:else if link.failed}Odkaz se nepovedlo zkopírovat. Zkopírujte ho prosím z&nbsp;adresního řádku.{/if}
+    {#if link.copied}
+      <span class="note"><span class="mark" aria-hidden="true"><Icon name="check" size={18} /></span>Odkaz je zkopírovaný, stačí ho vložit do zprávy.</span>
+    {:else if link.failed}
+      <span class="note failed">Odkaz se nepovedlo zkopírovat. Zkopírujte ho prosím z&nbsp;adresního řádku.</span>
+    {/if}
   </p>
 </aside>
 
@@ -363,13 +368,54 @@
     opacity: 0;
     pointer-events: none;
   }
+  /* the room is kept, so the flyer doesn't jump when the tag appears */
   .status {
-    min-height: 1.4em;
-    margin: 14px 0 0;
-    text-align: center;
+    min-height: 2.6em;
+    margin: 16px 0 0;
+    display: flex;
+    justify-content: center;
+  }
+  .note {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 100%;
+    padding: 6px 14px 7px 7px;
+    background: var(--ink);
+    color: var(--paper);
+    border: 3px solid var(--ink);
+    border-radius: 22px;
+    box-shadow: 0 8px 10px -6px rgba(40, 30, 10, 0.45);
     font-family: var(--f-marker);
+    font-weight: 700;
     font-size: 0.95rem;
-    color: var(--ink);
+    line-height: 1.25;
+    text-wrap: balance;
+    rotate: -1.5deg;
+    animation: note-in 0.42s var(--ease-out) both;
+  }
+  /* the green tick on a paper disc, like a stamp */
+  .mark {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    background: var(--paper);
+    border-radius: 50%;
+  }
+  .note.failed {
+    padding-left: 14px;
+    background: var(--route);
+    border-radius: 18px;
+  }
+  @keyframes note-in {
+    0% { opacity: 0; scale: 0.6; translate: 0 8px; }
+    60% { opacity: 1; scale: 1.06; translate: 0 -1px; }
+    100% { opacity: 1; scale: 1; translate: 0 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .note { animation: none; }
   }
   /* phones: the two faces sit above the heading, so the words get the flyer's whole width */
   @media (max-width: 479px) {
