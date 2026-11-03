@@ -37,7 +37,7 @@
   }
 
   // put the pieces at the top of the iframe's view and read where they landed
-  function place() {
+  function measureCrop() {
     const doc = frame?.contentDocument;
     const els = doc ? targets(doc) : [];
     if (!els.length) return;
@@ -63,9 +63,9 @@
     stop();
     const doc = frame.contentDocument;
     await doc.fonts.ready;
-    const ro = new ResizeObserver(place);
+    const ro = new ResizeObserver(measureCrop);
     ro.observe(doc.body);
-    const timers = [0, 300, 800, 1500, 2500].map((t) => setTimeout(place, t));
+    const timers = [0, 300, 800, 1500, 2500].map((t) => setTimeout(measureCrop, t));
     stop = () => {
       ro.disconnect();
       timers.forEach(clearTimeout);

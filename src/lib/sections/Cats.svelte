@@ -66,9 +66,10 @@
   }
 
   // a click opens the photo big (the cat already said hello on hover); with no photo yet, it meows
+  const photoEls = $state([]);
+  const photoImages = $state([]);
   function tap(cat, i, e) {
-    const el = e.currentTarget.querySelector('.photo');
-    if (cat.photo) zoomPhoto({ el, photo: cat.photo, alt: cat.name, hint: cat.photoHint, tilt: PHOTO_TILT[i], tape: true, opener: e.currentTarget });
+    if (cat.photo) zoomPhoto({ el: photoEls[i], img: photoImages[i], photo: cat.photo, alt: cat.name, hint: cat.photoHint, tilt: PHOTO_TILT[i], tape: true, opener: e.currentTarget });
     else poke(cat.id);
   }
 
@@ -93,7 +94,7 @@
         {#each cats as cat, i (cat.id)}
           <article class="cat {i ? 'b' : 'a'}" aria-labelledby="cat-{cat.id}">
             <button class="snap" type="button" onclick={(e) => tap(cat, i, e)} onmouseenter={() => hover(cat.id)} aria-label={cat.photo ? `${cat.name}: zvětšit fotku` : `Pohladit: ${cat.name}`}>
-              <Photo src={cat.photo} hint={cat.photoHint} alt={cat.name} tilt={PHOTO_TILT[i]} zoom={false} sizes="300px" />
+              <Photo bind:el={photoEls[i]} bind:image={photoImages[i]} src={cat.photo} hint={cat.photoHint} alt={cat.name} tilt={PHOTO_TILT[i]} zoom={false} sizes="300px" />
               {#if meow[cat.id]}
                 <span class="meow" use:meowPop={cat.id}>Mňau!</span>
               {/if}

@@ -6,14 +6,16 @@
   //           | 'link'  (no box: text with a wavy underline, in the surrounding colour)
   //   theme   'red' | 'paper'
   //   bounce  options for use:bouncy, e.g. { rest: { rotate: -2 } }
+  //   class   added to its own classes; el is the rendered element, to bind (e.g. to focus it)
   import { bouncy } from '../motion/springs.js';
 
-  let { href = undefined, variant = 'default', theme = 'red', bounce = {}, children, ...rest } = $props();
+  let { href = undefined, variant = 'default', theme = 'red', bounce = {}, class: cls = '', el = $bindable(), children, ...rest } = $props();
 </script>
 
 <svelte:element
   this={href ? 'a' : 'button'}
-  class="button {variant} {theme}"
+  bind:this={el}
+  class="button {variant} {theme} {cls}"
   {href}
   type={href ? undefined : 'button'}
   use:bouncy={bounce}

@@ -26,21 +26,22 @@
   };
 
   const prints = $state([]);
+  const printImages = $state([]);
   const items = gallery.map((g) => ({ photo: g.photo, hint: g.hint, alt: g.caption, caption: g.caption, ratio: RATIO[g.orientation] }));
   // the print itself lifts off its peg, caption and all, and flies back onto it when closed
   const show = (i, e) =>
-    zoom({ items, index: i, source: (k) => ({ el: prints[k], tilt: TILT[k % TILT.length] }), opener: e.currentTarget });
+    zoom({ items, index: i, source: (k) => ({ el: prints[k], tilt: TILT[k % TILT.length], img: printImages[k] }), opener: e.currentTarget });
 
   onMount(() => {
     const four = matchMedia('(min-width: 1024px)');
     const three = matchMedia('(min-width: 640px)');
-    const on = () => (per = four.matches ? 4 : three.matches ? 3 : 2);
-    on();
-    four.addEventListener('change', on);
-    three.addEventListener('change', on);
+    const updatePerRow = () => (per = four.matches ? 4 : three.matches ? 3 : 2);
+    updatePerRow();
+    four.addEventListener('change', updatePerRow);
+    three.addEventListener('change', updatePerRow);
     return () => {
-      four.removeEventListener('change', on);
-      three.removeEventListener('change', on);
+      four.removeEventListener('change', updatePerRow);
+      three.removeEventListener('change', updatePerRow);
     };
   });
 </script>
@@ -77,7 +78,7 @@
                   <rect class="spring" x="0.5" y="12" width="15" height="5" rx="2" />
                 </svg>
                 <span class="print" bind:this={prints[g.i]}>
-                  <Photo src={g.photo} hint={g.hint} alt={g.caption} ratio={RATIO[g.orientation]} tape={false} zoom={false} sizes="(min-width: 1024px) 262px, (min-width: 640px) 31vw, 40vw" />
+                  <Photo bind:image={printImages[g.i]} src={g.photo} hint={g.hint} alt={g.caption} ratio={RATIO[g.orientation]} tape={false} zoom={false} sizes="(min-width: 1024px) 262px, (min-width: 640px) 31vw, 40vw" />
                   <Text variant="small" as="span" class="caption">{g.caption}</Text>
                 </span>
                 </span>

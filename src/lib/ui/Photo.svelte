@@ -9,16 +9,15 @@
   import Tape from './Tape.svelte';
   import { zoomPhoto } from '../services/lightbox.js';
   import { photoInfo, srcset, photoFile } from '../services/images.js';
-  let { src = null, hint = '', alt = '', ratio = '4 / 5', tilt = 0, tape = true, zoom = true, sizes = '300px', eager = false, preview = null, class: cls = '' } = $props();
-  let figure;
-  let img = $state();
+  let { src = null, hint = '', alt = '', ratio = '4 / 5', tilt = 0, tape = true, zoom = true, sizes = '300px', eager = false, preview = null, class: cls = '', el = $bindable(), image = $bindable() } = $props();
+  // el: the photo's figure, image: its <img> (what the lightbox flies out of and shows while loading)
   let loaded = $state(false);
   // the big file didn't come: the small copy stays, sharp, rather than a blur and a spinner forever
   let failed = $state(false);
   const p = $derived(photoInfo(src));
   // a photo that was already in the cache can finish loading before its onload is listened to
   $effect(() => {
-    if (img?.complete && img.naturalWidth) loaded = true;
+    if (image?.complete && image.naturalWidth) loaded = true;
   });
 </script>
 
@@ -37,7 +36,7 @@
       <source type="image/webp" srcset={srcset(src, 'webp')} {sizes} />
     {/if}
     <img
-      bind:this={img}
+      bind:this={image}
       class:waiting={preview && !loaded}
       src={photoFile(src, 800)}
       srcset={srcset(src)}
@@ -53,7 +52,7 @@
   </picture>
 {/snippet}
 
-<figure class="photo {cls}" style="--tilt:{tilt}deg; --ratio:{ratio}" bind:this={figure}>
+<figure class="photo {cls}" style="--tilt:{tilt}deg; --ratio:{ratio}" bind:this={el}>
   {#if tape}
     <Tape tilt={-12} width={68} style="top:-12px; left:-14px;" />
     <Tape tilt={9} width={60} style="bottom:-10px; right:-12px; top:auto;" />
@@ -63,7 +62,7 @@
       class="frame zoom"
       type="button"
       aria-label="{alt || hint}: zvětšit fotku"
-      onclick={(e) => zoomPhoto({ el: figure, photo: src, alt, hint, ratio, tilt, tape, opener: e.currentTarget })}
+      onclick={(e) => zoomPhoto({ el, img: image, photo: src, alt, hint, ratio, tilt, tape, opener: e.currentTarget })}
     >
       {@render picture()}
     </button>

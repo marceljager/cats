@@ -84,15 +84,31 @@ export function linkCopier(ms = 2400) {
   };
 }
 
-// every way to share, in order; the phone's share sheet ('native') only where the browser has one,
-// or never with { native: false } (where a button of its own already opens it)
+/**
+ * @typedef {{ id: string, kind: 'link' | 'native' | 'copy', label: string, long: string, icon: string,
+ *   href?: string, target?: '_blank', event?: string }} ShareOption
+ *   kind says what it does: a link (href, opened in target; event is what visit counting calls it,
+ *   put on the link as data-track), the phone's share sheet, or copying the address
+ */
+
+// every way to share, in order; the phone's share sheet only where the browser has one, or never
+// with { native: false } (where a button of its own already opens it)
+/** @returns {ShareOption[]} */
 export function options({ native = canShare() } = {}) {
   const u = url();
   return [
-    ...(native ? [{ id: 'native', label: 'Sdílet', long: 'Sdílet přes telefon', icon: 'share' }] : []),
-    { id: 'whatsapp', label: 'WhatsApp', long: 'Poslat přes WhatsApp', icon: 'whatsapp', href: `https://wa.me/?text=${enc(`${share.text} ${u}`)}` },
-    { id: 'facebook', label: 'Facebook', long: 'Sdílet na Facebooku', icon: 'facebook', href: `https://www.facebook.com/sharer/sharer.php?u=${enc(u)}` },
-    { id: 'email', label: 'E-mail', long: 'Poslat e-mailem', icon: 'mail', href: `mailto:?subject=${enc(share.subject)}&body=${enc(`${share.text}\n\n${u}`)}` },
-    { id: 'copy', label: 'Odkaz', long: 'Zkopírovat odkaz', icon: 'link' },
+    ...(native ? [{ id: 'native', kind: /** @type {const} */ ('native'), label: 'Sdílet', long: 'Sdílet přes telefon', icon: 'share' }] : []),
+    { id: 'whatsapp', kind: 'link', label: 'WhatsApp', long: 'Poslat přes WhatsApp', icon: 'whatsapp', href: `https://wa.me/?text=${enc(`${share.text} ${u}`)}`, target: '_blank', event: 'sdilet-whatsapp' },
+    { id: 'facebook', kind: 'link', label: 'Facebook', long: 'Sdílet na Facebooku', icon: 'facebook', href: `https://www.facebook.com/sharer/sharer.php?u=${enc(u)}`, target: '_blank', event: 'sdilet-facebook' },
+    { id: 'email', kind: 'link', label: 'E-mail', long: 'Poslat e-mailem', icon: 'mail', href: `mailto:?subject=${enc(share.subject)}&body=${enc(`${share.text}\n\n${u}`)}`, event: 'sdilet-email' },
+    { id: 'copy', kind: 'copy', label: 'Odkaz', long: 'Zkopírovat odkaz', icon: 'link' },
   ];
+}
+
+// does what a native or copy option says (a link just opens): a share sheet that fails (some
+// desktop browsers) still leaves the link to copy
+/** @param {ShareOption} option @param {ReturnType<typeof linkCopier>} link */
+export async function shareWith(option, link) {
+  if (option.kind === 'native' && (await shareNative()) === 'failed') await link.copy();
+  else if (option.kind === 'copy') await link.copy();
 }

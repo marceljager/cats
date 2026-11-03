@@ -13,7 +13,7 @@
   let room;
   let fireGroup = $state(); // the flames' group, from LivingRoom
   let light = $state('');
-  function place() {
+  function aimLight() {
     if (!room || !fireGroup) return;
     const r = room.getBoundingClientRect();
     const f = fireGroup.getBoundingClientRect();
@@ -24,8 +24,8 @@
     light = `--fx:${fx.toFixed(0)}px; --fy:${fy.toFixed(0)}px; --reach:${reach.toFixed(0)}px`;
   }
   onMount(() => {
-    place();
-    const ro = new ResizeObserver(place);
+    aimLight();
+    const ro = new ResizeObserver(aimLight);
     ro.observe(room);
     return () => ro.disconnect();
   });
@@ -114,7 +114,7 @@
 
         <div class="pc-addr">
         <div class="actions">
-          <Button href={mailto}>
+          <Button href={mailto} data-track="napsat-email">
             <Icon name="mail" size={28} />
             <span class="btn-text">
               <Text variant="small" as="span" class="btn-cap">Pošlete e-mail</Text>
@@ -126,6 +126,7 @@
             href={contact.placeholder ? '#domov' : `https://instagram.com/${contact.instagram}`}
             target={contact.placeholder ? undefined : '_blank'}
             rel="noopener"
+            data-track={contact.placeholder ? undefined : 'instagram'}
           >
             <Icon name="instagram" size={28} />
             <span class="btn-text">

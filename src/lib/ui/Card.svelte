@@ -5,11 +5,12 @@
   //           | 'bubble' (wobbly speech bubble)
   //           | 'quote'  (small green bubble for a quote)
   //   as      the element to render, e.g. 'blockquote'
+  //   class   added to its own classes
   //   --card-bg overrides the background
-  let { variant = 'card', as = 'div', children, ...rest } = $props();
+  let { variant = 'card', as = 'div', class: cls = '', children, ...rest } = $props();
 </script>
 
-<svelte:element this={as} class="surface {variant}" {...rest}>
+<svelte:element this={as} class="surface {variant} {cls}" {...rest}>
   {@render children()}
 </svelte:element>
 

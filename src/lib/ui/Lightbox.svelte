@@ -30,14 +30,14 @@
   const sizes = $derived.by(() => {
     if (!current || typeof window === 'undefined') return '100vw';
     const phone = !isWide();
-    const w = Math.min(innerWidth * (phone ? 0.86 : 0.74), innerHeight * (phone ? 0.64 : 0.66) * num(current.ratio));
+    const w = Math.min(innerWidth * (phone ? 0.86 : 0.74), innerHeight * (phone ? 0.64 : 0.66) * ratioValue(current.ratio));
     return `${Math.round(w)}px`;
   });
   // what's already on screen of photo i (the print on the line, the stop's photo): shown blurred
   // while the big file loads; a photo not loaded on the page yet gets the smallest file instead
-  const previewOf = (i) => source?.(i)?.el?.querySelector('picture img')?.currentSrc || photoFile(items[i]?.photo, 320, 'webp');
+  const previewOf = (i) => source(i).img?.currentSrc || photoFile(items[i].photo, 320, 'webp');
   // '4 / 5' → 0.8
-  const num = (ratio) => {
+  const ratioValue = (ratio) => {
     const [w, h] = String(ratio).split('/').map(Number);
     return h ? w / h : w;
   };
@@ -74,15 +74,20 @@
     ready = false;
     dialog.showModal();
     document.documentElement.style.overflow = 'hidden';
-    await tick();
-    requestAnimationFrame(() => (lit = true));
-    const from = onPage(index);
-    lift(from.el);
-    if (reducedMotion()) {
+    try {
+      await tick();
+      requestAnimationFrame(() => (lit = true));
+      await flyOut();
+    } finally {
+      // whatever happens on the way, the dialog stays closable
       busy = false;
       ready = true;
-      return;
     }
+  }
+  async function flyOut() {
+    const from = onPage(index);
+    lift(from.el);
+    if (reducedMotion()) return;
     const to = bigFrame.offsetWidth;
     // pin the big frame onto the small photo before the browser paints, so the very first
     // frame on screen is still the photo on the page, not the big one
@@ -105,8 +110,6 @@
     // hand sizing back to CSS so the photo keeps fitting if the window changes
     bigFrame.style.width = '';
     clearTimeout(early);
-    busy = false;
-    ready = true;
   }
 
   // ...and shrinks back into that same photo on the page
@@ -116,20 +119,24 @@
     lit = false;
     if (!reducedMotion()) {
       busy = true;
-      const to = onPage(index);
-      await animate(
-        bigFrame,
-        { width: to.width, x: to.x, y: to.y, rotate: to.tilt, filter: SMALL },
-        { type: 'spring', visualDuration: 0.28, bounce: 0.25 },
-      );
-      busy = false;
+      try {
+        const to = onPage(index);
+        await animate(
+          bigFrame,
+          { width: to.width, x: to.x, y: to.y, rotate: to.tilt, filter: SMALL },
+          { type: 'spring', visualDuration: 0.28, bounce: 0.25 },
+        );
+      } finally {
+        busy = false;
+      }
     }
     // show the page's photo again in the same frame the big one goes, not when the close event
     // comes a task later; otherwise one frame paints with neither of them
     lift(null);
     dialog.close();
   }
-  async function closed() {
+  // after the dialog's own close event: everything back as it was, focus on the opener
+  async function resetAfterClose() {
     index = -1;
     ready = false;
     lit = false;
@@ -170,7 +177,7 @@
     if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(e.clientY - sy)) step(dx < 0 ? 1 : -1);
   };
 
-  onMount(() => setLightbox(show));
+  onMount(() => setLightbox(show)); // gives back the unregister, run when it goes
 </script>
 
 <dialog
@@ -178,13 +185,13 @@
   class="lightbox"
   class:lit
   aria-label={current ? (many ? `Fotka ${index + 1} z ${items.length}: ` : '') + (current.caption || current.alt || current.hint) : 'Fotka'}
-  onclose={closed}
+  onclose={resetAfterClose}
   oncancel={flyBackOnEscape}
   onclick={closeOnBackdrop}
   onkeydown={stepWithArrows}
 >
   {#if current}
-    <div class="frame" class:ready bind:this={bigFrame} role="presentation" style="--r:{num(current.ratio)}" onpointerdown={swipeStart} onpointerup={swipeEnd}>
+    <div class="frame" class:ready bind:this={bigFrame} role="presentation" style="--r:{ratioValue(current.ratio)}" onpointerdown={swipeStart} onpointerup={swipeEnd}>
       {#key index}
         <div class="pic" class:captioned={current.caption}>
           <Photo src={current.photo} hint={current.hint} alt={current.alt || current.caption} ratio={current.ratio} tape={current.tape ?? false} zoom={false} {sizes} eager preview={current.photo ? previewOf(index) : null} />

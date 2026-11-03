@@ -2,31 +2,20 @@
 // counting visits on GoatCounter (the script in index.html; no cookies, so no consent banner).
 // Page views count themselves; these are the clicks worth knowing about, as GoatCounter events.
 // It skips localhost by itself, so the dev server counts nothing.
-import { contact } from '../../content.js';
 
 export function track(name) {
   window.goatcounter?.count?.({ path: name, event: true });
 }
 
-// the links that leave the page, told apart by where they go: one listener for the whole page
-// catches them in the contact card, the share note and the flyer's tear-off strips alike
-/** @type {[(href: string) => boolean, string][]} */
-const links = [
-  [(u) => u.startsWith(`mailto:${contact.email}`), 'napsat-email'],
-  [(u) => u.includes('instagram.com/'), 'instagram'],
-  [(u) => u.startsWith('https://wa.me/'), 'sdilet-whatsapp'],
-  [(u) => u.includes('facebook.com/sharer'), 'sdilet-facebook'],
-  [(u) => u.startsWith('mailto:?'), 'sdilet-email'],
-];
-
+// the links worth counting say so themselves, data-track="event name" (the contact card's e-mail
+// and Instagram, the share note's and the flyer's links): one listener for the whole page
 export function trackLinks() {
   // capture: the flyer tears its strip off on the same click
   document.addEventListener(
     'click',
     (e) => {
-      const href = /** @type {Element} */ (e.target).closest?.('a[href]')?.getAttribute('href');
-      const hit = href && links.find(([test]) => test(href));
-      if (hit) track(hit[1]);
+      const name = /** @type {Element} */ (e.target).closest?.('[data-track]')?.getAttribute('data-track');
+      if (name) track(name);
     },
     true,
   );

@@ -32,24 +32,20 @@ describe('lightbox', () => {
     zoomPhoto({ el, photo: '/photos/velik.jpg', alt: 'Velík', ratio: '1 / 1', tilt: 3 });
     const req = show.mock.calls[0][0];
     expect(req.items).toEqual([{ photo: '/photos/velik.jpg', alt: 'Velík', hint: '', ratio: '1 / 1', tape: false }]);
-    expect(req.source(0)).toEqual({ el, tilt: 3 });
+    expect(req.source(0)).toEqual({ el, tilt: 3, img: null });
   });
 });
 
 describe('trackLinks', () => {
-  test('counts each link that leaves the page by where it goes', async () => {
+  test('counts a click anywhere inside a link that names its event, and nothing else', async () => {
     let click;
     vi.stubGlobal('document', { addEventListener: (type, fn) => (click = fn) });
     const { trackLinks } = await import('../src/lib/services/track.js');
-    const { contact } = await import('../src/content.js');
     trackLinks();
-    const on = (href) => click({ target: { closest: () => ({ getAttribute: () => href }) } });
-    on(`mailto:${contact.email}?subject=x`);
-    on('https://wa.me/?text=x');
-    on('https://www.facebook.com/sharer/sharer.php?u=x');
-    on('mailto:?subject=x');
-    on('https://instagram.com/x');
-    on('#cesta');
-    expect(counted).toEqual(['napsat-email', 'sdilet-whatsapp', 'sdilet-facebook', 'sdilet-email', 'instagram']);
+    const on = (name) => click({ target: { closest: (sel) => (sel === '[data-track]' && name ? { getAttribute: () => name } : null) } });
+    on('napsat-email');
+    on('sdilet-whatsapp');
+    on(null); // a link without data-track, e.g. '#cesta'
+    expect(counted).toEqual(['napsat-email', 'sdilet-whatsapp']);
   });
 });

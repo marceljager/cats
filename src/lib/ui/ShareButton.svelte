@@ -5,10 +5,11 @@
   import Button from './Button.svelte';
   import Icon from './Icon.svelte';
   import Text from './Text.svelte';
-  import { options, canShare, shareNative, linkCopier } from '../services/share.svelte.js';
+  import { options, canShare, shareNative, shareWith, linkCopier } from '../services/share.svelte.js';
   import { site } from '../../content.js';
 
   let root;
+  let button = $state();
   let menu = $state();
   let open = $state(false);
   let list = $state.raw([]);
@@ -22,8 +23,9 @@
     return link.stop;
   });
 
-  async function toggle() {
-    // a share sheet that fails to open (some desktop browsers) drops the note instead
+  // the phone's share sheet where there is one; elsewhere (or if it fails to open, as on some
+  // desktop browsers) the note opens or closes
+  async function shareOrToggleNote() {
     if (native && (await shareNative()) !== 'failed') return;
     open = !open;
     if (open) {
@@ -31,23 +33,23 @@
       menu?.querySelector('a, button')?.focus();
     }
   }
-  function shut(refocus = false) {
+  function closeNote(refocus = false) {
     open = false;
-    if (refocus) root?.querySelector('.button')?.focus();
+    if (refocus) button?.focus();
   }
   // a click anywhere else or Esc puts the note away
   function closeOnOutsideClick(e) {
-    if (open && !root.contains(e.target)) shut();
+    if (open && !root.contains(e.target)) closeNote();
   }
   function closeOnEscape(e) {
-    if (open && e.key === 'Escape') shut(true);
+    if (open && e.key === 'Escape') closeNote(true);
   }
 </script>
 
 <svelte:window onclick={closeOnOutsideClick} onkeydown={closeOnEscape} />
 
 <div class="share" bind:this={root}>
-  <Button theme="paper" onclick={toggle} aria-expanded={open} aria-controls="share-menu" bounce={{ over: { scale: 1.06, rotate: -2 } }}>
+  <Button bind:el={button} theme="paper" onclick={shareOrToggleNote} aria-expanded={open} aria-controls="share-menu" bounce={{ over: { scale: 1.06, rotate: -2 } }}>
     <Icon name="share" size={24} />
     <span>Sdílet</span>
   </Button>
@@ -59,12 +61,12 @@
       <ul>
         {#each list as o (o.id)}
           <li>
-            {#if o.href}
-              <a href={o.href} target={o.id === 'email' ? undefined : '_blank'} rel="noopener" onclick={() => shut()}>
+            {#if o.kind === 'link'}
+              <a href={o.href} target={o.target} rel="noopener" data-track={o.event} onclick={() => closeNote()}>
                 <Icon name={o.icon} size={26} />{o.long}
               </a>
             {:else}
-              <button type="button" onclick={link.copy} class:done={link.copied}>
+              <button type="button" onclick={() => shareWith(o, link)} class:done={link.copied}>
                 <Icon name={link.copied ? 'check' : o.icon} size={26} />{link.copied ? 'Odkaz je zkopírovaný' : link.failed ? 'Odkaz se nepovedlo zkopírovat' : o.long}
               </button>
             {/if}

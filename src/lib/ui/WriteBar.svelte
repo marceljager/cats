@@ -12,12 +12,12 @@
   let shown = $state(false);
 
   // looked up fresh each time, so a section that re-renders can't leave a stale answer behind
-  function check() {
+  function updateShown() {
     shown = ![...document.querySelectorAll('[data-writebar-yields]')].some((el) => onScreen(el));
   }
   onMount(() => {
-    check();
-    return onScrollFrame(check);
+    updateShown();
+    return onScrollFrame(updateShown);
   });
 </script>
 

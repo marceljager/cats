@@ -7,7 +7,7 @@
   import Icon from '../ui/Icon.svelte';
   import Tape from '../ui/Tape.svelte';
   import CatHead from '../art/CatHead.svelte';
-  import { options, shareNative, linkCopier } from '../services/share.svelte.js';
+  import { options, shareWith, linkCopier } from '../services/share.svelte.js';
   import { reducedMotion } from '../motion/viewport.js';
   import { site } from '../../content.js';
 
@@ -157,13 +157,6 @@
     pose?.stretch.jump(1);
   }
 
-  // the strips without a link: the phone's share sheet, or copying the address
-  async function shareVia(o) {
-    if (o.id === 'native') {
-      // a share sheet that fails (some desktop browsers) still leaves the link to copy
-      if ((await shareNative()) === 'failed') link.copy();
-    } else if (o.id === 'copy') link.copy();
-  }
 </script>
 
 <aside class="flyer" id="sdilet" aria-labelledby="sdilet-h">
@@ -190,12 +183,13 @@
   <ul class="tabs" style="--n:{list.length || 4}">
     {#each list as o, i (o.id)}
       <li class:gone={gone[o.id]} style="--tilt:{TILT[i % TILT.length]}deg">
-        {#if o.href}
+        {#if o.kind === 'link'}
           <a
             class="tab"
             href={o.href}
-            target={o.id === 'email' ? undefined : '_blank'}
+            target={o.target}
             rel="noopener"
+            data-track={o.event}
             aria-label={o.long}
             onclick={(e) => tear(e.currentTarget, i, o.id)}
             draggable="false"
@@ -211,7 +205,7 @@
             aria-label={o.long}
             onclick={(e) => {
               tear(e.currentTarget, i, o.id);
-              shareVia(o);
+              shareWith(o, link);
             }}
             draggable="false"
             use:hold

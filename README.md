@@ -42,7 +42,7 @@ same files work there and at the root of the CDN domain in front of it.
 - CDN: origin `https://marceljager.github.io` with the path `/cats/`, sending the origin's own host
   name. Cache `index.html` for minutes, everything else for long.
 - Visits: GoatCounter at https://marceljager.goatcounter.com (the script in `index.html`, no cookies, so
-  no consent banner). Besides page views it counts clicks as events, named in `src/lib/services/track.js`:
+  no consent banner). Besides page views it counts clicks as events, named on each counted link (`data-track`, in the contact card and `src/lib/services/share.svelte.js`):
   `napsat-email`, `instagram`, `sdilet-*` (WhatsApp, Facebook, e-mail, phone, copied link) and
   `foto` (a photo opened). Visits from localhost aren't counted.
 - Purge after deploy: secrets in the `production` environment, `CDN_PURGE_URL` (the CDN's purge-all

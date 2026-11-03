@@ -1,6 +1,6 @@
 // sending the page on (share.svelte.js): which ways it offers, and what each reports and counts
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
-import { copyLink, linkCopier, options, shareNative } from '../src/lib/services/share.svelte.js';
+import { copyLink, linkCopier, options, shareNative, shareWith } from '../src/lib/services/share.svelte.js';
 import { site } from '../src/content.js';
 
 let counted;
@@ -23,6 +23,13 @@ describe('options', () => {
     expect(decodeURIComponent(whatsapp.href)).toContain(`${site.share.text} https://velikapolly.cz/`);
     expect(whatsapp.href).not.toContain('cesta');
   });
+  test('each option says what it does, and a link names its event and where it opens', () => {
+    const all = options({ native: true });
+    expect(all.map((o) => o.kind)).toEqual(['native', 'link', 'link', 'link', 'copy']);
+    for (const o of all.filter((o) => o.kind === 'link')) expect(o.event).toBe(`sdilet-${o.id}`);
+    expect(all.find((o) => o.id === 'whatsapp').target).toBe('_blank');
+    expect(all.find((o) => o.id === 'email').target).toBeUndefined();
+  });
   test('the e-mail carries the subject and the text', () => {
     const email = options().find((o) => o.id === 'email').href;
     expect(email).toContain(`subject=${encodeURIComponent(site.share.subject)}`);
@@ -44,6 +51,25 @@ describe('shareNative', () => {
   test('a sheet that could not open fails, so the caller can offer another way', async () => {
     navigator.share = vi.fn().mockRejectedValue(new Error('not allowed'));
     expect(await shareNative()).toBe('failed');
+  });
+});
+
+describe('shareWith', () => {
+  const link = () => ({ copy: vi.fn() });
+  test('copies the address for the copy option', async () => {
+    const l = link();
+    await shareWith(options().find((o) => o.kind === 'copy'), l);
+    expect(l.copy).toHaveBeenCalledOnce();
+  });
+  test('falls back to copying when the share sheet fails, not when it went out', async () => {
+    const native = options({ native: true })[0];
+    const l = link();
+    navigator.share = vi.fn().mockResolvedValue(undefined);
+    await shareWith(native, l);
+    expect(l.copy).not.toHaveBeenCalled();
+    navigator.share = vi.fn().mockRejectedValue(new Error('not allowed'));
+    await shareWith(native, l);
+    expect(l.copy).toHaveBeenCalledOnce();
   });
 });
 
