@@ -233,6 +233,15 @@
     margin: 14px 0 0;
     --card-pad: 10px 14px 12px;
   }
+  /* phones: the vet's words fit on one line (a little less side padding, type scaled to the screen) */
+  @media (max-width: 559px) {
+    .quote {
+      --card-pad: 10px 10px 12px;
+    }
+    .quote :global(p) {
+      font-size: min(1.3rem, 5.1vw);
+    }
+  }
   .quote :global(.who) {
     display: block;
     margin-top: 2px;
