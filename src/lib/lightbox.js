@@ -2,6 +2,8 @@
 // page, springs up big and flies back to where it came from when closed.
 //   items:  [{ photo, alt, hint, ratio, caption?, tape? }]  the photos you can step through
 //   source: (i) => ({ el, rotate })  the photo on the page that item i flies out of and back into
+import { track } from './track.js';
+
 let show = null;
 
 export function setLightbox(fn) {
@@ -10,6 +12,7 @@ export function setLightbox(fn) {
 
 export function zoom({ items, index = 0, source, opener = null }) {
   show?.({ items, index, source, opener });
+  track('foto');
 }
 
 // a lone photo (a stop, a cat, the family): its shape and tilt are read off the photo itself

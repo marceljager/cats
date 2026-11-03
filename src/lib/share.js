@@ -1,6 +1,7 @@
 // sending the page on to friends: the phone's own share sheet where there is one, otherwise
 // WhatsApp, Facebook, an e-mail or a copied link
 import { cats } from '../content.js';
+import { track } from './track.js';
 
 const names = `${cats[0].name} a ${cats[1].name}`;
 export const title = `${names} hledají domov`;
@@ -16,6 +17,7 @@ export const canShare = () => typeof navigator !== 'undefined' && typeof navigat
 export async function shareNative() {
   try {
     await navigator.share({ title, text, url: url() });
+    track('sdilet-telefon');
     return true;
   } catch (e) {
     return e?.name === 'AbortError';
@@ -23,6 +25,7 @@ export async function shareNative() {
 }
 
 export async function copyLink() {
+  track('sdilet-odkaz');
   try {
     await navigator.clipboard.writeText(url());
     return true;
