@@ -1,14 +1,4 @@
-<script>
-  // cartoon icons, all built from the same three blocks so they always match:
-  //   part(d, tone)  a filled shape: flat colour, a cel shade along its lower-right edge
-  //                  (clipped inside the shape, so it never spills over the outline), ink outline on top
-  //   line(d)        an open ink stroke, same width as every outline
-  //   shine(d)       one white highlight stroke, same everywhere
-  // Parts are drawn in order, so a later part sits on top of the earlier ones.
-  //   tone  recolours every part, e.g. 'paper' on a background of the icon's own colour
-  let { name, size = 24, label = '', tone: recolour = undefined } = $props();
-  const uid = $props.id();
-
+<script module>
   const ring = (cx, cy, r, ri) =>
     `M${cx - r} ${cy} a${r} ${r} 0 1 0 ${2 * r} 0 a${r} ${r} 0 1 0 ${-2 * r} 0 Z M${cx - ri} ${cy} a${ri} ${ri} 0 1 0 ${2 * ri} 0 a${ri} ${ri} 0 1 0 ${-2 * ri} 0 Z`;
   const rounded = (x, y, w, h, r) =>
@@ -21,8 +11,9 @@
     down: 'M18.4 2.4 C19.6 8.3 19 13 19.6 17.8 L24.9 16.6 C21.9 21.3 19 26.1 16 30.2 C13 26.1 10.1 21.3 7.1 16.6 L12.4 17.8 C13 13 12.4 8.3 13.6 2.4 C15.4 1.2 16.6 1.2 18.4 2.4 Z',
   };
 
-  // every icon as a list of blocks: ['part', d, tone, evenodd?] | ['line', d] | ['shine', d] | ['dot', d]
-  const ICONS = {
+  // every icon as a list of blocks: ['part', d, tone, evenodd?] | ['line', d] | ['shine', d] | ['dot', d].
+  // Exported, so a drawing that needs an icon's shape in its own styling (the map's pin) uses the same paths.
+  export const ICONS = {
     mail: [
       ['part', rounded(3, 7, 26, 19, 3.5), 'paper'],
       ['line', 'M4.6 9 L16 17.4 L27.4 9'],
@@ -107,6 +98,19 @@
       ['part', 'M14 26.5 L22 13 L30 26.5 Z', 'slate'],
     ],
   };
+</script>
+
+<script>
+  // cartoon icons, all built from the same three blocks so they always match:
+  //   part(d, tone)  a filled shape: flat colour, a cel shade along its lower-right edge
+  //                  (clipped inside the shape, so it never spills over the outline), ink outline on top
+  //   line(d)        an open ink stroke, same width as every outline
+  //   shine(d)       one white highlight stroke, same everywhere
+  // Parts are drawn in order, so a later part sits on top of the earlier ones.
+  //   tone  recolours every part, e.g. 'paper' on a background of the icon's own colour
+  let { name, size = 24, label = '', tone: recolour = undefined } = $props();
+  const uid = $props.id();
+
   const blocks = $derived(ICONS[name] ?? []);
 </script>
 

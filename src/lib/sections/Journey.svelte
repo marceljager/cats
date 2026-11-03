@@ -4,11 +4,12 @@
   // measures where the stories sit on the page, draws the result and moves the car.
   import { onMount, tick } from 'svelte';
   import Text from '../ui/Text.svelte';
+  import { ICONS } from '../ui/Icon.svelte';
   import Stop from './Stop.svelte';
   import CarCard from './CarCard.svelte';
   import Doodle from '../art/Doodle.svelte';
   import { parallax } from '../motion/parallax.js';
-  import { keepDry, planRoute, sideOf } from '../art/route.js';
+  import { planRoute, sideOf } from '../art/route.js';
   import { curve, smooth } from '../art/spline.js';
   import { driftClouds, scatterGrass } from '../art/meadow.js';
   import { kmAt, lengthAt } from '../art/odometer.js';
@@ -19,22 +20,23 @@
   let root;
   let routePath = $state();
   let measurePath;
-  // the pin icon's drop (Icon.svelte), tip at (16, 29) in its 32-unit box
-  const PIN = 'M16 29s-9-8-9-15a9 9 0 0 1 18 0c0 7-9 15-9 15Z';
+  // the pin icon's shape (Icon.svelte): the drop, tip at (16, 29) in its 32-unit box, its shine and
+  // its centre. The map draws them in its own pin styling: dashed and cream while waiting
+  const [[, PIN], [, PIN_SHINE], [, PIN_EYE]] = ICONS.pin;
   let els = $state([]);
   let w = $state(0);
   let h = $state(0);
-  let d = $state('');
+  let routeD = $state(''); // the route's path data
   let len = $state(0);
   let travelled = $state(0);
   let car = $state({ x: 0, y: 0, tilt: 0, bump: 0 });
   let pins = $state([]);
-  let doodles = $state([]);
+  let places = $state([]);
   let borders = $state([]);
   let paths = $state({ rivers: [], grass: { light: '', dark: '', flowers: '', hearts: '', pebbles: '' } });
   let clouds = $state([]);
   let anchorY = $state(-1);
-  let keys = []; // [{ y, len }] route keypoints the car is mapped between
+  let keypoints = []; // [{ y, len }]: where the route reaches each y, which the car is mapped between
   let pinLens = []; // route length at each stop's pin, for the odometer
   let km = $state(0);
   let moving = $state(false);
@@ -87,8 +89,7 @@
     w = root.clientWidth;
     h = root.offsetHeight;
     geo = measureStops(wide);
-    const plan = planRoute({ geo, stops, w, wide });
-    keepDry(plan.places, plan.streams, plan.source, { w, sample: sampleRiver });
+    const plan = planRoute({ geo, stops, w, wide, sample: sampleRiver });
 
     // the route is a list of waypoints joined by one smooth spline, so it bends in round curves
     // everywhere and still runs exactly through every pin
@@ -96,11 +97,11 @@
     const start = `M ${pts[0][0]} ${pts[0][1]}`;
     const pieces = curve(pts);
     const lenAt = (i) => lengthOf(start + pieces.slice(0, i).join(''));
-    keys = [{ y: geo[0].pinY, len: 0 }, ...marks.map((m) => ({ y: m.y, len: lenAt(m.i) }))];
+    keypoints = [{ y: geo[0].pinY, len: 0 }, ...marks.map((m) => ({ y: m.y, len: lenAt(m.i) }))];
     pinLens = [0, ...marks.filter((m) => m.pin).map((m) => lenAt(m.i))];
-    d = start + pieces.join('');
+    routeD = start + pieces.join('');
     pins = geo.map((g) => ({ x: g.x, y: g.pinY }));
-    doodles = plan.places;
+    places = plan.places;
     borders = plan.borders;
     paths = { rivers: plan.streams.map(smooth), grass: scatterGrass(w, h) };
     clouds = driftClouds(w, h, wide);
@@ -117,20 +118,20 @@
     if (!onScreen(root)) return;
     const rect = root.getBoundingClientRect();
     const target = Math.min(Math.max(window.innerHeight * 0.5 - rect.top, 0), h - 1);
-    const L = Math.min(lengthAt(keys, target, len), len);
-    if (L === travelled && target === anchorY) return;
-    const pt = routePath.getPointAtLength(L);
-    const ahead = routePath.getPointAtLength(Math.min(L + 6, len));
+    const along = Math.min(lengthAt(target, keypoints, len), len);
+    if (along === travelled && target === anchorY) return;
+    const pt = routePath.getPointAtLength(along);
+    const ahead = routePath.getPointAtLength(Math.min(along + 6, len));
     const lean = Math.atan2(ahead.x - pt.x, Math.max(ahead.y - pt.y, 0.01)) * (180 / Math.PI);
     car = {
       x: pt.x,
       y: pt.y,
       tilt: Math.max(-34, Math.min(34, -lean * 0.5)),
-      bump: reducedMotion() ? 0 : Math.sin(L / 9) * 1.8,
+      bump: reducedMotion() ? 0 : Math.sin(along / 9) * 1.8,
     };
-    travelled = L;
+    travelled = along;
     anchorY = target;
-    km = kmAt(pinLens, stops, L);
+    km = kmAt(along, pinLens, stops);
   }
 
   onMount(() => {
@@ -158,6 +159,15 @@
   });
 </script>
 
+<!-- one of the pin's shapes drawn like Icon.svelte draws a part: the shade underneath, the fill
+     nudged up-left over it (clipped to the shape), the outline on top -->
+{#snippet part(d, cls, i)}
+  <clipPath id="{cls}-clip-{i}"><path {d} /></clipPath>
+  <path class="{cls}-shade" {d} />
+  <g clip-path="url(#{cls}-clip-{i})"><path class="{cls}-fill" {d} transform="translate(-2.2 -2.2)" /></g>
+  <path class="{cls}-line" {d} />
+{/snippet}
+
 <section class="journey section" id="cesta" aria-labelledby="cesta-h">
   <div class="wrap">
     <Text variant="title" id="cesta-h">Jak jsme dojeli z&nbsp;chorvatských hor až do Prahy</Text>
@@ -168,7 +178,7 @@
         <defs>
           <mask id="driven" maskUnits="userSpaceOnUse">
             <path
-              {d}
+              d={routeD}
               fill="none"
               stroke="#fff"
               stroke-width="16"
@@ -190,8 +200,8 @@
         <path class="flowers" d={paths.grass.flowers} />
         <path class="hearts" d={paths.grass.hearts} />
 
-        {#each doodles as dd}
-          <Doodle {...dd} />
+        {#each places as place}
+          <Doodle {...place} />
         {/each}
 
         {#each borders as b}
@@ -202,8 +212,8 @@
           </g>
         {/each}
 
-        <path class="ahead" {d} />
-        <path class="done" bind:this={routePath} {d} mask="url(#driven)" />
+        <path class="ahead" d={routeD} />
+        <path class="done" bind:this={routePath} d={routeD} mask="url(#driven)" />
 
         {#each pins as pin, i}
           <!-- the site's pin icon (Icon.svelte) at map size, tip on the route: a cream outline
@@ -211,18 +221,12 @@
           <g class="pin" class:reached={reached[i]} transform="translate({pin.x} {pin.y})">
             <ellipse class="pin-ground" cx="0" cy="1" rx="10" ry="3.5" />
             <g class="pin-body" use:springTo={{ to: { scale: reached[i] ? 1 : 0.85 }, bounce: 0.55, duration: 0.45 }}>
-                  <g transform="scale(1.75) translate(-16 -29)">
-                    <clipPath id="pin-clip-{i}"><path d={PIN} /></clipPath>
-                    <path class="pin-shade" d={PIN} />
-                    <g clip-path="url(#pin-clip-{i})"><path class="pin-fill" d={PIN} transform="translate(-2.2 -2.2)" /></g>
-                    <path class="pin-line" d={PIN} />
-                    <path class="pin-shine" d="M10.3 12 a6.2 6.2 0 0 1 3 -3.8" />
-                    <!-- the cream centre, shaded like the icon's -->
-                    <clipPath id="pin-eye-clip-{i}"><path d="M12.4 14 a3.6 3.6 0 1 0 7.2 0 a3.6 3.6 0 1 0 -7.2 0 Z" /></clipPath>
-                    <path class="pin-eye-shade" d="M12.4 14 a3.6 3.6 0 1 0 7.2 0 a3.6 3.6 0 1 0 -7.2 0 Z" />
-                    <g clip-path="url(#pin-eye-clip-{i})"><path class="pin-eye-fill" d="M12.4 14 a3.6 3.6 0 1 0 7.2 0 a3.6 3.6 0 1 0 -7.2 0 Z" transform="translate(-2.2 -2.2)" /></g>
-                    <path class="pin-eye" d="M12.4 14 a3.6 3.6 0 1 0 7.2 0 a3.6 3.6 0 1 0 -7.2 0 Z" />
-                  </g>
+              <g transform="scale(1.75) translate(-16 -29)">
+                {@render part(PIN, 'pin', i)}
+                <path class="pin-shine" d={PIN_SHINE} />
+                <!-- the cream centre, shaded like the icon's -->
+                {@render part(PIN_EYE, 'pin-eye', i)}
+              </g>
             </g>
           </g>
         {/each}
@@ -396,7 +400,7 @@
   .pin-eye-fill {
     fill: var(--paper);
   }
-  .pin-eye {
+  .pin-eye-line {
     fill: none;
     stroke: var(--ink);
     stroke-width: 1.8;

@@ -4,9 +4,10 @@ import { rng } from './random.js';
 
 // every kind of place, in the order the kit shows them:
 //   foot    its footprint around its anchor at scale 1, [left, right, top, bottom], which the map
-//           keeps out of the rivers (Journey.svelte); the city has none, it is drawn around its river
-//   layout  adds its pieces to `out`, drawing on the seeded randomness `r`; tree() plants a tree
-//           (each the same size on screen); scale is the size the place is drawn at
+//           keeps out of the rivers (keepDry in route.js); the city has none, it is drawn around its river
+//   layout  adds its pieces to `out`, drawing on the seeded randomness `r`; tree({ x, y, z? }) plants
+//           a tree (each the same size on screen, z placing it among the pieces); scale is the size
+//           the place is drawn at
 export const SCENERY = {
   forest: {
     foot: [-84, 81, -55, 31],
@@ -29,10 +30,7 @@ export const SCENERY = {
       out.push({ t: 'foot', x: 81, y: 14, rx: 50, ry: 4, z: -99 });
       out.push({ t: 'petrin', z: 0 });
       out.push({ t: 'hrad', z: 1 });
-      [[-112, 4], [-104, 1], [-16, -12]].forEach(([tx, ty]) => {
-        tree({ x: tx, y: ty });
-        out[out.length - 1].z = 2;
-      });
+      [[-112, 4], [-104, 1], [-16, -12]].forEach(([tx, ty]) => tree({ x: tx, y: ty, z: 2 }));
       // a terrace of townhouses side by side, each its own height, color and roof
       /** @param {(x: number) => boolean} [keep] which houses to leave standing, by their x */
       const terrace = (x0, x1, y, h0, h1, z, keep = () => true) => {
@@ -71,8 +69,7 @@ export const SCENERY = {
       out.push({ t: 'farmhouse', x: 64, y: 9, s: 1, smoke: true, delay: 1, z: 4 });
       out.push({ t: 'hay', x: -74, y: 10, z: 5 });
       out.push({ t: 'hay', x: -64, y: 13, z: 5 });
-      tree({ x: 86, y: 8 });
-      out[out.length - 1].z = 3;
+      tree({ x: 86, y: 8, z: 3 });
     },
   },
   mountains: {
@@ -110,9 +107,7 @@ export const SCENERY = {
         // a point on the hill's surface, dx from its crest
         const on = (dx) => ({ x: hl.x + dx, y: hl.y - hl.h * (0.5 + 0.5 * Math.cos((Math.PI * dx) / (hl.w / 2))) + 2 });
         (i === 0 ? [-8, 6] : [10]).forEach((dx) => {
-          const n = out.length;
-          tree(on(dx));
-          out[n].z = i * 2 + 1;
+          tree({ ...on(dx), z: i * 2 + 1 });
         });
       });
     },
@@ -145,8 +140,7 @@ export const SCENERY = {
       out.push({ t: 'foot', x: 2, y: 1, rx: 38, ry: 4.5, z: -99 });
       out.push({ t: 'mound', x: 0, y: 0, w: 66, h: 13, z: 0 });
       out.push({ t: 'tower', y: -11, z: 1 });
-      tree({ x: -24, y: -1 });
-      out[out.length - 1].z = 2;
+      tree({ x: -24, y: -1, z: 2 });
     },
   },
   rest: {
@@ -180,7 +174,7 @@ export function layoutPlace(kind, { seed = 1, scale = 1 } = {}) {
   const out = [];
   // every tree on the map is the same size on screen, whatever the scale of the place it stands in
   const tree = (p) =>
-    out.push({ t: r() < 0.45 ? 'pine' : 'tree', x: p.x, y: p.y, s: TREE / scale, sway: r() < 0.35, delay: r() * 3 });
+    out.push({ t: r() < 0.45 ? 'pine' : 'tree', x: p.x, y: p.y, s: TREE / scale, sway: r() < 0.35, delay: r() * 3, ...(p.z !== undefined && { z: p.z }) });
 
   SCENERY[kind].layout({ r, out, tree, scale });
   return out.sort((a, b) => (a.z ?? a.y ?? -999) - (b.z ?? b.y ?? -999));

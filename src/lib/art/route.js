@@ -55,12 +55,12 @@ function detourLoop({ detour, fromX, ay, s, w, wide }) {
 // sits on its Old Town square) with the map's river running through it as the Vltava, under
 // Charles Bridge (river); anything else stands at (x, y), the farm a size up as the whole little
 // scene it is. A stop without a place has neither.
-function placeOfStop({ kind, n, i, x, y, wide }) {
+function placeOfStop({ kind, pinGeo, i, x, y, wide }) {
   if (!kind) return { place: null, river: null };
   if (kind === 'city') {
     const cs = wide ? 1.6 : 1;
-    const cx = n.x - 46 * cs;
-    const cy = n.pinY - 12 * cs;
+    const cx = pinGeo.x - 46 * cs;
+    const cy = pinGeo.pinY - 12 * cs;
     const river = [[2, -110], [-6, -40], [2, 2], [10, 40], [26, 90]].map(([lx, ly]) => [cx + lx * cs, cy + ly * cs]);
     return { place: { kind, x: cx, y: cy, scale: cs, seed: i + 4 }, river };
   }
@@ -90,39 +90,39 @@ function bordersCrossed({ from, to, s, at }) {
   return borders;
 }
 
-// leg i of the trip, from stop `from` (where the route meets it: g) to stop `to` (n): the
-// waypoints after g's pin (pts[exit] is where it leaves g's story), the scenery along the way,
+// leg i of the trip, from stop `from` (where the route meets it: fromGeo) to stop `to` (toGeo): the
+// waypoints after fromGeo's pin (pts[exit] is where it leaves fromGeo's story), the scenery along the way,
 // the leg's river (into a city it runs on through the streets: city) and the borders it crosses
-function planLeg({ g, n, i, from, to, w, wide }) {
+function planLeg({ fromGeo, toGeo, i, from, to, w, wide }) {
   const pts = [];
   /** @type {Place[]} */
   const places = [];
   // down past the stop's story, wavering a touch
-  for (let y = g.pinY + 110, k = i * 7 + 3; y < g.exitY - 40; y += 110, k++) pts.push([g.x + Math.sin(k * 12.9898) * 2.6, y]);
-  pts.push([g.x, g.exitY]);
+  for (let y = fromGeo.pinY + 110, k = i * 7 + 3; y < fromGeo.exitY - 40; y += 110, k++) pts.push([fromGeo.x + Math.sin(k * 12.9898) * 2.6, y]);
+  pts.push([fromGeo.x, fromGeo.exitY]);
   const exit = pts.length - 1;
   const s = i % 2 ? 1 : -1; // side the detour swings out to
 
   // leaving the mountains: the road runs straight on down to Gospić, between a few peaks
   if (i === 0) {
-    const left = g.x < w / 2;
-    places.push({ kind: 'mountains', x: w * (left ? 0.95 : 0.05), y: g.exitY + 60, scale: wide ? 0.9 : 0.55, seed: 21 });
-    places.push({ kind: 'mountains', x: w * (left ? 0.05 : 0.95), y: g.exitY + 150, scale: wide ? 0.75 : 0.5, seed: 27 });
+    const left = fromGeo.x < w / 2;
+    places.push({ kind: 'mountains', x: w * (left ? 0.95 : 0.05), y: fromGeo.exitY + 60, scale: wide ? 0.9 : 0.55, seed: 21 });
+    places.push({ kind: 'mountains', x: w * (left ? 0.05 : 0.95), y: fromGeo.exitY + 150, scale: wide ? 0.75 : 0.5, seed: 27 });
   }
-  const at = (f) => g.exitY + (n.pinY - g.exitY) * f;
+  const at = (f) => fromGeo.exitY + (toGeo.pinY - fromGeo.exitY) * f;
 
   if (to.detour) {
-    const loop = detourLoop({ detour: to.detour, fromX: g.x, ay: at(0.36), s, w, wide });
+    const loop = detourLoop({ detour: to.detour, fromX: fromGeo.x, ay: at(0.36), s, w, wide });
     pts.push(...loop.pts);
     places.push(loop.spot);
   }
-  pts.push([n.x, n.pinY]);
+  pts.push([toGeo.x, toGeo.pinY]);
 
   // scenery along the way
   const far = (f) => w * (0.5 - s * f);
   const near = (f) => w * (0.5 + s * f);
   // the stop's own place sits just before we arrive
-  const own = placeOfStop({ kind: to.doodle, n, i, x: far(wide ? 0.32 : 0.26), y: at(0.8), wide });
+  const own = placeOfStop({ kind: to.doodle, pinGeo: toGeo, i, x: far(wide ? 0.32 : 0.26), y: at(0.8), wide });
   if (own.place) places.push(own.place);
   const cityRiver = own.river;
   places.push({ kind: 'field', x: far(wide ? 0.2 : 0.14), y: at(0.5), scale: wide ? 1 : 0.7, seed: i + 2 });
@@ -153,10 +153,11 @@ function besideStories(geo, w) {
 //   marks    { y, i, pin? }: the route at waypoint i reaches y, an exit or (pin) a stop's pin
 //   places   the scenery, as Doodle props ({ kind, x, y, scale, seed, label? })
 //   borders  { y, from, to, side }: border lines between countries
-//   streams  each river's waypoints (bent around the scenery by keepDry): the mountain stream,
-//            then one per leg crossing the map from side to side
+//   streams  each river's waypoints, bent around the scenery: the mountain stream, then one per
+//            leg crossing the map from side to side
 //   source   the lake the first stream springs from
-export function planRoute({ geo, stops, w, wide }) {
+// sample(river) measures a river's drawn line (see keepDry).
+export function planRoute({ geo, stops, w, wide, sample }) {
   const start = startInMountains(geo[0], w, wide);
   const pts = [[geo[0].x, geo[0].pinY]];
   const marks = [];
@@ -167,7 +168,7 @@ export function planRoute({ geo, stops, w, wide }) {
   /** @type {number[][] | null} */
   let vltava = null; // the river that runs on through the city and off the bottom of the map
   for (let i = 0; i < geo.length - 1; i++) {
-    const leg = planLeg({ g: geo[i], n: geo[i + 1], i, from: stops[i], to: stops[i + 1], w, wide });
+    const leg = planLeg({ fromGeo: geo[i], toGeo: geo[i + 1], i, from: stops[i], to: stops[i + 1], w, wide });
     marks.push({ y: geo[i].exitY, i: pts.length + leg.exit });
     pts.push(...leg.pts);
     marks.push({ y: geo[i + 1].pinY, i: pts.length - 1, pin: true });
@@ -180,26 +181,29 @@ export function planRoute({ geo, stops, w, wide }) {
   // the Vltava leaves the map past the last stop
   const last = geo[geo.length - 1];
   vltava?.push([w * 0.6, last.exitY + 40], [w + 60, last.exitY + 120]);
-  return { pts, marks, places, borders, streams, source: start.source };
+  const plan = { pts, marks, places, borders, streams, source: start.source };
+  keepDry(plan, { w, sample });
+  return plan;
 }
 
 // keep the scenery out of the water. The lookout and the rest stop sit on the route's detour
 // loops, so a river bends around them; anything else slides sideways off the rivers. The
 // stream's source lake and the city the Vltava runs through are meant to touch them.
-// Moves the places (and bends the streams) in place. sample(river) gives points along the
-// river's drawn line, every 8 units (the map measures it in an SVG path).
-export function keepDry(dood, streams, source, { w, sample }) {
-  const box = (dd, dx = 0) => {
-    const [l, r, t, b] = SCENERY[dd.kind].foot;
-    const s = Math.abs(dd.scale);
-    return [dd.x + dx + l * s, dd.x + dx + r * s, dd.y + t * s, dd.y + b * s];
+// Moves the places (and bends the streams) of a plan in place; planRoute does it before returning.
+// sample(river) gives points along the river's drawn line, every 8 units (the map measures it in
+// an SVG path).
+export function keepDry({ places, streams, source }, { w, sample }) {
+  const box = (place, dx = 0) => {
+    const [l, r, t, b] = SCENERY[place.kind].foot;
+    const s = Math.abs(place.scale);
+    return [place.x + dx + l * s, place.x + dx + r * s, place.y + t * s, place.y + b * s];
   };
   const wet = (b, rs, pad = 12) => rs.filter(([x, y]) => x > b[0] - pad && x < b[1] + pad && y > b[2] - pad && y < b[3] + pad);
-  const scenery = dood.filter((dd) => dd !== source && SCENERY[dd.kind].foot);
+  const scenery = places.filter((place) => place !== source && SCENERY[place.kind].foot);
 
-  for (const dd of scenery.filter((dd) => dd.kind === 'lookout' || dd.kind === 'rest')) {
+  for (const place of scenery.filter((place) => place.kind === 'lookout' || place.kind === 'rest')) {
     for (const river of streams) {
-      const b = box(dd);
+      const b = box(place);
       const hit = wet(b, sample(river));
       if (!hit.length) continue;
       // swing the river past the spot on the side it already runs on
@@ -207,25 +211,29 @@ export function keepDry(dood, streams, source, { w, sample }) {
       const x = mx < (b[0] + b[1]) / 2 ? b[0] - 30 : b[1] + 30;
       // its own waypoints alongside the spot give way to two that pass it
       const [y0, y1] = [b[2] - 10, b[3] + 10];
-      const at = river.findIndex(([, ry]) => ry >= y0);
-      const end = river.findIndex(([, ry]) => ry > y1);
-      river.splice(at < 0 ? river.length : at, (end < 0 ? river.length : end) - (at < 0 ? river.length : at), [x, y0], [x, y1]);
+      const index = (test) => {
+        const k = river.findIndex(test);
+        return k < 0 ? river.length : k;
+      };
+      const from = index(([, ry]) => ry >= y0);
+      const to = index(([, ry]) => ry > y1);
+      river.splice(from, to - from, [x, y0], [x, y1]);
     }
   }
 
   const rs = streams.flatMap(sample);
-  for (const dd of scenery.filter((dd) => dd.kind !== 'lookout' && dd.kind !== 'rest')) {
-    const hit = wet(box(dd), rs);
+  for (const place of scenery.filter((place) => place.kind !== 'lookout' && place.kind !== 'rest')) {
+    const hit = wet(box(place), rs);
     if (!hit.length) continue;
     // slide away from the river first, then the other way, a little further each try
-    const away = hit.reduce((a, [x]) => a + x, 0) / hit.length < dd.x ? 1 : -1;
+    const away = hit.reduce((a, [x]) => a + x, 0) / hit.length < place.x ? 1 : -1;
     for (let step = 12; step < w * 0.6; step += 12) {
       const dx = [away * step, -away * step].find((d) => {
-        const b = box(dd, d);
-        return dd.x + d > 0 && dd.x + d < w && !wet(b, rs).length;
+        const b = box(place, d);
+        return place.x + d > 0 && place.x + d < w && !wet(b, rs).length;
       });
       if (dx !== undefined) {
-        dd.x += dx;
+        place.x += dx;
         break;
       }
     }

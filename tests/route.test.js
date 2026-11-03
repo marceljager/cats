@@ -7,6 +7,18 @@ import { kmAt, lengthAt } from '../src/lib/art/odometer.js';
 import { KINDS, SCENERY } from '../src/lib/art/scenery.js';
 import { stops } from '../src/content.js';
 
+// a river sampled every 8 units along straight lines between its waypoints, like the map samples
+// its drawn line
+const straight = (river) => {
+  const out = [];
+  for (let i = 0; i < river.length - 1; i++) {
+    const [[x0, y0], [x1, y1]] = [river[i], river[i + 1]];
+    const n = Math.ceil(Math.hypot(x1 - x0, y1 - y0) / 8);
+    for (let k = 0; k < n; k++) out.push([x0 + ((x1 - x0) * k) / n, y0 + ((y1 - y0) * k) / n]);
+  }
+  return out;
+};
+
 describe('curve', () => {
   const pts = [[0, 0], [40, 80], [10, 200], [90, 260]];
   test('runs through every waypoint, one piece between each two', () => {
@@ -22,12 +34,12 @@ describe('curve', () => {
 describe('lengthAt', () => {
   const keys = [{ y: 0, len: 0 }, { y: 100, len: 50 }, { y: 300, len: 250 }];
   test('interpolates between keypoints', () => {
-    expect(lengthAt(keys, 50, 400)).toBe(25);
-    expect(lengthAt(keys, 200, 400)).toBe(150);
+    expect(lengthAt(50, keys, 400)).toBe(25);
+    expect(lengthAt(200, keys, 400)).toBe(150);
   });
   test('stays at the start above the first keypoint and runs to the end past the last', () => {
-    expect(lengthAt(keys, -40, 400)).toBe(0);
-    expect(lengthAt(keys, 900, 400)).toBe(400);
+    expect(lengthAt(-40, keys, 400)).toBe(0);
+    expect(lengthAt(900, keys, 400)).toBe(400);
   });
 });
 
@@ -35,14 +47,15 @@ describe('kmAt', () => {
   const trip = [{ km: 0 }, { km: 40 }, { km: 330 }];
   const pinLens = [0, 100, 300];
   test('reads the odometer between the pins, in whole kilometres', () => {
-    expect(kmAt(pinLens, trip, 50)).toBe(20);
-    expect(kmAt(pinLens, trip, 200)).toBe(185);
-    expect(kmAt(pinLens, trip, 111)).toBe(56); // 55.95 km
+    expect(kmAt(50, pinLens, trip)).toBe(20);
+    expect(kmAt(200, pinLens, trip)).toBe(185);
+    expect(kmAt(111, pinLens, trip)).toBe(56); // 55.95 km
   });
   test('holds at the first and last stop', () => {
-    expect(kmAt(pinLens, trip, 0)).toBe(0);
-    expect(kmAt(pinLens, trip, 999)).toBe(330);
-    expect(kmAt([], trip, 50)).toBe(0);
+    expect(kmAt(0, pinLens, trip)).toBe(0);
+    expect(kmAt(999, pinLens, trip)).toBe(330);
+    expect(kmAt(50, [], trip)).toBe(0);
+    expect(kmAt(50, [], [])).toBe(0);
   });
 });
 
@@ -57,7 +70,7 @@ describe('planRoute', () => {
   for (const [wide, w] of [[true, 1200], [false, 390]]) {
     describe(wide ? 'wide screen' : 'phone', () => {
       const geo = measured(wide, w);
-      const plan = planRoute({ geo, stops, w, wide });
+      const plan = planRoute({ geo, stops, w, wide, sample: straight });
       test('starts on the first pin and reaches every later one', () => {
         expect(plan.pts[0]).toEqual([geo[0].x, geo[0].pinY]);
         const pins = plan.marks.filter((m) => m.pin);
@@ -76,23 +89,14 @@ describe('planRoute', () => {
         expect(plan.borders).toHaveLength(crossings);
       });
       test('comes out the same every time', () => {
-        expect(planRoute({ geo, stops, w, wide })).toEqual(plan);
+        expect(planRoute({ geo, stops, w, wide, sample: straight })).toEqual(plan);
       });
     });
   }
 });
 
 describe('keepDry', () => {
-  // a straight river, sampled every 8 units like the map does
-  const sample = (river) => {
-    const out = [];
-    for (let i = 0; i < river.length - 1; i++) {
-      const [[x0, y0], [x1, y1]] = [river[i], river[i + 1]];
-      const n = Math.ceil(Math.hypot(x1 - x0, y1 - y0) / 8);
-      for (let k = 0; k < n; k++) out.push([x0 + ((x1 - x0) * k) / n, y0 + ((y1 - y0) * k) / n]);
-    }
-    return out;
-  };
+  const sample = straight;
   const wet = (place, rivers) => {
     const [l, r, t, b] = SCENERY[place.kind].foot;
     const s = Math.abs(place.scale);
@@ -102,20 +106,20 @@ describe('keepDry', () => {
     const streams = [[[300, 0], [300, 600]]];
     const forest = { kind: 'forest', x: 300, y: 300, scale: 1 };
     expect(wet(forest, streams)).toBe(true);
-    keepDry([forest], streams, null, { w: 800, sample });
+    keepDry({ places: [forest], streams, source: null }, { w: 800, sample });
     expect(wet(forest, streams)).toBe(false);
   });
   test('bends a river round a lookout instead of moving it', () => {
     const streams = [[[300, 0], [300, 600]]];
     const lookout = { kind: 'lookout', x: 300, y: 300, scale: 1 };
-    keepDry([lookout], streams, null, { w: 800, sample });
+    keepDry({ places: [lookout], streams, source: null }, { w: 800, sample });
     expect(lookout.x).toBe(300);
     expect(wet(lookout, streams)).toBe(false);
   });
   test('leaves the source lake where it is', () => {
     const streams = [[[300, 0], [300, 600]]];
     const lake = { kind: 'lake', x: 300, y: 10, scale: 0.5 };
-    keepDry([lake], streams, lake, { w: 800, sample });
+    keepDry({ places: [lake], streams, source: lake }, { w: 800, sample });
     expect(lake.x).toBe(300);
   });
 });

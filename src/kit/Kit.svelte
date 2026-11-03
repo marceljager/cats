@@ -34,7 +34,6 @@
     ['--ink', 'Inkoust'],
   ];
   const icons = ['mail', 'instagram', 'pin', 'check', 'heart', 'camera', 'right', 'left', 'down', 'close', 'home', 'cats', 'copy', 'boy', 'girl', 'mountains'];
-  const doodles = KINDS;
   let copied = $state(false);
 </script>
 
@@ -337,7 +336,7 @@
   <section id="h">
     <h2><span class="letter">H</span> Kresby na mapě</h2>
     <div class="grid doodles">
-      {#each doodles as kind, i}
+      {#each KINDS as kind, i}
         <figure class="item">
           <span class="no">H{i + 1}</span>
           <svg class="doodle-demo" viewBox={kind === 'city' || kind === 'mountains' ? '-170 -150 340 220' : '-120 -110 240 170'} aria-hidden="true"><Doodle {kind} x={0} y={0} seed={i + 3} /></svg>
