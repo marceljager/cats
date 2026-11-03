@@ -10,37 +10,15 @@
   import { cats } from '../content.js';
   import { layer } from './forest.js';
 
-  // parallax: each layer of the forest is its own element, moved by a transform per scroll frame, so
-  // the phone's GPU slides finished layers instead of repainting the scene. Off screen, the loops stop.
+  // the hero's loops (stars, flicker, the kittens) stop while it's off screen. The parallax itself
+  // is CSS (scroll-driven animations, see .layer): the browser moves the layers in step with the
+  // scroll, which a script can't do on iPhone, where it only hears about the scroll a frame late
   let hero;
   let idle = $state(false);
   onMount(() => {
     const io = new IntersectionObserver(([e]) => (idle = !e.isIntersecting));
     io.observe(hero);
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return () => io.disconnect();
-    const layers = [...hero.querySelectorAll('[data-speed]')].map((el) => [el, Number(el.dataset.speed)]);
-    const copy = hero.querySelector('.copy');
-    let raf = 0;
-    let last = -1;
-    const frame = () => {
-      raf = 0;
-      const y = Math.min(window.scrollY, hero.offsetHeight * 1.2);
-      if (y === last) return;
-      last = y;
-      for (const [el, k] of layers) el.style.transform = `translate3d(0, ${(y * k).toFixed(1)}px, 0)`;
-      copy.style.transform = `translate3d(0, ${(y * 0.3).toFixed(1)}px, 0)`;
-      copy.style.opacity = String(Math.max(0, 1 - y / 700));
-    };
-    const onScroll = () => {
-      if (!raf) raf = requestAnimationFrame(frame);
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    frame();
-    return () => {
-      io.disconnect();
-      window.removeEventListener('scroll', onScroll);
-      cancelAnimationFrame(raf);
-    };
+    return () => io.disconnect();
   });
 
   const far = layer(3, 26, -40, 1480, 760, 200, 330, [[860, 960]]);
@@ -57,7 +35,7 @@
        Every layer is its own SVG (same viewBox, stacked), so it can move and blur as one finished
        picture; the flicker of the window has a layer of its own -->
   <div class="scene" aria-hidden="true">
-    <svg class="layer sky" data-speed="0.5" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice">
+    <svg class="layer sky" style="--k:0.5" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice">
       <defs>
         <radialGradient id="moonglow">
           <stop offset="0" stop-color="#f4f1d8" stop-opacity="0.35" />
@@ -81,7 +59,7 @@
     <!-- the window's glow and the fire in it, flickering together: the flicker is this one small
          layer's opacity, so nothing else repaints for it -->
     {#snippet lights()}
-      <svg class="layer lights" data-speed="0.38" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice">
+      <svg class="layer lights" style="--k:0.38" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice">
         <defs>
           <radialGradient id="warm">
             <stop offset="0" stop-color="#ffcf5c" stop-opacity="0.8" />
@@ -94,7 +72,7 @@
     {/snippet}
     <!-- with a hand-drawn forest the glow shows around the house, behind the drawing -->
     {#if drawn('F2')}{@render lights()}{/if}
-    <svg class="layer back soft" data-speed="0.38" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice">
+    <svg class="layer back soft" style="--k:0.38" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice">
       <Drawn id="F2">
         <!-- the distant forest floor: one dark mass the far trees grow out of, no hard edge -->
         <path class="far" d="M-40 1100 V772 C120 762 260 780 420 770 S760 764 900 774 S1240 762 1480 772 V1100 Z" />
@@ -108,13 +86,13 @@
     </svg>
     {#if !drawn('F2')}{@render lights()}{/if}
 
-    <svg class="layer middle softer" data-speed="0.28" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice">
+    <svg class="layer middle softer" style="--k:0.28" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice">
       <Drawn id="F3">
         {#each mid as t}<path class="mid-trunk" d={t.trunk} /><g class="mid">{#each t.tiers as d}<path class="outline" {d} />{/each}{#each t.tiers as d}<path {d} />{/each}</g>{/each}
       </Drawn>
     </svg>
 
-    <svg class="layer near" data-speed="0.2" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice">
+    <svg class="layer near" style="--k:0.2" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice">
       <!-- the flat forest floor the kittens sit on, running on down behind the hills -->
       <Drawn id="F4">
         <path class="ground" d="M-20 1100 V832 C200 812 420 824 640 818 C860 812 1100 826 1460 812 V1100 Z" />
@@ -182,9 +160,10 @@
     height: calc(100% - clamp(30px, 4.5vw, 58px));
     background: linear-gradient(#0b1626, #18304d 70%, #1f3b5c);
   }
-  /* parallax: every layer sinks a little more than the one in front of it (the script sets each
-     one's transform from its data-speed), so things only ever slip behind what is nearer; the big
-     front trees stay put. A layer is moved and blurred as one finished picture, never redrawn */
+  /* parallax: every layer sinks a little more than the one in front of it (--k of the scroll), so
+     things only ever slip behind what is nearer; the big front trees stay put. Scroll-driven: the
+     browser runs it with the scroll itself, and where it can't, the forest simply stays still.
+     A layer is moved as one finished picture, never redrawn */
   .layer {
     position: absolute;
     inset: 0;
@@ -195,6 +174,33 @@
   }
   .fore {
     will-change: auto;
+  }
+  @supports (animation-timeline: scroll()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .layer:not(.fore) {
+        animation: sink linear both;
+        animation-timeline: scroll(root);
+        animation-range: 0 1000px;
+      }
+      /* the window's light both sinks with its layer and keeps flickering */
+      .layer.lights {
+        animation: sink linear both, flicker 7s ease-in-out infinite;
+        animation-timeline: scroll(root), auto;
+        animation-range: 0 1000px, normal;
+      }
+      /* the words sink a little and fade out over the first 700px */
+      .copy {
+        animation: rise-away linear both;
+        animation-timeline: scroll(root);
+        animation-range: 0 700px;
+      }
+    }
+  }
+  @keyframes sink {
+    to { transform: translate3d(0, calc(var(--k) * 1000px), 0); }
+  }
+  @keyframes rise-away {
+    to { transform: translate3d(0, 210px, 0); opacity: 0; }
   }
   /* depth: the farther a layer, the softer it is. Only with a mouse on a wide screen: Safari blurs
      on the CPU, and at phone size the softening barely shows */
@@ -302,7 +308,7 @@
     opacity: 0.1;
   }
   /* scrolled past: every loop in the hero (stars, flicker, the kittens) stops until it's back */
-  .idle :global(*) {
+  .idle :global(:not(.layer, .copy)) {
     animation-play-state: paused !important;
   }
   .ground {

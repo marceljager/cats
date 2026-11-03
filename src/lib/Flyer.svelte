@@ -356,15 +356,19 @@
     box-shadow: 0 14px 14px -8px rgba(60, 35, 10, 0.4);
     border-top: 2px dotted var(--ink);
   }
+  /* one word per strip, never broken: on a narrow phone the label shrinks to fit its strip */
+  .tab {
+    container-type: inline-size;
+  }
   .tab-label {
     font-family: var(--f-label);
     font-variation-settings: 'wdth' 75;
     font-weight: 700;
-    font-size: 0.9rem;
+    font-size: min(0.9rem, 17cqw);
     letter-spacing: 0.02em;
     line-height: 1.1;
     text-align: center;
-    overflow-wrap: anywhere;
+    white-space: nowrap;
   }
   /* torn off: an empty slot on the flyer until the new strip slides in */
   .gone .tab {

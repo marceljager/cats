@@ -163,7 +163,7 @@ export const vet = {
     {
       place: 'Praha',
       title: 'Kompletní prohlídka',
-      done: ['Celková prohlídka', 'Odblešení', 'Vyčištění uší'],
+      done: ['Celková prohlídka', 'Odblešení', 'Vyčištění uší', 'Kastrace (Velík)'],
       who: 'Veterina v Praze',
     },
   ],
