@@ -187,6 +187,11 @@
     translate: -50% 0;
     overflow: visible;
     will-change: transform;
+    /* the scenery doesn't take the pointer, so it can reach the kittens' heads under the trees */
+    pointer-events: none;
+  }
+  .near :global(.nudge) {
+    pointer-events: auto;
   }
   .fore {
     will-change: auto;
@@ -341,12 +346,18 @@
     stroke-linecap: round;
   }
 
+  /* the text sits over the scene, but only its own lines take the pointer: the empty rest of the
+     box lets it through to the kittens' heads below */
   .copy {
     position: relative;
     z-index: 2;
+    pointer-events: none;
     will-change: transform, opacity;
     width: 100%;
     padding: clamp(48px, 9vh, 110px) var(--pad) 0;
+  }
+  .copy > :global(*) {
+    pointer-events: auto;
   }
   .copy :global(.hero-title) {
     max-width: 11ch;
