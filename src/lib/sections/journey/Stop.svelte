@@ -60,6 +60,8 @@
     --card-pad: 0 18px 22px;
     border-radius: 18px;
     font-family: var(--f-marker);
+    /* its own layer: the spring moves and scales it every frame, which shouldn't repaint the story */
+    will-change: transform;
   }
   header {
     display: flex;

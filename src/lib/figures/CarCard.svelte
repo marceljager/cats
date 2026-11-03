@@ -2,11 +2,12 @@
   // @ts-check
   // the car: a little cartoon van body on two wheels; the two big heads ride on top
   import CatHead from './CatHead.svelte';
-  /** @type {{ x?: number, y?: number, tilt?: number, bump?: number, km?: number, moving?: boolean }} */
-  let { x = 0, y = 0, tilt = 0, bump = 0, km = 0, moving = false } = $props();
+  // hidden: not on the route yet (before the map is measured), so it isn't shown at the corner
+  /** @type {{ x?: number, y?: number, tilt?: number, bump?: number, km?: number, moving?: boolean, hidden?: boolean }} */
+  let { x = 0, y = 0, tilt = 0, bump = 0, km = 0, moving = false, hidden = false } = $props();
 </script>
 
-<div class="car" style="transform: translate3d({x}px, {y}px, 0) translate(-50%, -50%) rotate({tilt}deg)" aria-hidden="true">
+<div class="car" class:hidden style="transform: translate3d({x}px, {y}px, 0) translate(-50%, -50%) rotate({tilt}deg)" aria-hidden="true">
   <div class="bounce" style="translate: 0 {bump}px">
     <div class="body">
       <span class="wheel a"></span>
@@ -30,6 +31,9 @@
     z-index: 4;
     will-change: transform;
     pointer-events: none;
+  }
+  .hidden {
+    visibility: hidden;
   }
   .body {
     position: relative;

@@ -31,14 +31,20 @@
   let len = $state(0);
   let travelled = $state(0);
   let car = $state({ x: 0, y: 0, tilt: 0, bump: 0 });
+  // the car stays hidden until it has been put on the route, so it never shows at the map's corner
+  let placed = $state(false);
+  let goal = 0; // how far along the route the scroll asks the car to be; `travelled` eases towards it
+  let points = new Float32Array(0); // x, y every STEP units along the route, so a frame never asks the SVG
+  const STEP = 4;
+  let viewH = 0; // the screen height the reading line is taken from, kept while a phone's toolbar slides
+  let glide = 0;
   let pins = $state([]);
   let places = $state([]);
   let borders = $state([]);
   let paths = $state({ rivers: [], grass: { light: '', dark: '', flowers: '', hearts: '', pebbles: '' } });
   let clouds = $state([]);
-  let anchorY = $state(-1);
   let keypoints = []; // [{ y, len }]: where the route reaches each y, which the car is mapped between
-  let pinLens = []; // route length at each stop's pin, for the odometer
+  let pinLens = $state.raw([]); // route length at each stop's pin, for the odometer and the stories
   let km = $state(0);
   let moving = $state(false);
   let still = 0;
@@ -47,7 +53,7 @@
   const total = $derived(stops[stops.length - 1].km);
 
   // a story comes up once the car has reached its pin
-  const reached = $derived(stops.map((_, i) => anchorY >= 0 && geo.length > 0 && anchorY >= geo[i].pinY));
+  const reached = $derived(stops.map((_, i) => placed && i < pinLens.length && travelled >= pinLens[i] - 1));
 
   function lengthOf(path) {
     measurePath.setAttribute('d', path);
@@ -106,33 +112,81 @@
     borders = plan.borders;
     paths = { rivers: plan.streams.map(smooth), grass: scatterGrass(w, h) };
     clouds = driftClouds(w, h, wide);
+    viewH = innerHeight;
     tick().then(() => {
       len = routePath.getTotalLength();
-      moveCar();
+      // the route walked once here, so moving the car is a lookup instead of an SVG query per frame
+      const n = Math.ceil(len / STEP) + 1;
+      points = new Float32Array(n * 2);
+      for (let i = 0; i < n; i++) {
+        const q = routePath.getPointAtLength(Math.min(i * STEP, len));
+        points[i * 2] = q.x;
+        points[i * 2 + 1] = q.y;
+      }
+      aim();
+      if (placed) put(Math.min(travelled, len));
     });
   }
 
-  // the car sits where the route crosses the middle of the screen
-  function moveCar() {
-    if (!routePath || !len) return;
-    // off screen (e.g. still up in the hero): nothing to move
-    if (!onScreen(root)) return;
-    const rect = root.getBoundingClientRect();
-    const target = Math.min(Math.max(window.innerHeight * 0.5 - rect.top, 0), h - 1);
-    const along = Math.min(lengthAt(target, keypoints, len), len);
-    if (along === travelled && target === anchorY) return;
-    const pt = routePath.getPointAtLength(along);
-    const ahead = routePath.getPointAtLength(Math.min(along + 6, len));
-    const lean = Math.atan2(ahead.x - pt.x, Math.max(ahead.y - pt.y, 0.01)) * (180 / Math.PI);
+  // the point `along` the route, between the two looked-up points around it
+  function pointAt(along) {
+    const n = points.length / 2;
+    const f = Math.min(Math.max(along / STEP, 0), n - 1);
+    const i = Math.min(Math.floor(f), n - 2);
+    const t = f - i;
+    return [
+      points[i * 2] + (points[i * 2 + 2] - points[i * 2]) * t,
+      points[i * 2 + 1] + (points[i * 2 + 3] - points[i * 2 + 1]) * t,
+    ];
+  }
+
+  // puts the car `along` the route, leaning into the bend ahead
+  function put(along) {
+    const [x, y] = pointAt(along);
+    const [ax, ay] = pointAt(along + 6);
+    const lean = Math.atan2(ax - x, Math.max(ay - y, 0.01)) * (180 / Math.PI);
     car = {
-      x: pt.x,
-      y: pt.y,
+      x,
+      y,
       tilt: Math.max(-34, Math.min(34, -lean * 0.5)),
       bump: reducedMotion() ? 0 : Math.sin(along / 9) * 1.8,
     };
     travelled = along;
-    anchorY = target;
     km = kmAt(along, pinLens, stops);
+  }
+
+  // the car heads for where the route crosses the middle of the screen; the first time (and with
+  // reduced motion) it is put there, otherwise it glides there over the next frames, so a coarse
+  // or uneven scroll still reads as driving
+  function aim() {
+    if (!points.length) return;
+    // off screen (e.g. still up in the hero): nothing to move
+    if (!onScreen(root)) return;
+    const rect = root.getBoundingClientRect();
+    const target = Math.min(Math.max(viewH * 0.5 - rect.top, 0), h - 1);
+    goal = Math.min(lengthAt(target, keypoints, len), len);
+    if (!placed || reducedMotion()) {
+      put(goal);
+      placed = true;
+      return;
+    }
+    if (goal !== travelled) glide ||= requestAnimationFrame(drive);
+  }
+
+  let last = 0;
+  function drive(now) {
+    const dt = last ? Math.min(now - last, 64) : 16;
+    const gap = goal - travelled;
+    // most of the way there in about a tenth of a second, whatever the frame rate
+    const next = Math.abs(gap) < 0.3 ? goal : travelled + gap * (1 - Math.exp(-dt / 70));
+    put(next);
+    if (next === goal) {
+      glide = 0;
+      last = 0;
+      return;
+    }
+    last = now;
+    glide = requestAnimationFrame(drive);
   }
 
   onMount(() => {
@@ -146,7 +200,7 @@
         clearTimeout(still);
         still = setTimeout(() => (moving = false), 900);
       }
-      moveCar();
+      aim();
     };
     const ro = new ResizeObserver(() => drawMap());
     ro.observe(root);
@@ -156,6 +210,7 @@
       ro.disconnect();
       stop();
       clearTimeout(still);
+      cancelAnimationFrame(glide);
     };
   });
 </script>
@@ -176,18 +231,6 @@
 
     <div class="route" bind:this={root}>
       <svg class="map" width={w} height={h} viewBox="0 0 {w} {h}" aria-hidden="true">
-        <defs>
-          <mask id="driven" maskUnits="userSpaceOnUse">
-            <path
-              d={routeD}
-              fill="none"
-              stroke="#fff"
-              stroke-width="16"
-              stroke-linecap="round"
-              style="stroke-dasharray: {len} {len}; stroke-dashoffset: {len - travelled};"
-            />
-          </mask>
-        </defs>
         <path d="" bind:this={measurePath} class="measure" />
         {#each paths.rivers as rv}
           <path class="river-bank" d={rv} />
@@ -214,6 +257,22 @@
         {/each}
 
         <path class="ahead" d={routeD} />
+      </svg>
+      <!-- the driven route and the pins on a layer of their own: the route grows on every frame the
+           car moves, and redrawing it shouldn't mean redrawing the whole meadow under it -->
+      <svg class="map driven" width={w} height={h} viewBox="0 0 {w} {h}" aria-hidden="true">
+        <defs>
+          <mask id="driven" maskUnits="userSpaceOnUse">
+            <path
+              d={routeD}
+              fill="none"
+              stroke="#fff"
+              stroke-width="16"
+              stroke-linecap="round"
+              style="stroke-dasharray: {len} {len}; stroke-dashoffset: {len - travelled};"
+            />
+          </mask>
+        </defs>
         <path class="done" bind:this={routePath} d={routeD} mask="url(#driven)" />
 
         {#each pins as pin, i}
@@ -250,7 +309,7 @@
         </div>
       {/each}
 
-      <CarCard {...car} {km} {moving} />
+      <CarCard {...car} {km} {moving} hidden={!placed} />
 
       <div class="stops">
         {#each stops as stop, i (stop.id)}
@@ -279,6 +338,11 @@
     inset: 0;
     overflow: visible;
     pointer-events: none;
+  }
+  /* the meadow and the driven route each get a layer of their own: the meadow is painted once and
+     only slides with the page, the car moves over both, and only the route is redrawn as it grows */
+  .map {
+    will-change: transform;
   }
   .measure {
     fill: none;
