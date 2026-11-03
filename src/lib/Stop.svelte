@@ -6,22 +6,24 @@
   import Icon from './Icon.svelte';
   import { springTo } from './springs.js';
 
-  let { stop, side = 'right', state = 'upcoming', el = $bindable() } = $props();
+  // one stop's story beside the map; it stays dimmed and lowered (upcoming) until the car reaches its
+  // pin (reached), then pops open and gets taped down
+  let { stop, side = 'right', reached = false, el = $bindable() } = $props();
   const lean = $derived(side === 'right' ? 0.8 : -0.8);
 </script>
 
-<article class="stop {side} {state}" bind:this={el} aria-labelledby="stop-{stop.id}">
+<article class="stop {side}" class:upcoming={!reached} bind:this={el} aria-labelledby="stop-{stop.id}">
   <div
     class="card"
     use:springTo={{
-      to: state === 'upcoming' ? { y: 34, scale: 0.9, rotate: lean * -4 } : { y: 0, scale: 1, rotate: lean },
+      to: reached ? { y: 0, scale: 1, rotate: lean } : { y: 34, scale: 0.9, rotate: lean * -4 },
       bounce: 0.55,
       duration: 0.3,
     }}
   >
     <Card>
       <!-- taped on once the car reaches it, and it stays -->
-      {#if state !== 'upcoming'}
+      {#if reached}
         <Tape rotate={7} width="88px" class="pin-tape" />
       {/if}
       <header>

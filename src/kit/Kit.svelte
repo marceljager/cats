@@ -13,6 +13,7 @@
   import Kittens from '../lib/Kittens.svelte';
   import CarCard from '../lib/CarCard.svelte';
   import Doodle from '../lib/Doodle.svelte';
+  import { KINDS } from '../lib/scenery.js';
   import LuggageTags from '../lib/LuggageTags.svelte';
   import { cats } from '../content.js';
 
@@ -33,7 +34,7 @@
     ['--ink', 'Inkoust'],
   ];
   const icons = ['mail', 'instagram', 'pin', 'check', 'heart', 'camera', 'right', 'left', 'down', 'close', 'home', 'cats', 'copy', 'boy', 'girl', 'mountains'];
-  const doodles = ['forest', 'city', 'farm', 'mountains', 'hills', 'lake', 'field', 'lookout', 'rest'];
+  const doodles = KINDS;
   let copied = $state(false);
 </script>
 

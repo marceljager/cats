@@ -1,4 +1,7 @@
 <script>
+  // the trip as a map: the route winds from story to story, the car drives along it as the page
+  // scrolls and each story comes up as the car reaches its pin. The geometry is in route.js; this
+  // measures where the stories sit on the page, draws the result and moves the car.
   import { onMount, tick } from 'svelte';
   import Text from './Text.svelte';
   import Stop from './Stop.svelte';
@@ -7,7 +10,7 @@
   import Drawn from './Drawn.svelte';
   import { drawn } from './drawn.js';
   import { parallax } from './parallax.js';
-  import { rng } from './random.js';
+  import { curve, driftClouds, keepDry, kmAt, lengthAt, planRoute, scatterGrass, sideOf, smooth } from './route.js';
   import { springTo } from './springs.js';
   import { onScreen, onScrollFrame, reducedMotion } from './viewport.js';
 
@@ -36,137 +39,33 @@
   let km = $state(0);
   let moving = $state(false);
   let still = 0;
-  let geo = []; // per stop: { pinY, exitY }
-  let wide = false;
+  let geo = $state.raw([]); // per stop: { x, top, bottom, pinY, exitY }
 
   const total = $derived(stops[stops.length - 1].km);
 
-  // a story appears when the car arrives at its pin
-  const states = $derived(
-    anchorY >= 0 && geo.length
-      ? stops.map((_, i) => {
-          const g = geo[i];
-          if (anchorY < g.pinY) return 'upcoming';
-          if (i === stops.length - 1) return anchorY > g.pinY + 220 ? 'passed' : 'current';
-          return anchorY <= g.exitY ? 'current' : 'passed';
-        })
-      : stops.map(() => 'upcoming'),
-  );
-
-  function sideOf(i) {
-    return i % 2 === 0 ? 'right' : 'left';
-  }
-
-  // a smooth hand-drawn line through waypoints, for the rivers: a centripetal Catmull-Rom
-  // spline, which never overshoots into a loop or a hairpin however unevenly the points are spaced
-  function smooth(pts) {
-    return `M ${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}` + curve(pts).join('');
-  }
-
-  // the same spline as a list of pieces, piece i running from point i to point i + 1
-  function curve(pts) {
-    const f = (n) => n.toFixed(1);
-    const dist = (a, b) => Math.max(Math.hypot(b[0] - a[0], b[1] - a[1]) ** 0.5, 1e-3);
-    const out = [];
-    for (let i = 0; i < pts.length - 1; i++) {
-      const p1 = pts[i];
-      const p2 = pts[i + 1];
-      // past either end, extend the line straight on
-      const p0 = pts[i - 1] ?? [2 * p1[0] - p2[0], 2 * p1[1] - p2[1]];
-      const p3 = pts[i + 2] ?? [2 * p2[0] - p1[0], 2 * p2[1] - p1[1]];
-      const d1 = dist(p0, p1);
-      const d2 = dist(p1, p2);
-      const d3 = dist(p2, p3);
-      const c1 = [0, 1].map((k) => (d1 * d1 * p2[k] - d2 * d2 * p0[k] + (2 * d1 * d1 + 3 * d1 * d2 + d2 * d2) * p1[k]) / (3 * d1 * (d1 + d2)));
-      const c2 = [0, 1].map((k) => (d3 * d3 * p1[k] - d2 * d2 * p3[k] + (2 * d3 * d3 + 3 * d3 * d2 + d2 * d2) * p2[k]) / (3 * d3 * (d3 + d2)));
-      out.push(` C ${f(c1[0])} ${f(c1[1])}, ${f(c2[0])} ${f(c2[1])}, ${f(p2[0])} ${f(p2[1])}`);
-    }
-    return out;
-  }
+  // a story comes up once the car has reached its pin
+  const reached = $derived(stops.map((_, i) => anchorY >= 0 && geo.length > 0 && anchorY >= geo[i].pinY));
 
   function lengthOf(path) {
     measureEl.setAttribute('d', path);
     return measureEl.getTotalLength();
   }
-
-  // each doodle's footprint around its anchor, at scale 1: [left, right, top, bottom]
-  const FOOT = {
-    mountains: [-140, 160, -127, 36],
-    forest: [-84, 81, -55, 31],
-    hills: [-68, 72, -57, 15],
-    lake: [-60, 75, -47, 27],
-    field: [-82, 85, -26, 32],
-    farm: [-88, 96, -31, 14],
-    lookout: [-36, 40, -75, 27],
-    rest: [-42, 43, -40, 27],
-  };
-
-  // keep the scenery out of the water. The lookout and the rest stop sit on the route's detour
-  // loops, so a river bends around them; anything else slides sideways off the rivers. The
-  // stream's source lake and the city the Vltava runs through are meant to touch them.
-  function keepDry(dood, streams, source) {
-    const box = (dd, dx = 0) => {
-      const [l, r, t, b] = FOOT[dd.kind];
-      const s = Math.abs(dd.scale);
-      return [dd.x + dx + l * s, dd.x + dx + r * s, dd.y + t * s, dd.y + b * s];
-    };
-    const sample = (river) => {
-      measureEl.setAttribute('d', smooth(river));
-      const total = measureEl.getTotalLength();
-      const out = [];
-      for (let l = 0; l < total; l += 8) {
-        const q = measureEl.getPointAtLength(l);
-        out.push([q.x, q.y]);
-      }
-      return out;
-    };
-    const wet = (b, rs, pad = 12) => rs.filter(([x, y]) => x > b[0] - pad && x < b[1] + pad && y > b[2] - pad && y < b[3] + pad);
-    const scenery = dood.filter((dd) => dd !== source && FOOT[dd.kind]);
-
-    for (const dd of scenery.filter((dd) => dd.kind === 'lookout' || dd.kind === 'rest')) {
-      for (const river of streams) {
-        const b = box(dd);
-        const hit = wet(b, sample(river));
-        if (!hit.length) continue;
-        // swing the river past the spot on the side it already runs on
-        const mx = hit.reduce((a, [x]) => a + x, 0) / hit.length;
-        const x = mx < (b[0] + b[1]) / 2 ? b[0] - 30 : b[1] + 30;
-        // its own waypoints alongside the spot give way to two that pass it
-        const [y0, y1] = [b[2] - 10, b[3] + 10];
-        const at = river.findIndex(([, ry]) => ry >= y0);
-        const end = river.findIndex(([, ry]) => ry > y1);
-        river.splice(at < 0 ? river.length : at, (end < 0 ? river.length : end) - (at < 0 ? river.length : at), [x, y0], [x, y1]);
-      }
+  // points along a river's drawn line, every 8 units
+  function sampleRiver(river) {
+    measureEl.setAttribute('d', smooth(river));
+    const total = measureEl.getTotalLength();
+    const out = [];
+    for (let l = 0; l < total; l += 8) {
+      const q = measureEl.getPointAtLength(l);
+      out.push([q.x, q.y]);
     }
-
-    const rs = streams.flatMap(sample);
-    for (const dd of scenery.filter((dd) => dd.kind !== 'lookout' && dd.kind !== 'rest')) {
-      const hit = wet(box(dd), rs);
-      if (!hit.length) continue;
-      // slide away from the river first, then the other way, a little further each try
-      const away = hit.reduce((a, [x]) => a + x, 0) / hit.length < dd.x ? 1 : -1;
-      for (let step = 12; step < w * 0.6; step += 12) {
-        const dx = [away * step, -away * step].find((d) => {
-          const b = box(dd, d);
-          return dd.x + d > 0 && dd.x + d < w && !wet(b, rs).length;
-        });
-        if (dx !== undefined) {
-          dd.x += dx;
-          break;
-        }
-      }
-    }
+    return out;
   }
 
-  function build() {
-    if (!root) return;
-    wide = innerWidth >= 760;
-    w = root.clientWidth;
-    h = root.offsetHeight;
+  // where the route meets each story, from where the stories sit on the page
+  function measureStops(wide) {
     const base = root.getBoundingClientRect();
-
-    // where the route meets each story
-    geo = stops.map((_, i) => {
+    return stops.map((_, i) => {
       const box = els[i].getBoundingClientRect();
       const top = box.top - base.top;
       const bottom = top + box.height;
@@ -179,221 +78,46 @@
       // phones: the car parks above the story, then drives on behind it
       return { x: left + box.width * (i % 2 ? 0.3 : 0.7), top, bottom, pinY: top - 40, exitY: bottom + 30 };
     });
+  }
 
-    const g0 = geo[0];
-    const dood = [];
-    const lines = [];
-    const rivers = [];
+  // lays the whole map out again for the stories where they now sit (on mount and on every resize)
+  function drawMap() {
+    if (!root) return;
+    const wide = innerWidth >= 760;
+    w = root.clientWidth;
+    h = root.offsetHeight;
+    geo = measureStops(wide);
+    const plan = planRoute({ geo, stops, w, wide });
+    keepDry(plan.places, plan.streams, plan.source, { w, sample: sampleRiver });
 
-    // the trip starts on the Velebit pin, up in the mountains
-    // the route is a list of waypoints joined by one smooth spline (curve), so it bends in round
-    // curves everywhere and still runs exactly through every pin
-    const pts = [[g0.x, g0.pinY]];
-    const marks = []; // { y, i, pin }: the route at waypoint i reaches this y (an exit or a pin)
-
-    // the Velebit range around the pin, with the little lake the river springs from
-    if (wide) {
-      // layered back to front, all left of the story card: distant peaks, the main range (the pin
-      // on its right flank, its label clear of the route), a smaller range in front
-      dood.push({ kind: 'mountains', x: g0.x + 120, y: g0.pinY - 50, scale: 0.7, seed: 8 });
-      dood.push({ kind: 'mountains', x: g0.x - 70, y: g0.pinY + 6, scale: 1.15, seed: 5, label: 'Velebit' });
-      dood.push({ kind: 'mountains', x: g0.x + 150, y: g0.pinY + 70, scale: 0.6, seed: 13 });
-      dood.push({ kind: 'forest', x: g0.x - w * 0.12, y: g0.pinY + 150, scale: 0.85, seed: 2 });
-    } else {
-      dood.push({ kind: 'mountains', x: g0.x - 6, y: g0.pinY + 18, scale: 0.95, seed: 5 });
-      dood.push({ kind: 'mountains', x: w * 0.2, y: g0.pinY - 50, scale: 0.6, seed: 8, label: 'Velebit' });
-    }
-    const lake = wide ? [g0.x - w * 0.16, g0.pinY + 70] : [w * 0.12, g0.pinY - 4];
-    const source = { kind: 'lake', x: lake[0], y: lake[1], scale: wide ? 0.55 : 0.4, seed: 17 };
-    dood.push(source);
-    // each stretch of the trip has its own river: a mountain stream from the lake under Velebit
-    // running off west toward the sea, then one per leg crossing the map from side to side
-    const streams = [[[lake[0], lake[1] + 6], [lake[0] + (wide ? 10 : 0), lake[1] + 90], [lake[0] - 10, lake[1] + 260], [-60, lake[1] + 380]]];
-    let vltava = null; // the river that runs on through the city and off the bottom of the map
-
-    geo.forEach((g, i) => {
-      const n = geo[i + 1];
-      if (!n) return; // the trip ends at the last pin
-      // down past the stop's story, wavering a touch
-      for (let y = g.pinY + 110, k = i * 7 + 3; y < g.exitY - 40; y += 110, k++) pts.push([g.x + Math.sin(k * 12.9898) * 2.6, y]);
-      pts.push([g.x, g.exitY]);
-      marks.push({ y: g.exitY, i: pts.length - 1 });
-      const r = rng(i * 131 + 7);
-      const s = i % 2 ? 1 : -1; // side the detour swings out to
-
-      // leaving the mountains: the road runs straight on down to Gospić, between a few peaks
-      let sx = g.x;
-      let sy = g.exitY;
-      if (i === 0) {
-        const left = g.x < w / 2;
-        dood.push({ kind: 'mountains', x: w * (left ? 0.95 : 0.05), y: g.exitY + 60, scale: wide ? 0.9 : 0.55, seed: 21 });
-        dood.push({ kind: 'mountains', x: w * (left ? 0.05 : 0.95), y: g.exitY + 150, scale: wide ? 0.75 : 0.5, seed: 27 });
-      }
-      const gap = n.pinY - sy;
-      const at = (f) => sy + gap * f;
-      const detour = stops[i + 1].detour;
-
-      if (detour) {
-        const spot = typeof detour === 'string' ? { label: detour, icon: 'lookout' } : detour;
-        // pull off the road to look at something, round the spot and come back
-        const R = wide ? 46 : 34;
-        const ax = w * (0.5 + 0.06 * s);
-        const ay = at(0.36);
-        const tx = ax + s * R * (wide ? 3.6 : 2.5);
-        const ty = ay + R;
-        const bx = ax + s * R * 0.25;
-        const by = ay + R * 2.1;
-        // out to the spot and round it in a loop (over its top, its far side, under it) and back;
-        // coming from the spot's side already, we head straight into the loop instead of doubling
-        // back past the turn-off
-        if ((sx - ax) * s <= 0) pts.push([ax, ay]);
-        pts.push([tx - s * R * 0.6, ty - R * 0.85], [tx, ty], [tx - s * R * 0.6, ty + R * 0.85], [bx, by]);
-        dood.push({ kind: spot.icon ?? 'lookout', x: tx + s * (wide ? 34 : 26), y: ty + 10, label: spot.label, scale: wide ? 1.2 : 0.95 });
-      }
-      pts.push([n.x, n.pinY]);
-      marks.push({ y: n.pinY, i: pts.length - 1, pin: true });
-
-      // scenery along the way
-      const far = (f) => w * (0.5 - s * f);
-      const near = (f) => w * (0.5 + s * f);
-      // the stop's own place sits just before we arrive
-      const kind = stops[i + 1].doodle ?? 'village';
-      let cityRiver = null;
-      if (kind === 'city') {
-        // the city is drawn around the stop: its pin sits on the Old Town square
-        const cs = wide ? 1.6 : 1;
-        const cx = n.x - 46 * cs;
-        const cy = n.pinY - 12 * cs;
-        dood.push({ kind, x: cx, y: cy, scale: cs, seed: i + 4 });
-        // the map's river runs through it as the Vltava, under Charles Bridge
-        cityRiver = [[2, -110], [-6, -40], [2, 2], [10, 40], [26, 90]].map(([lx, ly]) => [cx + lx * cs, cy + ly * cs]);
-      } else {
-        const vx = far(wide ? 0.32 : 0.26);
-        const vy = at(0.8);
-        // the farm is a whole little scene (barn, goats, farmhouse), so it gets drawn a size up
-        dood.push({ kind, x: vx, y: vy, scale: (wide ? 1.2 : 0.85) * (kind === 'farm' ? 1.35 : 1), seed: i + 4 });
-      }
-      dood.push({ kind: 'field', x: far(wide ? 0.2 : 0.14), y: at(0.5), scale: wide ? 1 : 0.7, seed: i + 2 });
-      if (i > 0) {
-        dood.push({ kind: 'forest', x: near(wide ? 0.3 : 0.26), y: at(0.12), scale: wide ? 1.2 : 0.75, seed: i + 11 });
-        dood.push({ kind: i % 2 ? 'lake' : 'hills', x: far(wide ? 0.3 : 0.27), y: at(0.18), scale: wide ? 1.1 : 0.75, seed: i + 9 });
-      }
-      if (!cityRiver) dood.push({ kind: 'forest', x: near(wide ? 0.36 : 0.3), y: at(0.9), scale: wide ? 0.9 : 0.6, seed: i + 31 });
-      // this leg's river comes in from one side, meanders across, swinging round the places on
-      // its banks, and leaves by the other side; into a city it runs straight on to the line it
-      // takes through the streets
-      const edge = (side) => (side > 0 ? w + 60 : -60);
-      const course = [[edge(s), at(0.12)], [w * (0.5 + s * (0.25 + r() * 0.15)), at(0.3 + r() * 0.1)]];
-      const swing = [w * (0.5 - s * (0.3 + r() * 0.15)), at(cityRiver ? 0.45 : 0.62 + r() * 0.1)];
-      if (cityRiver) course.push(...cityRiver);
-      else course.push(swing, [edge(-s), at(0.92)]);
-      streams.push(course);
-      if (cityRiver) vltava = course;
-
-      // border crossings, with any countries driven through on the way
-      const lands = [stops[i].country, ...(stops[i + 1].via ?? []), stops[i + 1].country];
-      for (let c = 0; c < lands.length - 1; c++) {
-        if (lands[c] === lands[c + 1]) continue;
-        lines.push({ y: at((c + 1) / lands.length), from: lands[c], to: lands[c + 1], side: s < 0 ? 'right' : 'left' });
-      }
-    });
-
-    // wide screens: scenery beside each story too
-    if (wide) {
-      geo.forEach((g, i) => {
-        const outer = sideOf(i) === 'right' ? g.x * 0.45 : w - (w - g.x) * 0.45;
-        dood.push({ kind: i % 2 ? 'hills' : 'forest', x: outer, y: (g.top + g.bottom) / 2, scale: 0.8, seed: i + 51 });
-      });
-    }
-
-    const last = geo[geo.length - 1];
-    // the Vltava leaves the map past the last stop
-    vltava?.push([w * 0.6, last.exitY + 40], [w + 60, last.exitY + 120]);
-    keepDry(dood, streams, source);
-    rivers.push(...streams.map(smooth));
-
+    // the route is a list of waypoints joined by one smooth spline, so it bends in round curves
+    // everywhere and still runs exactly through every pin
+    const { pts, marks } = plan;
+    const start = `M ${pts[0][0]} ${pts[0][1]}`;
     const pieces = curve(pts);
-    const p = `M ${pts[0][0]} ${pts[0][1]}` + pieces.join('');
-    const lenAt = (i) => lengthOf(`M ${pts[0][0]} ${pts[0][1]}` + pieces.slice(0, i).join(''));
-    keys = [{ y: g0.pinY, len: 0 }, ...marks.map((m) => ({ y: m.y, len: lenAt(m.i) }))];
+    const lenAt = (i) => lengthOf(start + pieces.slice(0, i).join(''));
+    keys = [{ y: geo[0].pinY, len: 0 }, ...marks.map((m) => ({ y: m.y, len: lenAt(m.i) }))];
     pinLens = [0, ...marks.filter((m) => m.pin).map((m) => lenAt(m.i))];
-    d = p;
+    d = start + pieces.join('');
     pins = geo.map((g) => ({ x: g.x, y: g.pinY }));
-    doodles = dood;
-    borders = lines;
-    // grass tufts and pebbles scattered over the land: each tuft a few tapered blades fanning out,
-    // its own height and lean, some a darker green, now and then a tiny flower on the tallest blade
-    const rt = rng(99);
-    const f = (n) => n.toFixed(1);
-    const dot = (x, y, rx, ry = rx) => ` M ${f(x - rx)} ${f(y)} a ${f(rx)} ${f(ry)} 0 1 0 ${f(rx * 2)} 0 a ${f(rx)} ${f(ry)} 0 1 0 ${f(-rx * 2)} 0 Z`;
-    const grass = { light: '', dark: '', flowers: '', hearts: '', pebbles: '' };
-    for (let n = 0; n < Math.round(h / 22); n++) {
-      const tx = rt() * w;
-      const ty = rt() * h;
-      const blades = 3 + Math.floor(rt() * 3);
-      const tall = 9 + rt() * 5;
-      let d = '';
-      let top = null;
-      for (let b = 0; b < blades; b++) {
-        const u = blades === 1 ? 0 : (b / (blades - 1)) * 2 - 1; // -1 left .. 1 right
-        const bx = tx + u * 5;
-        const bh = tall * (1 - Math.abs(u) * 0.35) * (0.85 + rt() * 0.3);
-        const lean = u * 5 + (rt() - 0.5) * 2;
-        const tipX = bx + lean;
-        const tipY = ty - bh;
-        d += ` M ${f(bx - 1.5)} ${f(ty)} Q ${f(bx + lean * 0.2 - 0.4)} ${f(ty - bh * 0.6)} ${f(tipX)} ${f(tipY)} Q ${f(bx + lean * 0.3 + 1.3)} ${f(ty - bh * 0.5)} ${f(bx + 1.5)} ${f(ty)} Z`;
-        if (!top || tipY < top[1]) top = [tipX, tipY];
-      }
-      grass[rt() < 0.3 ? 'dark' : 'light'] += d;
-      if (rt() < 0.16) {
-        grass.flowers += dot(top[0], top[1] - 0.6, 2.1);
-        grass.hearts += dot(top[0], top[1] - 0.6, 0.85);
-      }
-      if (rt() < 0.12) grass.pebbles += dot(tx + 12 + rt() * 6, ty - 1, 2.6 + rt() * 1.4, 1.8);
-    }
-    paths = { rivers, grass };
-
-    // clouds drifting high above the map, along its edges
-    const rc = rng(7);
-    const cl = [];
-    for (let cy = 260, n = 0; cy < h - 200; cy += wide ? 620 : 560, n++) {
-      const left = n % 2 === 0;
-      const cw = (wide ? 180 : 120) + rc() * (wide ? 90 : 40);
-      const cx = left ? -cw * 0.3 + rc() * w * (wide ? 0.08 : 0.05) : w - cw * 0.7 - rc() * w * (wide ? 0.08 : 0.05);
-      // round puffs on a flat base (in the 200 x 92 cloud box), each cloud a little different
-      const puffs = [[40, 62, 19], [74, 46, 26], [114, 40, 29], [150, 54, 22], [172, 66, 14]].map(([px, py, pr]) => {
-        const k = 0.88 + rc() * 0.24;
-        return [px, py + pr * (1 - k), pr * k];
-      });
-      cl.push({ x: cx, y: cy + rc() * 160, w: cw, flip: !left, dur: 18 + rc() * 10, puffs });
-    }
-    clouds = cl;
+    doodles = plan.places;
+    borders = plan.borders;
+    paths = { rivers: plan.streams.map(smooth), grass: scatterGrass(w, h) };
+    clouds = driftClouds(w, h, wide);
     tick().then(() => {
       len = routeEl.getTotalLength();
-      update();
+      moveCar();
     });
   }
 
-  // map the reading line to a length along the route, piecewise between keypoints
-  function lengthAt(y) {
-    for (let i = 1; i < keys.length; i++) {
-      const a = keys[i - 1];
-      const b = keys[i];
-      if (y <= b.y) {
-        const f = b.y === a.y ? 1 : Math.max(0, (y - a.y) / (b.y - a.y));
-        return a.len + (b.len - a.len) * f;
-      }
-    }
-    return len;
-  }
-
-  function update() {
+  // the car sits where the route crosses the middle of the screen
+  function moveCar() {
     if (!routeEl || !len) return;
-    const rect = root.getBoundingClientRect();
     // off screen (e.g. still up in the hero): nothing to move
     if (!onScreen(root)) return;
+    const rect = root.getBoundingClientRect();
     const target = Math.min(Math.max(window.innerHeight * 0.5 - rect.top, 0), h - 1);
-    const L = Math.min(lengthAt(target), len);
+    const L = Math.min(lengthAt(keys, target, len), len);
     if (L === travelled && target === anchorY) return;
     const pt = routeEl.getPointAtLength(L);
     const ahead = routeEl.getPointAtLength(Math.min(L + 6, len));
@@ -406,19 +130,7 @@
     };
     travelled = L;
     anchorY = target;
-    km = kmAt(L);
-  }
-
-  // kilometres from the forest, interpolated between the stops' pins
-  function kmAt(L) {
-    if (!pinLens.length || L <= pinLens[0]) return stops[0].km;
-    for (let i = 1; i < pinLens.length; i++) {
-      if (L <= pinLens[i]) {
-        const f = (L - pinLens[i - 1]) / (pinLens[i] - pinLens[i - 1] || 1);
-        return Math.round(stops[i - 1].km + (stops[i].km - stops[i - 1].km) * f);
-      }
-    }
-    return stops[stops.length - 1].km;
+    km = kmAt(pinLens, stops, L);
   }
 
   onMount(() => {
@@ -432,12 +144,12 @@
         clearTimeout(still);
         still = setTimeout(() => (moving = false), 900);
       }
-      update();
+      moveCar();
     };
-    const ro = new ResizeObserver(() => build());
+    const ro = new ResizeObserver(() => drawMap());
     ro.observe(root);
     const stop = onScrollFrame(follow);
-    build();
+    drawMap();
     return () => {
       ro.disconnect();
       stop();
@@ -494,12 +206,12 @@
         <path class="done" bind:this={routeEl} {d} mask="url(#driven)" />
 
         {#each pins as pin, i}
-          {@const k = states[i] === 'upcoming' ? 0 : 1}
+          {@const k = reached[i] ? 1 : 0}
           <!-- the site's pin icon (Icon.svelte) at map size, tip on the route: a cream outline
                waiting, red with its cel shade and shine once the car arrives -->
-          <g class="pin {states[i]}" transform="translate({pin.x} {pin.y})">
+          <g class="pin" class:reached={reached[i]} transform="translate({pin.x} {pin.y})">
             {#if !drawn('M11')}<ellipse class="pin-ground" cx="0" cy="1" rx="10" ry="3.5" />{/if}
-            <g class="pin-body" use:springTo={{ to: { scale: states[i] === 'upcoming' ? 0.85 : 1 }, bounce: 0.55, duration: 0.45 }}>
+            <g class="pin-body" use:springTo={{ to: { scale: reached[i] ? 1 : 0.85 }, bounce: 0.55, duration: 0.45 }}>
               <!-- hand-drawn: one sheet with the waiting pin and, 60 to the right, the reached one -->
               <g transform="translate({-60 * k} 0)">
                 <Drawn id="M11" part={k}>
@@ -545,7 +257,7 @@
 
       <div class="stops">
         {#each stops as stop, i (stop.id)}
-          <Stop {stop} side={sideOf(i)} state={states[i]} bind:el={els[i]} />
+          <Stop {stop} side={sideOf(i)} reached={reached[i]} bind:el={els[i]} />
         {/each}
       </div>
     </div>
@@ -702,20 +414,16 @@
     transform-origin: 50% 100%;
   }
   /* arrived: the pin pops up, red and shiny */
-  .pin.current .pin-shade,
-  .pin.passed .pin-shade {
+  .pin.reached .pin-shade {
     fill: #b3281f;
   }
-  .pin.current .pin-fill,
-  .pin.passed .pin-fill {
+  .pin.reached .pin-fill {
     fill: #e2483d;
   }
-  .pin.current .pin-line,
-  .pin.passed .pin-line {
+  .pin.reached .pin-line {
     stroke-dasharray: none;
   }
-  .pin.current .pin-shine,
-  .pin.passed .pin-shine {
+  .pin.reached .pin-shine {
     opacity: 0.8;
   }
   .cloud {
