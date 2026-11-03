@@ -39,10 +39,12 @@ export async function copyLink() {
     field.style.cssText = 'position:fixed; opacity:0; pointer-events:none';
     document.body.append(field);
     field.select();
-    let ok = false;
+    let ok;
     try {
       ok = document.execCommand('copy');
-    } catch {}
+    } catch {
+      ok = false;
+    }
     field.remove();
     // selecting the field took focus away from the button that was pressed
     back?.focus?.();

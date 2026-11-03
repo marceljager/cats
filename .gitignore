@@ -11,3 +11,6 @@ src/photos.json
 # review screenshots, kept locally only
 screenshots/
 .impeccable/review/
+
+# desloppify local state
+.desloppify/

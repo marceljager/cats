@@ -22,7 +22,7 @@ const sets = await p.evaluate(() => {
       f.querySelectorAll('path,rect,circle,ellipse,polygon').forEach((e) => {
         const cs = getComputedStyle(e);
         if (cs.display === 'none') return;
-        let area = 1; try { const bb = e.getBBox(); area = Math.max(1, Math.sqrt(bb.width * bb.height)); } catch {}
+        let area; try { const bb = e.getBBox(); area = Math.max(1, Math.sqrt(bb.width * bb.height)); } catch { area = 1; }
         if (cs.fill !== 'none') add(cs.fill, area);
         if (cs.stroke !== 'none' && parseFloat(cs.strokeWidth) > 0) add(cs.stroke, 4);
       });

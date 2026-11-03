@@ -36,7 +36,10 @@ export async function optimizeImages({ log = console.log } = {}) {
   let old = {};
   try {
     old = JSON.parse(await readFile(MANIFEST, 'utf8'));
-  } catch {}
+  } catch (err) {
+    // no manifest yet (first run, fresh checkout) or a broken one: every photo counts as new
+    if (err.code !== 'ENOENT' && !(err instanceof SyntaxError)) throw err;
+  }
 
   const manifest = {};
   const keep = new Set();
