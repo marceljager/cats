@@ -3,19 +3,19 @@
   // scrolls and each story comes up as the car reaches its pin. The geometry is in route.js; this
   // measures where the stories sit on the page, draws the result and moves the car.
   import { onMount, tick } from 'svelte';
-  import Text from '../ui/Text.svelte';
-  import { ICONS } from '../ui/Icon.svelte';
+  import Text from '../../ui/Text.svelte';
+  import { ICONS } from '../../ui/Icon.svelte';
   import Stop from './Stop.svelte';
-  import CarCard from './CarCard.svelte';
-  import Doodle from '../art/Doodle.svelte';
-  import { parallax } from '../motion/parallax.js';
-  import { planRoute, sideOf } from '../art/route.js';
-  import { curve, smooth } from '../art/spline.js';
-  import { driftClouds, scatterGrass } from '../art/meadow.js';
-  import { kmAt, lengthAt } from '../art/odometer.js';
-  import { springTo } from '../motion/springs.js';
-  import { stops } from '../../content.js';
-  import { isWide, onScreen, onScrollFrame, reducedMotion } from '../motion/viewport.js';
+  import CarCard from '../../figures/CarCard.svelte';
+  import Doodle from '../../art/Doodle.svelte';
+  import { parallax } from '../../motion/parallax.js';
+  import { planRoute, sideOf } from '../../art/route.js';
+  import { curve, smooth } from '../../art/spline.js';
+  import { driftClouds, scatterGrass } from '../../art/meadow.js';
+  import { kmAt, lengthAt } from '../../art/odometer.js';
+  import { springTo } from '../../motion/springs.js';
+  import { stops } from '../../../content.js';
+  import { isWide, onScreen, onScrollFrame, reducedMotion } from '../../motion/viewport.js';
 
   let root;
   let routePath = $state();

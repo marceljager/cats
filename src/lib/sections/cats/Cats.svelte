@@ -1,26 +1,26 @@
 <script>
   import LuggageTags from './LuggageTags.svelte';
-  import Text from '../ui/Text.svelte';
-  import Photo from '../ui/Photo.svelte';
-  import Tape from '../ui/Tape.svelte';
-  import Card from '../ui/Card.svelte';
-  import CatHead from '../art/CatHead.svelte';
-  import Icon from '../ui/Icon.svelte';
-  import { cats } from '../../content.js';
-  import { bouncy, pop } from '../motion/springs.js';
-  import { reducedMotion } from '../motion/viewport.js';
-  import { zoomPhoto } from '../services/lightbox.js';
+  import Text from '../../ui/Text.svelte';
+  import Photo from '../../ui/Photo.svelte';
+  import Tape from '../../ui/Tape.svelte';
+  import Card from '../../ui/Card.svelte';
+  import CatHead from '../../figures/CatHead.svelte';
+  import Icon from '../../ui/Icon.svelte';
+  import { cats } from '../../../content.js';
+  import { bouncy, pop } from '../../motion/springs.js';
+  import { reducedMotion } from '../../motion/viewport.js';
+  import { zoomPhoto } from '../../services/lightbox.js';
 
-  // photo-booth frames: the two of them pulling a different face in each shot
   const HEART = 'M0 10 C0 10 -9 4.5 -9 -1 A4.6 4.6 0 0 1 0 -3.4 A4.6 4.6 0 0 1 9 -1 C9 4.5 0 10 0 10 Z';
-  // three frames, each a tiny scene: both shake their heads, both hop one after the other,
-  // and the two of them cuddle under a heart. `act` names the loop each head plays.
+  // the photo-booth strip: three frames, the two of them pulling a different face in each, a tiny
+  // scene apiece: both shake their heads, both hop one after the other, and the two of them cuddle
+  // under a heart. Each cat's pose is under its id; `act` names the loop its head plays.
   // Each backdrop is one colour in three shades (bg, a lighter `light`, a darker `deep`) with its
   // own pattern: clouds, sunburst rays, little hearts.
   const FRAMES = [
-    { bg: '#8fbbe0', light: '#b9d6ef', deep: '#6d9dcb', pattern: 'clouds', v: { x: 58, y: 84, mood: 'happy', tilt: -5, act: 'shake' }, p: { x: 108, y: 90, mood: 'happy', tilt: 7, act: 'shake later' } },
-    { bg: '#f2c94c', light: '#f8dc85', deep: '#dcae2e', pattern: 'rays', v: { x: 54, y: 84, mood: 'cold', tilt: 3, look: 1, act: 'hop' }, p: { x: 110, y: 92, mood: 'cold', tilt: -4, look: -1, act: 'hop later' }, shadows: true },
-    { bg: '#f4a6bd', light: '#f9c7d6', deep: '#e585a3', pattern: 'hearts', v: { x: 64, y: 86, mood: 'happy', tilt: 12 }, p: { x: 100, y: 92, mood: 'happy', tilt: -13 }, heart: true },
+    { bg: '#8fbbe0', light: '#b9d6ef', deep: '#6d9dcb', pattern: 'clouds', velik: { x: 58, y: 84, mood: 'happy', tilt: -5, act: 'shake' }, polly: { x: 108, y: 90, mood: 'happy', tilt: 7, act: 'shake later' } },
+    { bg: '#f2c94c', light: '#f8dc85', deep: '#dcae2e', pattern: 'rays', velik: { x: 54, y: 84, mood: 'cold', tilt: 3, look: 1, act: 'hop' }, polly: { x: 110, y: 92, mood: 'cold', tilt: -4, look: -1, act: 'hop later' }, shadows: true },
+    { bg: '#f4a6bd', light: '#f9c7d6', deep: '#e585a3', pattern: 'hearts', velik: { x: 64, y: 86, mood: 'happy', tilt: 12 }, polly: { x: 100, y: 92, mood: 'happy', tilt: -13 }, heart: true },
   ];
 
   // sunburst rays from just above the heads, every other wedge
@@ -145,14 +145,14 @@
             {/if}
             <path class="backdrop-shade" d="M0 104 Q80 92 160 104 V130 H0 Z" style="fill:{f.deep}" />
             {#if f.shadows}
-              <ellipse class="hop-shadow" cx={f.v.x} cy="122" rx="26" ry="4" />
-              <ellipse class="hop-shadow later" cx={f.p.x} cy="123" rx="22" ry="3.5" />
+              <ellipse class="hop-shadow" cx={f.velik.x} cy="122" rx="26" ry="4" />
+              <ellipse class="hop-shadow later" cx={f.polly.x} cy="123" rx="22" ry="3.5" />
             {/if}
-            <g class="act {f.v.act ?? ''}">
-              <CatHead catId="velik" cx={f.v.x} cy={f.v.y} r={34} mood={f.v.mood} look={f.v.look ?? 0} tilt={f.v.tilt} delay={k * 0.35} />
+            <g class="act {f.velik.act ?? ''}">
+              <CatHead catId="velik" cx={f.velik.x} cy={f.velik.y} r={34} mood={f.velik.mood} look={f.velik.look ?? 0} tilt={f.velik.tilt} delay={k * 0.35} />
             </g>
-            <g class="act {f.p.act ?? ''}">
-              <CatHead catId="polly" cx={f.p.x} cy={f.p.y} r={29} mood={f.p.mood} look={f.p.look ?? 0} tilt={f.p.tilt} delay={k * 0.35 + 0.6} />
+            <g class="act {f.polly.act ?? ''}">
+              <CatHead catId="polly" cx={f.polly.x} cy={f.polly.y} r={29} mood={f.polly.mood} look={f.polly.look ?? 0} tilt={f.polly.tilt} delay={k * 0.35 + 0.6} />
             </g>
             {#if f.heart}<g transform="translate(70 10)"><g class="shot-heart"><Icon name="heart" size={24} /></g></g>{/if}
           </svg>

@@ -1,9 +1,9 @@
-// src/photos.json, written by scripts/images.js and read by src/lib/services/images.js: every
+// src/photos.json, written by scripts/encode-photos.js and read by src/lib/services/photos.js: every
 // file the site asks for exists, and every photo content.js names has its encoded copies
 import { existsSync } from 'node:fs';
 import { describe, expect, test } from 'vitest';
 import photos from '../src/photos.json';
-import { photoFile, photoInfo, srcset } from '../src/lib/services/images.js';
+import { photoFile, photoInfo, srcset } from '../src/lib/services/photos.js';
 import { cats, gallery, stops } from '../src/content.js';
 
 // 'photos/velik-640.avif' (relative to the page) → public/photos/velik-640.avif

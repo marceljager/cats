@@ -1,10 +1,10 @@
 <script>
   // the closing scene under the contact postcard; Contact.svelte darkens the room away from its fire
   // (bind:fire is the flames' group)
-  import Icon from '../ui/Icon.svelte';
-  import Kittens from '../art/Kittens.svelte';
-  import { parallax } from '../motion/parallax.js';
-  import { layer } from '../art/forest.js';
+  import Icon from '../../ui/Icon.svelte';
+  import Kittens from '../../figures/Kittens.svelte';
+  import { parallax } from '../../motion/parallax.js';
+  import { layer } from '../../art/forest.js';
 
   let { fire = $bindable() } = $props();
 

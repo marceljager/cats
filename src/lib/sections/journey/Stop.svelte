@@ -1,10 +1,10 @@
 <script>
-  import Photo from '../ui/Photo.svelte';
-  import Text from '../ui/Text.svelte';
-  import Card from '../ui/Card.svelte';
-  import Tape from '../ui/Tape.svelte';
-  import Icon from '../ui/Icon.svelte';
-  import { springTo } from '../motion/springs.js';
+  import Photo from '../../ui/Photo.svelte';
+  import Text from '../../ui/Text.svelte';
+  import Card from '../../ui/Card.svelte';
+  import Tape from '../../ui/Tape.svelte';
+  import Icon from '../../ui/Icon.svelte';
+  import { springTo } from '../../motion/springs.js';
 
   // one stop's story beside the map; it stays dimmed and lowered (upcoming) until the car reaches its
   // pin (reached), then pops open and gets taped down

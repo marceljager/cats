@@ -4,9 +4,9 @@
   // is on screen: the hero and the family section's "write to us" buttons, and the contact section
   // itself.
   import { onMount } from 'svelte';
-  import Button from './Button.svelte';
-  import Icon from './Icon.svelte';
-  import CatHead from '../art/CatHead.svelte';
+  import Button from '../ui/Button.svelte';
+  import Icon from '../ui/Icon.svelte';
+  import CatHead from '../figures/CatHead.svelte';
   import { onScreen, onScrollFrame } from '../motion/viewport.js';
 
   let shown = $state(false);

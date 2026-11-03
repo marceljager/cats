@@ -8,13 +8,13 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "node scripts/images.js && vite build && vite build --ssr src/entry-server.js --outDir .ssr && node scripts/prerender.js",
+    "build": "node scripts/encode-photos.js && vite build && vite build --ssr src/entry-server.js --outDir .ssr && node scripts/prerender.js",
     "preview": "vite preview",
-    "images": "node scripts/images.js",
+    "photos": "node scripts/encode-photos.js",
     "og": "node tools/og.js",
     "icons": "node tools/icons.js",
     "check": "svelte-check --threshold error",
-    "test": "node scripts/images.js && vitest run"
+    "test": "node scripts/encode-photos.js && vitest run"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^6.2.4",

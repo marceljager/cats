@@ -2,9 +2,9 @@
   // the little "Sdílet" button in the hero's corner: on a phone it opens the phone's own share
   // sheet; elsewhere it drops a taped paper note with the ways to send us on
   import { onMount, tick } from 'svelte';
-  import Button from './Button.svelte';
-  import Icon from './Icon.svelte';
-  import Text from './Text.svelte';
+  import Button from '../ui/Button.svelte';
+  import Icon from '../ui/Icon.svelte';
+  import Text from '../ui/Text.svelte';
   import { options, canShare, shareNative, shareWith, linkCopier } from '../services/share.svelte.js';
   import { site } from '../../content.js';
 

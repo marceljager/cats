@@ -1,12 +1,12 @@
 <script>
-  import Icon from '../ui/Icon.svelte';
-  import Text from '../ui/Text.svelte';
-  import Button from '../ui/Button.svelte';
-  import Card from '../ui/Card.svelte';
+  import Icon from '../../ui/Icon.svelte';
+  import Text from '../../ui/Text.svelte';
+  import Button from '../../ui/Button.svelte';
+  import Card from '../../ui/Card.svelte';
   import Flyer from './Flyer.svelte';
   import LivingRoom from './LivingRoom.svelte';
-  import CatHead from '../art/CatHead.svelte';
-  import { contact } from '../../content.js';
+  import CatHead from '../../figures/CatHead.svelte';
+  import { contact } from '../../../content.js';
   import { onMount } from 'svelte';
 
   // the fire is the only light in the room: track where it is so the darkness can fall away from it

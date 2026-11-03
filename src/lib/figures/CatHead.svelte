@@ -10,7 +10,7 @@
   //   tilt  resting lean in degrees; delay staggers the bobble
   import { cats } from '../../content.js';
   import { rub } from '../motion/springs.js';
-  import { photoFile } from '../services/images.js';
+  import { photoFile } from '../services/photos.js';
 
   let { catId, cx = 0, cy = 0, r = 30, mood = 'calm', look = 0, tilt = 0, delay = 0, wobble = true } = $props();
 
@@ -30,7 +30,8 @@
     const h = w / f.ratio;
     return { x: -f.x * w, y: -f.y * h, w, h };
   });
-  const fur = $derived(catId === 'polly' ? '#f3ead6' : '#fbfaf5');
+  // the drawn placeholder face's fur, until there's a photo
+  const fur = $derived(data?.fur ?? '#fbfaf5');
   const ear = (side) =>
     `M ${side * 0.86 * r} ${-0.32 * r} L ${side * 0.64 * r} ${-1.28 * r} L ${side * 0.1 * r} ${-0.84 * r} Z`;
   const inner = (side) =>

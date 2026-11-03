@@ -9,12 +9,12 @@
   import Crop from './Crop.svelte';
   import Photo from '../lib/ui/Photo.svelte';
   import Tape from '../lib/ui/Tape.svelte';
-  import CatHead from '../lib/art/CatHead.svelte';
-  import Kittens from '../lib/art/Kittens.svelte';
-  import CarCard from '../lib/sections/CarCard.svelte';
+  import CatHead from '../lib/figures/CatHead.svelte';
+  import Kittens from '../lib/figures/Kittens.svelte';
+  import CarCard from '../lib/figures/CarCard.svelte';
   import Doodle from '../lib/art/Doodle.svelte';
   import { KINDS } from '../lib/art/scenery.js';
-  import LuggageTags from '../lib/sections/LuggageTags.svelte';
+  import LuggageTags from '../lib/sections/cats/LuggageTags.svelte';
   import { cats } from '../content.js';
 
   // the pin icon's drop (Icon.svelte), tip at (16, 29) in its 32-unit box

@@ -1,6 +1,6 @@
-// what search engines and link previews get (scripts/seo.js)
+// what search engines and link previews get (vite/seo.js)
 import { describe, expect, test } from 'vitest';
-import { headTags, seoFiles } from '../scripts/seo.js';
+import { headTags, seoFiles } from '../vite/seo.js';
 import { cats, contact, site, stops } from '../src/content.js';
 
 const URL_ = 'https://velikapolly.cz';

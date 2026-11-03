@@ -2,9 +2,9 @@
   import { onMount } from 'svelte';
   import Text from '../ui/Text.svelte';
   import Icon from '../ui/Icon.svelte';
-  import Kittens from '../art/Kittens.svelte';
+  import Kittens from '../figures/Kittens.svelte';
   import Button from '../ui/Button.svelte';
-  import ShareButton from '../ui/ShareButton.svelte';
+  import ShareButton from '../chrome/ShareButton.svelte';
   import { cats, catNames } from '../../content.js';
   import { layer } from '../art/forest.js';
 

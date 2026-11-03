@@ -1,14 +1,14 @@
 <script>
   // a photo taped onto the box; without src it shows a placeholder to replace.
   // A real photo opens big in the lightbox; pass zoom={false} where a button around it does that.
-  //   sizes    how wide the photo shows, for picking a file from srcset (scripts/images.js makes them)
+  //   sizes    how wide the photo shows, for picking a file from srcset (scripts/encode-photos.js makes them)
   //   eager    load it right away instead of when it scrolls near
   //   preview  a small copy already on screen: shown blurred, with a spinner, until this one loads
   import Icon from './Icon.svelte';
   import Text from './Text.svelte';
   import Tape from './Tape.svelte';
   import { zoomPhoto } from '../services/lightbox.js';
-  import { photoInfo, srcset, photoFile } from '../services/images.js';
+  import { photoInfo, srcset, photoFile } from '../services/photos.js';
   let { src = null, hint = '', alt = '', ratio = '4 / 5', tilt = 0, tape = true, zoom = true, sizes = '300px', eager = false, preview = null, class: cls = '', el = $bindable(), image = $bindable() } = $props();
   // el: the photo's figure, image: its <img> (what the lightbox flies out of and shows while loading)
   let loaded = $state(false);

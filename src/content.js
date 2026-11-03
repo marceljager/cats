@@ -8,7 +8,7 @@
  * @typedef {{ x: number, y: number, w: number, ratio: number }} HeadFrame
  * @typedef {{ id: string, name: string, sex: string, age: string, namedAfter: string,
  *   namedIcon: 'mountains' | 'pin', neutered?: string, photo: string | null, photoHint: string,
- *   head: string | null, headFrame?: HeadFrame, says: string }} Cat
+ *   head: string | null, headFrame?: HeadFrame, fur?: string, says: string }} Cat
  * @typedef {{ label: string, icon: 'lookout' | 'rest' }} Detour
  * @typedef {{ id: string, place: string, country: string, km: number, title: string, story: string[],
  *   photo: string | null, photoHint: string, doodle?: import('./lib/art/scenery.js').PlaceKind,
@@ -80,6 +80,8 @@ export const cats = [
     photoHint: 'Polly zblízka',
     head: '/photos/polly-hlava.webp',
     headFrame: { x: 0.53, y: 0.58, w: 0.76, ratio: 645 / 669 },
+    // barva srsti nakreslené hlavy, dokud není fotka (jinak bílá)
+    fur: '#f3ead6',
     says: 'Já jsem Polly, podle místa Poljana ve Slovinsku, kde jsme si na cestě poprvé protáhli tlapky. Jsem kočka a je mi taky 6–7 měsíců. Velík je můj bratr. Ale nenechte se zmást, já jsem ta chytřejší. Kam jdou lidi, tam jdu já, ale radši svět pozoruji z bezpečné vzdálenosti nebo z okna. Lidi se mnou začali trénovat i různé triky a to mě moc baví. Jsem sice malá, ale statečná – ani psi si na mě nedovolí.',
   },
 ];

@@ -20,8 +20,8 @@ describe('the dev server photo plugin', () => {
   test('a failed run is reported and the next photo change still runs', async () => {
     vi.resetModules();
     const optimizeImages = vi.fn().mockRejectedValueOnce(new Error('broken file')).mockResolvedValue({});
-    vi.doMock('../scripts/images.js', () => ({ optimizeImages }));
-    const { images } = await import('../scripts/dev-photos.js');
+    vi.doMock('../scripts/encode-photos.js', () => ({ optimizeImages }));
+    const { devPhotos } = await import('../vite/dev-photos.js');
     const handlers = {};
     const errors = [];
     const reloads = [];
@@ -30,7 +30,7 @@ describe('the dev server photo plugin', () => {
       config: { logger: { info() {}, error: (m) => errors.push(m) } },
       ws: { send: (m) => reloads.push(m) },
     };
-    images().configureServer(server);
+    devPhotos().configureServer(server);
     const photo = new URL('../photos/new.jpg', import.meta.url).pathname;
     await handlers.add(photo);
     expect(errors).toEqual(['images: broken file']);
@@ -38,12 +38,12 @@ describe('the dev server photo plugin', () => {
     await handlers.change(photo);
     expect(optimizeImages).toHaveBeenCalledTimes(2);
     expect(reloads).toEqual([{ type: 'full-reload' }]);
-    vi.doUnmock('../scripts/images.js');
+    vi.doUnmock('../scripts/encode-photos.js');
   });
 });
 
 test('the photo encoder, already up to date, gives back the manifest the site reads', async () => {
-  const { optimizeImages } = await import('../scripts/images.js');
+  const { optimizeImages } = await import('../scripts/encode-photos.js');
   const manifest = await optimizeImages({ log: () => {} });
   const { default: photos } = await import('../src/photos.json');
   expect(manifest).toEqual(photos);

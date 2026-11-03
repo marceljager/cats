@@ -37,7 +37,7 @@ jobs:
           path: |
             public/photos
             src/photos.json
-          key: photos-${{ hashFiles('photos/**', 'scripts/images.js') }}
+          key: photos-${{ hashFiles('photos/**', 'scripts/encode-photos.js') }}
           restore-keys: photos-
       - run: npm run build
         env:

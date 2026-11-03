@@ -3,12 +3,12 @@
   // springs up into the big frame, then shrinks back into the same spot when closed
   import { onMount, tick } from 'svelte';
   import { animate } from 'motion';
-  import Text from './Text.svelte';
-  import Photo from './Photo.svelte';
-  import Icon from './Icon.svelte';
-  import Button from './Button.svelte';
+  import Text from '../ui/Text.svelte';
+  import Photo from '../ui/Photo.svelte';
+  import Icon from '../ui/Icon.svelte';
+  import Button from '../ui/Button.svelte';
   import { setLightbox } from '../services/lightbox.js';
-  import { photoFile } from '../services/images.js';
+  import { photoFile } from '../services/photos.js';
   import { isWide, reducedMotion } from '../motion/viewport.js';
 
   const SMALL = 'drop-shadow(0 6px 5px rgba(40, 60, 15, 0.3))';

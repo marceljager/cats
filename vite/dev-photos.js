@@ -1,10 +1,10 @@
 // The photos while the dev server runs (wired up in vite.config.js).
-import { optimizeImages } from './images.js';
+import { optimizeImages } from '../scripts/encode-photos.js';
 
-// dev server only (npm run build runs scripts/images.js itself, before vite): photos/ →
+// dev server only (npm run build runs scripts/encode-photos.js itself, before vite): photos/ →
 // public/photos/ at start, and again whenever a photo in photos/ is added, changed or removed.
 // One run at a time; a run that fails is reported and the next change still gets its own run.
-export function images() {
+export function devPhotos() {
   let queue = Promise.resolve();
   const run = (log) => {
     const job = queue.then(() => optimizeImages({ log }));
@@ -12,7 +12,7 @@ export function images() {
     return job;
   };
   return {
-    name: 'images',
+    name: 'dev-photos',
     apply: 'serve',
     async buildStart() {
       await run((m) => this.info(m));
