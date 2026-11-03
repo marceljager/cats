@@ -166,14 +166,14 @@
 </script>
 
 <aside class="flyer" id="sdilet" aria-labelledby="sdilet-h">
-  <Tape rotate={-8} width="74px" style="top:-13px; left:18px;" />
-  <Tape rotate={7} width="66px" style="top:-11px; right:22px;" />
+  <Tape tilt={-8} width={74} style="top:-13px; left:18px;" />
+  <Tape tilt={7} width={66} style="top:-11px; right:22px;" />
 
   <div class="body">
   <div class="head">
     <svg class="faces" viewBox="-34 -40 68 62" aria-hidden="true">
-      <CatHead cat="velik" cx={-12} cy={0} r={15} mood="happy" tilt={-8} delay={0} />
-      <CatHead cat="polly" cx={14} cy={4} r={13} mood="happy" tilt={8} delay={0.6} />
+      <CatHead catId="velik" cx={-12} cy={0} r={15} mood="happy" tilt={-8} delay={0} />
+      <CatHead catId="polly" cx={14} cy={4} r={13} mood="happy" tilt={8} delay={0.6} />
     </svg>
     <div>
       <Text variant="heading" id="sdilet-h" class="flyer-title">Pomozte nám najít domov</Text>

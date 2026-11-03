@@ -1,11 +1,12 @@
 <script>
   // a cartoon strip of masking tape: inked outline, torn zigzag ends, a cel shade along the bottom and a shine
-  let { rotate = -4, width = '96px', style = '', class: cls = '' } = $props();
+  //   tilt   its lean in degrees
+  //   width  its length in px (it is drawn to that length, so not any other CSS unit)
+  let { tilt = -4, width = 96, style = '', class: cls = '' } = $props();
 
   const H = 26; // strip height
   const T = 4; // depth of the torn teeth
   const id = $props.id();
-  const w = $derived(parseFloat(width) || 96);
   // a torn end: four teeth along the edge at x, sticking out towards dir, drawn down or up
   const torn = (x, dir, down) => {
     let d = '';
@@ -16,24 +17,24 @@
     }
     return d;
   };
-  const outline = $derived(`M ${T} 0 H ${w - T}${torn(w - T, 1, true)} H ${T}${torn(T, -1, false)} Z`);
+  const outline = $derived(`M ${T} 0 H ${width - T}${torn(width - T, 1, true)} H ${T}${torn(T, -1, false)} Z`);
 </script>
 
 <svg
   class="tape {cls}"
   aria-hidden="true"
-  width={w}
+  {width}
   height={H}
-  viewBox="-2 -2 {w + 4} {H + 4}"
-  style="--r:{rotate}deg; {style}"
+  viewBox="-2 -2 {width + 4} {H + 4}"
+  style="--r:{tilt}deg; {style}"
 >
   <defs>
     <clipPath id="tape-{id}"><path d={outline} /></clipPath>
   </defs>
   <path class="fill" d={outline} />
   <g clip-path="url(#tape-{id})">
-    <rect class="shade" x="0" y={H - 6} width={w} height="6" />
-    <path class="shine" d="M {T + 7} 7 H {Math.max(T + 14, w * 0.45)}" />
+    <rect class="shade" x="0" y={H - 6} {width} height="6" />
+    <path class="shine" d="M {T + 7} 7 H {Math.max(T + 14, width * 0.45)}" />
   </g>
   <path class="line" d={outline} />
 </svg>

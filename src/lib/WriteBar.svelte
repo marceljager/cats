@@ -1,7 +1,8 @@
 <script>
   // phones: the page is long, so the way to write to us waits at the bottom edge, under the thumb,
-  // with the two of them peeking over it. It steps aside while another "write to us" button is on
-  // screen (the hero, the family section) and once the contact section itself comes into view.
+  // with the two of them peeking over it. It steps aside while anything marked data-writebar-yields
+  // is on screen: the hero and the family section's "write to us" buttons, and the contact section
+  // itself.
   import { onMount } from 'svelte';
   import Button from './Button.svelte';
   import Icon from './Icon.svelte';
@@ -12,8 +13,7 @@
 
   // looked up fresh each time, so a section that re-renders can't leave a stale answer behind
   function check() {
-    const blockers = [document.querySelector('.hero'), document.getElementById('domov'), ...document.querySelectorAll('main a[href="#domov"]')];
-    shown = !blockers.some((el) => el && onScreen(el));
+    shown = ![...document.querySelectorAll('[data-writebar-yields]')].some((el) => onScreen(el));
   }
   onMount(() => {
     check();
@@ -23,8 +23,8 @@
 
 <div class="bar" class:shown inert={!shown}>
   <svg class="faces" viewBox="-34 -36 68 52" aria-hidden="true">
-    <CatHead cat="velik" cx={-12} cy={0} r={15} mood="happy" tilt={-8} delay={0} />
-    <CatHead cat="polly" cx={14} cy={3} r={13} mood="happy" tilt={8} delay={0.6} />
+    <CatHead catId="velik" cx={-12} cy={0} r={15} mood="happy" tilt={-8} delay={0} />
+    <CatHead catId="polly" cx={14} cy={3} r={13} mood="happy" tilt={8} delay={0.6} />
   </svg>
   <Button href="#domov" bounce={{ over: { scale: 1.02 } }}>Napište našim lidem <Icon name="right" size={24} /></Button>
 </div>

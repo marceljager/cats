@@ -19,8 +19,8 @@
     </div>
     <!-- heads after the body, so they sit in front of it -->
     <svg class="riders" viewBox="0 0 120 70" aria-hidden="true">
-      <CatHead cat="velik" cx={38} cy={50} r={29} mood="happy" tilt={-6} />
-      <CatHead cat="polly" cx={84} cy={46} r={24} mood="happy" tilt={8} delay={0.7} />
+      <CatHead catId="velik" cx={38} cy={50} r={29} mood="happy" tilt={-6} />
+      <CatHead catId="polly" cx={84} cy={46} r={24} mood="happy" tilt={8} delay={0.7} />
     </svg>
   </div>
   <!-- odometer: kilometres from the forest, shown only while driving -->

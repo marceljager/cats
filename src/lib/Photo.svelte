@@ -8,14 +8,14 @@
   import Text from './Text.svelte';
   import Tape from './Tape.svelte';
   import { zoomPhoto } from './lightbox.js';
-  import { info, srcset, pick } from './images.js';
+  import { photoInfo, srcset, photoFile } from './images.js';
   let { src = null, hint = '', alt = '', ratio = '4 / 5', tilt = 0, tape = true, zoom = true, sizes = '300px', eager = false, preview = null, class: cls = '' } = $props();
   let figure;
   let img = $state();
   let loaded = $state(false);
   // the big file didn't come: the small copy stays, sharp, rather than a blur and a spinner forever
   let failed = $state(false);
-  const p = $derived(info(src));
+  const p = $derived(photoInfo(src));
   // a photo that was already in the cache can finish loading before its onload is listened to
   $effect(() => {
     if (img?.complete && img.naturalWidth) loaded = true;
@@ -39,7 +39,7 @@
     <img
       bind:this={img}
       class:waiting={preview && !loaded}
-      src={p ? pick(src, 800) : src}
+      src={photoFile(src, 800)}
       srcset={srcset(src)}
       sizes={p ? sizes : undefined}
       width={p?.w}
@@ -55,8 +55,8 @@
 
 <figure class="photo {cls}" style="--tilt:{tilt}deg; --ratio:{ratio}" bind:this={figure}>
   {#if tape}
-    <Tape rotate={-12} width="68px" style="top:-12px; left:-14px;" />
-    <Tape rotate={9} width="60px" style="bottom:-10px; right:-12px; top:auto;" />
+    <Tape tilt={-12} width={68} style="top:-12px; left:-14px;" />
+    <Tape tilt={9} width={60} style="bottom:-10px; right:-12px; top:auto;" />
   {/if}
   {#if src && zoom}
     <button

@@ -29,7 +29,7 @@
   const items = gallery.map((g) => ({ photo: g.photo, hint: g.hint, alt: g.caption, caption: g.caption, ratio: RATIO[g.orientation] }));
   // the print itself lifts off its peg, caption and all, and flies back onto it when closed
   const show = (i, e) =>
-    zoom({ items, index: i, source: (k) => ({ el: prints[k], rotate: TILT[k % TILT.length] }), opener: e.currentTarget });
+    zoom({ items, index: i, source: (k) => ({ el: prints[k], tilt: TILT[k % TILT.length] }), opener: e.currentTarget });
 
   onMount(() => {
     const four = matchMedia('(min-width: 1024px)');

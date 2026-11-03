@@ -24,7 +24,7 @@
     <Card>
       <!-- taped on once the car reaches it, and it stays -->
       {#if reached}
-        <Tape rotate={7} width="88px" class="pin-tape" />
+        <Tape tilt={7} width={88} class="pin-tape" />
       {/if}
       <header>
         <h3 id="stop-{stop.id}" class="plaque">{stop.place}</h3>

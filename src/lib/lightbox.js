@@ -2,7 +2,8 @@
 // page, springs up big and flies back to where it came from when closed.
 //   zoom({ items, index, source, opener })
 //     items:  [{ photo, alt, hint, ratio, caption?, tape? }]  the photos you can step through
-//     source: (i) => ({ el, rotate })  the photo on the page that item i flies out of and back into
+//     source: (i) => ({ el, tilt })  the photo on the page that item i flies out of and back into,
+//             and its lean in degrees
 //     opener: what gets the focus back once it closes (by default whatever had it)
 //   zoomPhoto({ el, photo, alt, hint, ratio, tilt, tape, opener })  a lone photo (a stop, a cat)
 import { track } from './track.js';
@@ -22,5 +23,5 @@ export function zoom({ items, index = 0, source, opener = null }) {
 }
 
 export function zoomPhoto({ el, photo, alt, hint = '', ratio = '4 / 5', tilt = 0, tape = false, opener = null }) {
-  zoom({ items: [{ photo, alt, hint, ratio, tape }], source: () => ({ el, rotate: tilt }), opener });
+  zoom({ items: [{ photo, alt, hint, ratio, tape }], source: () => ({ el, tilt }), opener });
 }

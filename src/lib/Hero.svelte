@@ -44,7 +44,7 @@
     [-120, 110, 1.3], [-300, 220, 1], [-480, 70, 1.5], [-640, 190, 1.1], [1560, 90, 1.4], [1720, 230, 1], [1900, 60, 1.3], [2080, 170, 1.2]];
 </script>
 
-<header class="hero" class:idle bind:this={hero}>
+<header class="hero" class:idle bind:this={hero} data-writebar-yields>
   <!-- the cold forest under Velebit at night; the two of them looking at the one warm window.
        Every layer is its own SVG (same viewBox, stacked), so it can move and blur as one finished
        picture; the flicker of the window has a layer of its own -->

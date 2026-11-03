@@ -95,7 +95,7 @@
                 </svg>
                 <figcaption class="who">
                   <svg class="mini" viewBox="-20 -24 40 42" aria-hidden="true">
-                    <CatHead cat={cat.id} r={15} mood="calm" wobble={false} />
+                    <CatHead catId={cat.id} r={15} mood="calm" wobble={false} />
                   </svg>
                   {cat.name} říká
                 </figcaption>
@@ -115,7 +115,7 @@
     <div class="together">
       <!-- a photo-booth strip of the two of them, taped onto the booth's red curtain -->
       <div class="booth" aria-hidden="true" use:bouncy={{ rest: { rotate: -3 }, over: { rotate: -1, scale: 1.03, y: -4 } }}>
-        <Tape rotate={3} width="64px" style="top:-14px; left:calc(50% - 32px); z-index:2;" />
+        <Tape tilt={3} width={64} style="top:-14px; left:calc(50% - 32px); z-index:2;" />
         {#each FRAMES as f, k}
           <svg class="shot" viewBox="0 0 160 130">
             <rect class="backdrop" width="160" height="130" style="fill:{f.bg}" />
@@ -136,10 +136,10 @@
               <ellipse class="hop-shadow later" cx={f.p.x} cy="123" rx="22" ry="3.5" />
             {/if}
             <g class="act {f.v.act ?? ''}">
-              <CatHead cat="velik" cx={f.v.x} cy={f.v.y} r={34} mood={f.v.mood} look={f.v.look ?? 0} tilt={f.v.tilt} delay={k * 0.35} />
+              <CatHead catId="velik" cx={f.v.x} cy={f.v.y} r={34} mood={f.v.mood} look={f.v.look ?? 0} tilt={f.v.tilt} delay={k * 0.35} />
             </g>
             <g class="act {f.p.act ?? ''}">
-              <CatHead cat="polly" cx={f.p.x} cy={f.p.y} r={29} mood={f.p.mood} look={f.p.look ?? 0} tilt={f.p.tilt} delay={k * 0.35 + 0.6} />
+              <CatHead catId="polly" cx={f.p.x} cy={f.p.y} r={29} mood={f.p.mood} look={f.p.look ?? 0} tilt={f.p.tilt} delay={k * 0.35 + 0.6} />
             </g>
             {#if f.heart}<g transform="translate(70 10)"><g class="shot-heart"><Icon name="heart" size={24} /></g></g>{/if}
           </svg>
@@ -450,7 +450,7 @@
     }
   }
   @media (min-width: 1024px) {
-    #cats-h {
+    .cats :global(.cats-title) {
       max-width: none;
       white-space: nowrap;
     }

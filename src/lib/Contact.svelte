@@ -15,12 +15,12 @@
 
   // the fire is the only light in the room: track where it is so the darkness can fall away from it
   let room;
-  let fireEl;
+  let fireGroup;
   let light = $state('');
   function place() {
-    if (!room || !fireEl) return;
+    if (!room || !fireGroup) return;
     const r = room.getBoundingClientRect();
-    const f = fireEl.getBoundingClientRect();
+    const f = fireGroup.getBoundingClientRect();
     const fx = f.left + f.width / 2 - r.left;
     const fy = f.top + f.height * 0.55 - r.top;
     // reach: the distance to the farthest corner, so the far corners end up darkest
@@ -63,7 +63,7 @@
   const near = layer({ seed: 11, count: 6, span: [330, 600], base: 330, height: [95, 140] });
 </script>
 
-<section class="contact" id="domov" aria-labelledby="domov-h" bind:this={room} style={light}>
+<section class="contact" id="domov" aria-labelledby="domov-h" bind:this={room} style={light} data-writebar-yields>
   <!-- the green map rolls down into the night -->
   <svg class="hills" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
     <path class="edge" d="M-10 38 C120 72 240 76 360 50 C480 24 560 20 700 52 C840 82 960 80 1080 50 C1200 20 1320 26 1450 60" />
@@ -88,8 +88,8 @@
               <rect class="stamp-art" x="7" y="7" width="64" height="66" rx="2" />
               <path class="stamp-hill" d="M7 58 C24 52 42 54 71 48 V73 H7 Z" />
               <circle class="stamp-moon" cx="58" cy="20" r="6" />
-              <CatHead cat="velik" cx={29} cy={54} r={14} mood="happy" wobble={false} tilt={6} />
-              <CatHead cat="polly" cx={52} cy={60} r={12} mood="happy" wobble={false} tilt={-6} />
+              <CatHead catId="velik" cx={29} cy={54} r={14} mood="happy" wobble={false} tilt={6} />
+              <CatHead catId="polly" cx={52} cy={60} r={12} mood="happy" wobble={false} tilt={-6} />
               <text class="stamp-text" x="39" y="86" text-anchor="middle">DOMOV</text>
             </g>
           </g>
@@ -172,7 +172,7 @@
     </defs>
 
     {#snippet fire()}
-      <g class="fire" bind:this={fireEl}>
+      <g class="fire" bind:this={fireGroup}>
         <Drawn id="O3">
           <g transform="translate(392 0)">
             <path class="flame-o" d="M572 396 C564 368 586 356 582 330 C600 348 598 318 616 300 C620 330 642 336 638 358 C654 350 654 374 646 396 Z" />

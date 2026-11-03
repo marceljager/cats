@@ -2,7 +2,8 @@
 // and a JPEG (or PNG) fallback, so <picture> can offer them all and the browser picks one
 import photos from '../photos.json';
 
-export const info = (src) => (src ? photos[src] : undefined);
+// what the manifest knows of one photo ('/photos/velik.jpg'): its size and the widths made of it
+export const photoInfo = (src) => (src ? photos[src] : undefined);
 
 // '/photos/x.jpg' → 'photos/x.jpg', relative to the page (the site is one page at its folder's root),
 // so the same build works at a domain's root (behind the CDN) and in a subfolder
@@ -12,7 +13,7 @@ const url = (path) => path.replace(/^\//, '');
 // "…-320.avif 320w, …-480.avif 480w, …"; the JPEG fallback comes in fewer widths, and a PNG one
 // (a cut-out) in none, so then there's no srcset and the img's own src stands
 export function srcset(src, fmt) {
-  const p = info(src);
+  const p = photoInfo(src);
   if (!p) return undefined;
   const widths = fmt ? p.widths : p.fallbackWidths;
   if (!widths.length) return undefined;
@@ -20,8 +21,8 @@ export function srcset(src, fmt) {
 }
 
 // one file at least `px` wide (or the largest there is): for places without srcset, like SVG <image>
-export function pick(src, px, fmt) {
-  const p = info(src);
+export function photoFile(src, px, fmt) {
+  const p = photoInfo(src);
   if (!p) return src && url(src);
   const widths = fmt ? p.widths : p.fallbackWidths;
   if (!widths.length) return `${url(p.name)}.${p.fallback}`;

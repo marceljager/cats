@@ -17,8 +17,8 @@
   let { stops } = $props();
 
   let root;
-  let routeEl = $state();
-  let measureEl;
+  let routePath = $state();
+  let measurePath;
   // the pin icon's drop (Icon.svelte), tip at (16, 29) in its 32-unit box
   const PIN = 'M16 29s-9-8-9-15a9 9 0 0 1 18 0c0 7-9 15-9 15Z';
   let els = $state([]);
@@ -47,16 +47,16 @@
   const reached = $derived(stops.map((_, i) => anchorY >= 0 && geo.length > 0 && anchorY >= geo[i].pinY));
 
   function lengthOf(path) {
-    measureEl.setAttribute('d', path);
-    return measureEl.getTotalLength();
+    measurePath.setAttribute('d', path);
+    return measurePath.getTotalLength();
   }
   // points along a river's drawn line, every 8 units
   function sampleRiver(river) {
-    measureEl.setAttribute('d', smooth(river));
-    const total = measureEl.getTotalLength();
+    measurePath.setAttribute('d', smooth(river));
+    const total = measurePath.getTotalLength();
     const out = [];
     for (let l = 0; l < total; l += 8) {
-      const q = measureEl.getPointAtLength(l);
+      const q = measurePath.getPointAtLength(l);
       out.push([q.x, q.y]);
     }
     return out;
@@ -105,22 +105,22 @@
     paths = { rivers: plan.streams.map(smooth), grass: scatterGrass(w, h) };
     clouds = driftClouds(w, h, wide);
     tick().then(() => {
-      len = routeEl.getTotalLength();
+      len = routePath.getTotalLength();
       moveCar();
     });
   }
 
   // the car sits where the route crosses the middle of the screen
   function moveCar() {
-    if (!routeEl || !len) return;
+    if (!routePath || !len) return;
     // off screen (e.g. still up in the hero): nothing to move
     if (!onScreen(root)) return;
     const rect = root.getBoundingClientRect();
     const target = Math.min(Math.max(window.innerHeight * 0.5 - rect.top, 0), h - 1);
     const L = Math.min(lengthAt(keys, target, len), len);
     if (L === travelled && target === anchorY) return;
-    const pt = routeEl.getPointAtLength(L);
-    const ahead = routeEl.getPointAtLength(Math.min(L + 6, len));
+    const pt = routePath.getPointAtLength(L);
+    const ahead = routePath.getPointAtLength(Math.min(L + 6, len));
     const lean = Math.atan2(ahead.x - pt.x, Math.max(ahead.y - pt.y, 0.01)) * (180 / Math.PI);
     car = {
       x: pt.x,
@@ -177,7 +177,7 @@
             />
           </mask>
         </defs>
-        <path d="" bind:this={measureEl} class="measure" />
+        <path d="" bind:this={measurePath} class="measure" />
         {#each paths.rivers as rv}
           <path class="river-bank" d={rv} />
           <path class="river" d={rv} />
@@ -203,7 +203,7 @@
         {/each}
 
         <path class="ahead" {d} />
-        <path class="done" bind:this={routeEl} {d} mask="url(#driven)" />
+        <path class="done" bind:this={routePath} {d} mask="url(#driven)" />
 
         {#each pins as pin, i}
           {@const k = reached[i] ? 1 : 0}

@@ -3,24 +3,24 @@
 <script>
   // A cat's big caricature head that bobbles on its neck, for use inside any <svg>.
   // Shows the cat's photo (cats[].head in content.js) or a drawn placeholder face until then.
-  //   cat   'velik' | 'polly'
+  //   catId 'velik' | 'polly' (cats[].id in content.js)
   //   cx/cy centre, r radius (the ears reach above it)
   //   mood  'cold' (wide eyes) | 'happy' (smiling, blushing) | 'calm'
   //   look  -1…1, where the eyes glance (placeholder only)
   //   tilt  resting lean in degrees; delay staggers the bobble
   import { cats } from '../content.js';
   import { rub } from './springs.js';
-  import { pick } from './images.js';
+  import { photoFile } from './images.js';
 
-  let { cat, cx = 0, cy = 0, r = 30, mood = 'calm', look = 0, tilt = 0, delay = 0, wobble = true } = $props();
+  let { catId, cx = 0, cy = 0, r = 30, mood = 'calm', look = 0, tilt = 0, delay = 0, wobble = true } = $props();
 
   const id = $props.id();
-  const data = $derived(cats.find((c) => c.id === cat));
+  const data = $derived(cats.find((c) => c.id === catId));
   const photo = $derived(data?.head ?? null);
   // an SVG <image> has no srcset: one WebP big enough for the largest head on a sharp screen
-  const file = $derived(photo && pick(photo, 480, 'webp'));
+  const file = $derived(photo && photoFile(photo, 480, 'webp'));
   // a transparent PNG cut-out of just the head sits as it is; any other photo is cropped to a circle
-  const cutout = $derived(data?.headCutout ?? (photo ? /\.(png|webp)$/i.test(photo) : false));
+  const cutout = $derived(photo ? /\.(png|webp)$/i.test(photo) : false);
   // a cut-out is sized so its face is as wide as the drawn face (2r) and centred where it sits;
   // without headFrame the whole image is fitted to the head's box
   const fit = $derived.by(() => {
@@ -30,7 +30,7 @@
     const h = w / f.ratio;
     return { x: -f.x * w, y: -f.y * h, w, h };
   });
-  const fur = $derived(cat === 'polly' ? '#f3ead6' : '#fbfaf5');
+  const fur = $derived(catId === 'polly' ? '#f3ead6' : '#fbfaf5');
   const ear = (side) =>
     `M ${side * 0.86 * r} ${-0.32 * r} L ${side * 0.64 * r} ${-1.28 * r} L ${side * 0.1 * r} ${-0.84 * r} Z`;
   const inner = (side) =>

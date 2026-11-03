@@ -9,16 +9,16 @@
   const ageUnit = $derived(cat.age.replace(/.*[\d–-]+\s*/, ''));
   // w = tag length, sized to its content
   const tags = $derived([
-    { kind: 'sex', cap: 'POHLAVÍ', val: cat.sex, w: 150, fill: boy ? '#8fbbe0' : '#f4a6bd', shade: boy ? '#6f9fcb' : '#e08aa4', rot: -6 },
-    { kind: 'age', cap: 'VĚK', val: cat.age, w: 176, fill: '#f2c94c', shade: '#d9ab2a', rot: 4 },
-    { kind: 'name', cap: 'JMÉNO PO', val: cat.namedAfter, w: 176, fill: '#a6d58a', shade: '#86bb69', rot: -3 },
-    ...(cat.neutered ? [{ kind: 'neutered', cap: 'KASTRACE', val: cat.neutered, w: 214, fill: '#cdb8ea', shade: '#ae96d4', rot: 5 }] : []),
+    { kind: 'sex', cap: 'POHLAVÍ', val: cat.sex, w: 150, fill: boy ? '#8fbbe0' : '#f4a6bd', shade: boy ? '#6f9fcb' : '#e08aa4', tilt: -6 },
+    { kind: 'age', cap: 'VĚK', val: cat.age, w: 176, fill: '#f2c94c', shade: '#d9ab2a', tilt: 4 },
+    { kind: 'name', cap: 'JMÉNO PO', val: cat.namedAfter, w: 176, fill: '#a6d58a', shade: '#86bb69', tilt: -3 },
+    ...(cat.neutered ? [{ kind: 'neutered', cap: 'KASTRACE', val: cat.neutered, w: 214, fill: '#cdb8ea', shade: '#ae96d4', tilt: 5 }] : []),
   ]);
 </script>
 
 <ul class="tags">
   {#each tags as t}
-    <li style="--w:{t.w}; rotate:{t.rot}deg" use:swing={{ target: '.swing', base: 110, stiffness: 190, scroll: true, scrollScale: 0.7 }}>
+    <li style="--w:{t.w}; rotate:{t.tilt}deg" use:swing={{ target: '.swing', base: 110, stiffness: 190, scroll: true, scrollScale: 0.7 }}>
       <svg class="tag" viewBox="-4 -6 {t.w + 8} 80" role="img" aria-label="{t.cap.toLowerCase()}: {t.val}">
         <g class="swing">
           <!-- tag: chamfered end, inked edge, printed dashed border -->

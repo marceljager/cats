@@ -8,6 +8,6 @@ export default defineConfig(({ mode }) => {
     // relative URLs throughout, so one build works in any folder: the root of the CDN's domain and
     // marceljager.github.io/cats/ alike
     base: './',
-    plugins: [images(), svelte(), seo(siteUrl)],
+    plugins: [images(), svelte({ configFile: false }), seo(siteUrl)],
   };
 });

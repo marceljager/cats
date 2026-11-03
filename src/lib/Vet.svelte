@@ -17,8 +17,10 @@
     <!-- a vet's clipboard with the report clipped on -->
     <!-- on wider screens the clipboard comes in tilted, straightens as it reaches the middle of the
          screen, and tilts away again as it leaves; on a phone it sits straight and still -->
+    <!-- pointing at it only clacks the clip: nothing to do with a keyboard -->
     <div
       class="board"
+      role="presentation"
       onpointerenter={clack}
       use:scrollLinked={{ keyframes: { y: [14, 0, -14], rotate: [2.5, 0.8, -2.5] }, rest: { y: 0, rotate: 0 }, media: '(min-width: 760px)' }}
     >

@@ -75,8 +75,8 @@
             <!-- the arms that hold us -->
             <path class="arm teal" d="M40 162 C44 134 70 128 92 136" />
             <path class="arm pink" d="M162 162 C158 136 134 132 112 138" />
-            <CatHead cat="velik" cx={86} cy={128} r={19} mood="happy" tilt={-8} />
-            <CatHead cat="polly" cx={116} cy={132} r={16} mood="happy" tilt={8} delay={0.7} />
+            <CatHead catId="velik" cx={86} cy={128} r={19} mood="happy" tilt={-8} />
+            <CatHead catId="polly" cx={116} cy={132} r={16} mood="happy" tilt={8} delay={0.7} />
             <g class="float">{@render heart(100, 26, 1.2)}</g>
             <g class="float late">{@render heart(32, 40, 0.8)}{@render heart(172, 34, 0.9)}</g>
           </svg>
@@ -99,8 +99,8 @@
             <path class="legs" d="M26 140 V148 M174 140 V148" />
             {@render dog(54, 88, 21, -8)}
             {@render dog(146, 86, 22, 8)}
-            <CatHead cat="velik" cx={92} cy={98} r={13} mood="calm" tilt={-14} />
-            <CatHead cat="polly" cx={110} cy={102} r={11} mood="calm" tilt={12} delay={0.5} />
+            <CatHead catId="velik" cx={92} cy={98} r={13} mood="calm" tilt={-14} />
+            <CatHead catId="polly" cx={110} cy={102} r={11} mood="calm" tilt={12} delay={0.5} />
             <!-- a little too crowded -->
             <path class="sweat" d="M78 72 q5 8 0 12 q-5 -4 0 -12 Z M124 76 q4 7 0 10 q-4 -3 0 -10 Z" />
             <text class="mark" x="100" y="46" text-anchor="middle">!?</text>
@@ -119,7 +119,7 @@
             {@render person(64, 80, 28, 'mustard', 'short', 'sneeze')}
             <!-- the spray, and the hand that keeps on stroking anyway -->
             <path class="spray" d="M84 98 l10 2 M86 106 l11 6 M84 112 l8 9" />
-            <CatHead cat="polly" cx={150} cy={128} r={20} mood="happy" tilt={-6} delay={0.4} />
+            <CatHead catId="polly" cx={150} cy={128} r={20} mood="happy" tilt={-6} delay={0.4} />
             <path class="arm mustard" d="M92 162 C96 132 114 112 140 106" />
             <ellipse class="hand" cx="144" cy="106" rx="10" ry="7" transform="rotate(-12 144 106)" />
             <!-- tissues -->
@@ -146,7 +146,7 @@
         <Text class="family-note">Nejradši spolu, ale jde to i&nbsp;zvlášť.</Text>
       </div>
       <p class="next">
-        <Button href="#domov" bounce={{ rest: { rotate: -1.5 }, over: { rotate: -3, x: 0, y: -2, scale: 1.03 } }}>Napište našim lidem <Icon name="right" size={24} /></Button>
+        <Button href="#domov" data-writebar-yields bounce={{ rest: { rotate: -1.5 }, over: { rotate: -3, x: 0, y: -2, scale: 1.03 } }}>Napište našim lidem <Icon name="right" size={24} /></Button>
         <Button href="#kotata" variant="link">Nejdřív nás poznejte <Icon name="down" size={22} /></Button>
       </p>
     </div>

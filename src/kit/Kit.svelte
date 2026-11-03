@@ -177,7 +177,7 @@
         <span class="no">D3</span>
         <div class="who-wrap">
           <span class="who"
-            ><svg viewBox="-24 -32 48 56" width="26" height="26" aria-hidden="true"><CatHead cat="velik" r={18} mood="happy" wobble={false} /></svg
+            ><svg viewBox="-24 -32 48 56" width="26" height="26" aria-hidden="true"><CatHead catId="velik" r={18} mood="happy" wobble={false} /></svg
             >Velík</span
           >
         </div>
@@ -260,7 +260,7 @@
         <div class="says">
           <Card variant="bubble">
             <span class="who"
-              ><svg viewBox="-24 -32 48 56" width="26" height="26" aria-hidden="true"><CatHead cat="polly" r={18} mood="happy" wobble={false} /></svg
+              ><svg viewBox="-24 -32 48 56" width="26" height="26" aria-hidden="true"><CatHead catId="polly" r={18} mood="happy" wobble={false} /></svg
               >Polly</span
             >
             <p>Jsem Polly, holka, je mi 6–7 měsíců a&nbsp;jmenuju se po Poljaně.</p>
@@ -280,7 +280,7 @@
       </div>
       <div class="item">
         <span class="no">E6</span>
-        <div class="tape-host"><Tape rotate={-4} /><Tape rotate={5} width="70px" /></div>
+        <div class="tape-host"><Tape tilt={-4} /><Tape tilt={5} width={70} /></div>
         <small class="src">Lepicí páska · Tape.svelte</small>
       </div>
     </div>
