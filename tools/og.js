@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import sharp from 'sharp';
+import { site } from '../src/content.js';
 
 const root = new URL('../', import.meta.url);
 // CHROME points at another Chrome than the one in /Applications
@@ -16,10 +17,18 @@ const PHOTO = 'photos/kotata-na-dece.jpg';
 // a square of the (portrait) photo centred between the two faces, so neither cat gets more of it
 const CROP = { left: 250, top: 760, width: 800, height: 800 };
 
-const font = (f) => fileURLToPath(new URL(`node_modules/@fontsource-variable/nunito/files/${f}`, root));
-const photo = await sharp(fileURLToPath(new URL(PHOTO, root))).rotate().extract(CROP).resize(840, 840).jpeg({ quality: 88 }).toBuffer();
+export const font = (f) => fileURLToPath(new URL(`node_modules/@fontsource-variable/nunito/files/${f}`, root));
 
-const html = `<!doctype html><meta charset="utf-8">
+// the square of the photo the polaroid shows, as a JPEG
+export async function cropPhoto() {
+  return sharp(fileURLToPath(new URL(PHOTO, root))).rotate().extract(CROP).resize(840, 840).jpeg({ quality: 88 }).toBuffer();
+}
+
+// the page Chrome photographs, with the photo (a JPEG buffer) inlined
+export function ogPage(photo) {
+  // the "a" stays with the name after it, as on the page
+  const headline = site.name.replace(' a ', ' a&nbsp;');
+  return `<!doctype html><meta charset="utf-8">
 <style>
   @font-face { font-family: Nunito; font-weight: 200 1000; src: url("file://${font('nunito-latin-wght-normal.woff2')}") format("woff2"); }
   @font-face { font-family: Nunito; font-weight: 200 1000; src: url("file://${font('nunito-latin-ext-wght-normal.woff2')}") format("woff2"); unicode-range: U+0100-024F, U+1E00-1EFF; }
@@ -50,28 +59,35 @@ const html = `<!doctype html><meta charset="utf-8">
     box-shadow: inset 0 -6px 0 #e0b04a; clip-path: polygon(0 0, 100% 0, 97% 25%, 100% 50%, 97% 75%, 100% 100%, 0 100%, 3% 75%, 0 50%, 3% 25%); opacity: .95; }
 </style>
 <div class="words">
-  <h1>Velík a&nbsp;Polly hledají domov</h1>
+  <h1>${headline}</h1>
   <p>zdarma v Praze</p>
 </div>
 <figure class="print">
   <span class="tape"></span>
   <span class="shot"></span>
 </figure>`;
+}
 
-const page = join(tmpdir(), `og-${process.pid}.html`);
-const shot = join(tmpdir(), `og-${process.pid}.png`);
-await writeFile(page, html);
-try {
+// photographs the page with headless Chrome and writes it to `out` as a 1200×630 PNG
+export async function shoot(html, out) {
+  const page = join(tmpdir(), `og-${process.pid}.html`);
+  const shot = join(tmpdir(), `og-${process.pid}.png`);
+  await writeFile(page, html);
   try {
-    execFileSync(CHROME, ['--headless=new', '--disable-gpu', '--hide-scrollbars', '--force-device-scale-factor=1', '--window-size=1200,630', '--virtual-time-budget=3000', `--screenshot=${shot}`, `file://${page}`], { stdio: ['ignore', 'ignore', 'pipe'] });
-  } catch (err) {
-    throw new Error(`og: Chrome couldn't take the screenshot (${CHROME})\n${err.stderr ?? err.message}`);
+    try {
+      execFileSync(CHROME, ['--headless=new', '--disable-gpu', '--hide-scrollbars', '--force-device-scale-factor=1', '--window-size=1200,630', '--virtual-time-budget=3000', `--screenshot=${shot}`, `file://${page}`], { stdio: ['ignore', 'ignore', 'pipe'] });
+    } catch (err) {
+      throw new Error(`og: Chrome couldn't take the screenshot (${CHROME})\n${err.stderr ?? err.message}`);
+    }
+    // Chrome adds no bottom bar in headless, but trim to the exact size anyway, then squeeze the PNG
+    await sharp(await readFile(shot)).extract({ left: 0, top: 0, width: 1200, height: 630 }).png({ compressionLevel: 9, palette: true, quality: 90 }).toFile(out);
+  } finally {
+    await rm(page, { force: true });
+    await rm(shot, { force: true });
   }
-  const out = fileURLToPath(new URL('public/og.png', root));
-  // Chrome adds no bottom bar in headless, but trim to the exact size anyway, then squeeze the PNG
-  await sharp(await readFile(shot)).extract({ left: 0, top: 0, width: 1200, height: 630 }).png({ compressionLevel: 9, palette: true, quality: 90 }).toFile(out);
+}
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  await shoot(ogPage(await cropPhoto()), fileURLToPath(new URL('public/og.png', root)));
   console.log('og: wrote public/og.png');
-} finally {
-  await rm(page, { force: true });
-  await rm(shot, { force: true });
 }
