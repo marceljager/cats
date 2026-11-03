@@ -21,13 +21,27 @@
     return () => io.disconnect();
   });
 
-  const far = layer(3, 26, -40, 1480, 760, 200, 330, [[860, 960]]);
-  const mid = layer(9, 14, -60, 1500, 930, 420, 560, [[600, 1000]]);
+  // the scene is drawn for 1440 wide; on screens wider than its proportions the forest carries on to
+  // each side (those extra trees sit off screen everywhere else)
+  const far = [
+    ...layer(3, 26, -40, 1480, 760, 200, 330, [[860, 960]]),
+    ...layer(4, 14, -800, -40, 760, 200, 330),
+    ...layer(5, 14, 1480, 2240, 760, 200, 330),
+  ];
+  const mid = [
+    ...layer(9, 14, -60, 1500, 930, 420, 560, [[600, 1000]]),
+    ...layer(10, 7, -800, -60, 930, 420, 560),
+    ...layer(11, 7, 1500, 2240, 930, 420, 560),
+  ];
   // the big front trees are rooted well below the frame, so their trunks run down behind the hills
   const front = [
     ...layer(21, 3, -80, 260, 1010, 620, 740),
     ...layer(33, 3, 1180, 1520, 1010, 640, 760),
+    ...layer(22, 3, -780, -200, 1010, 620, 760),
+    ...layer(34, 3, 1640, 2220, 1010, 620, 760),
   ];
+  const STARS = [[120, 80, 1.6], [260, 170, 1.2], [420, 60, 1.4], [560, 140, 1], [690, 50, 1.6], [820, 120, 1.2], [980, 70, 1.4], [1090, 180, 1], [1250, 260, 1.3], [1380, 120, 1.5], [340, 260, 1], [760, 230, 1.3], [620, 300, 1], [900, 300, 1.2],
+    [-120, 110, 1.3], [-300, 220, 1], [-480, 70, 1.5], [-640, 190, 1.1], [1560, 90, 1.4], [1720, 230, 1], [1900, 60, 1.3], [2080, 170, 1.2]];
 </script>
 
 <header class="hero" class:idle bind:this={hero}>
@@ -45,7 +59,7 @@
       <circle cx="1190" cy="150" r="150" fill="url(#moonglow)" />
       <Drawn id="F1">
         <g class="stars">
-          {#each [[120, 80, 1.6], [260, 170, 1.2], [420, 60, 1.4], [560, 140, 1], [690, 50, 1.6], [820, 120, 1.2], [980, 70, 1.4], [1090, 180, 1], [1250, 260, 1.3], [1380, 120, 1.5], [340, 260, 1], [760, 230, 1.3], [620, 300, 1], [900, 300, 1.2]] as [sx, sy, sr], i}
+          {#each STARS as [sx, sy, sr], i}
             <circle cx={sx} cy={sy} r={sr * 1.6} style="--d:{(i % 5) * 0.7}s" />
           {/each}
         </g>
@@ -75,7 +89,7 @@
     <svg class="layer back soft" style="--k:0.38" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice">
       <Drawn id="F2">
         <!-- the distant forest floor: one dark mass the far trees grow out of, no hard edge -->
-        <path class="far" d="M-40 1100 V772 C120 762 260 780 420 770 S760 764 900 774 S1240 762 1480 772 V1100 Z" />
+        <path class="far" d="M-820 1100 V770 C-600 760 -300 778 -40 772 C120 762 260 780 420 770 S760 764 900 774 S1240 762 1480 772 C1760 778 2000 764 2260 772 V1100 Z" />
         {#each far as t}<path class="far-trunk" d={t.trunk} /><g class="far-crown">{#each t.tiers as d}<path {d} />{/each}</g>{/each}
         <!-- the apartment in the distance -->
         <path class="house" d="M872 760 V706 L912 676 L952 706 V760 Z" />
@@ -95,7 +109,7 @@
     <svg class="layer near" style="--k:0.2" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice">
       <!-- the flat forest floor the kittens sit on, running on down behind the hills -->
       <Drawn id="F4">
-        <path class="ground" d="M-20 1100 V832 C200 812 420 824 640 818 C860 812 1100 826 1460 812 V1100 Z" />
+        <path class="ground" d="M-820 1100 V826 C-500 816 -240 830 -20 832 C200 812 420 824 640 818 C860 812 1100 826 1460 812 C1760 804 2000 822 2260 816 V1100 Z" />
         <path class="tufts" d="M220 846 l4 -12 l4 12 M236 850 l3 -10 l3 10 M1010 842 l4 -12 l4 12 M1028 846 l3 -9 l3 9 M560 840 l3 -10 l3 10 M1180 846 l4 -11 l4 11" />
       </Drawn>
       <!-- the kittens, huddled, looking toward the window -->
@@ -164,11 +178,16 @@
      things only ever slip behind what is nearer; the big front trees stay put. Scroll-driven: the
      browser runs it with the scroll itself, and where it can't, the forest simply stays still.
      A layer is moved as one finished picture, never redrawn */
+  /* every layer is scaled to the scene's height and centred, so a wide screen shows more forest to
+     each side instead of a blown-up middle (on narrower screens the sides are simply off screen) */
   .layer {
     position: absolute;
-    inset: 0;
-    width: 100%;
+    top: 0;
+    left: 50%;
     height: 100%;
+    width: auto;
+    aspect-ratio: 1440 / 900;
+    translate: -50% 0;
     overflow: visible;
     will-change: transform;
   }
@@ -462,6 +481,17 @@
     }
     .actions {
       margin-top: 18px;
+    }
+  }
+  /* very wide screens: the words grow with the screen, so they don't sit small in a big forest */
+  @media (min-width: 1800px) {
+    .copy {
+      zoom: 1.2;
+    }
+  }
+  @media (min-width: 2300px) {
+    .copy {
+      zoom: 1.4;
     }
   }
   @media (prefers-reduced-motion: reduce) {

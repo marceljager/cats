@@ -240,9 +240,9 @@
       {@render sleepers()}
     {:else}
     <!-- the floor and the skirting board -->
-    <rect class="floor" x="-20" y="400" width="1480" height="80" />
-    <path class="boards" d="M-20 426 H1460 M-20 452 H1460 M120 400 V426 M420 426 V452 M760 400 V426 M1100 426 V452 M300 452 V480 M980 452 V480" />
-    <rect class="skirting" x="-20" y="392" width="1480" height="12" />
+    <rect class="floor" x="-1100" y="400" width="3640" height="80" />
+    <path class="boards" d="M-1100 426 H2540 M-1100 452 H2540 M-560 400 V426 M-220 426 V452 M120 400 V426 M420 426 V452 M760 400 V426 M1100 426 V452 M1460 400 V426 M1800 426 V452 M2140 400 V426 M-380 452 V480 M300 452 V480 M980 452 V480 M1640 452 V480" />
+    <rect class="skirting" x="-1100" y="392" width="3640" height="12" />
 
     <!-- a bookshelf: two shelves of books, a little plant on top -->
     <rect class="wood" x="150" y="226" width="136" height="174" rx="4" />
@@ -419,10 +419,17 @@
   }
 
   /* the room */
+  /* the room is scaled to its height and centred: a wide screen shows more wall and floor to each
+     side instead of a stretched, top-cropped room; a narrow one crops its sides as before */
   .scene {
+    position: relative;
+    left: 50%;
     display: block;
-    width: 100%;
-    height: clamp(300px, 34vw, 460px);
+    height: clamp(300px, 34vw, 540px);
+    width: auto;
+    aspect-ratio: 1440 / 460;
+    translate: -50% 0;
+    overflow: visible;
     margin-top: 56px;
   }
   .scene path,
