@@ -78,6 +78,29 @@ test('closing gives the page back: photo shown, scroll unlocked, focus on what o
   expect(document.activeElement).toBe(opener);
 });
 
+test('closed by a click, the photo gets the focus back without its ring; closed by a key, with it', async () => {
+  const closeWith = async (how) => {
+    zoom({ items: photos, index: 0, source, opener });
+    await settle();
+    if (how === 'click') dialog().dispatchEvent(new Event('pointerdown', { bubbles: true }));
+    else dialog().dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    document.querySelector('.nav.shut button').click();
+    await settle();
+    dialog().dispatchEvent(new Event('close'));
+    await settle();
+  };
+  await closeWith('click');
+  expect(document.activeElement).toBe(opener);
+  expect(opener.classList.contains('quiet-focus')).toBe(true);
+  // the next key brings the ring back
+  dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab' }));
+  expect(opener.classList.contains('quiet-focus')).toBe(false);
+  opener.blur();
+  await closeWith('key');
+  expect(document.activeElement).toBe(opener);
+  expect(opener.classList.contains('quiet-focus')).toBe(false);
+});
+
 test('once the lightbox is gone, asking for a photo opens nothing', async () => {
   unmount(app);
   zoom({ items: photos, index: 0, source, opener });

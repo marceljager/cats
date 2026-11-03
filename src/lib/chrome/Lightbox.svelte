@@ -24,6 +24,7 @@
   let busy = false;
   let source = null;
   let opener = null;
+  let keyed = false; // whether the last thing done in the lightbox was a key (so the focus ring belongs back)
   let hidden = null;
   const current = $derived(index >= 0 ? items[index] : null);
   const many = $derived(items.length > 1);
@@ -71,6 +72,7 @@
     items = req.items;
     source = req.source;
     opener = req.opener ?? document.activeElement;
+    keyed = false;
     index = req.index;
     ready = false;
     dialog.showModal();
@@ -143,9 +145,23 @@
     lit = false;
     document.documentElement.style.overflow = '';
     lift(null);
-    // wait until the photo is back in place (visible again) before handing focus back to it
+    // wait until the photo is back in place (visible again) before handing focus back to it;
+    // closed by a tap or click, the photo gets the focus without its ring
     await tick();
-    opener?.focus();
+    if (!opener) return;
+    if (!keyed) quietFocus(opener);
+    opener.focus({ focusVisible: keyed });
+  }
+  // browsers that ignore focusVisible: the ring stays hidden until the next key or until it loses the focus
+  function quietFocus(el) {
+    el.classList.add('quiet-focus');
+    const off = () => {
+      el.classList.remove('quiet-focus');
+      el.removeEventListener('blur', off);
+      removeEventListener('keydown', off, true);
+    };
+    el.addEventListener('blur', off);
+    addEventListener('keydown', off, true);
   }
   const step = (d) => {
     if (busy || !many) return;
@@ -189,7 +205,11 @@
   onclose={resetAfterClose}
   oncancel={flyBackOnEscape}
   onclick={closeOnBackdrop}
-  onkeydown={stepWithArrows}
+  onkeydown={(e) => {
+    keyed = true;
+    stepWithArrows(e);
+  }}
+  onpointerdown={() => (keyed = false)}
 >
   {#if current}
     <div class="frame" class:ready bind:this={bigFrame} role="presentation" style="--r:{ratioValue(current.ratio)}" onpointerdown={swipeStart} onpointerup={swipeEnd}>
