@@ -4,7 +4,7 @@ import { cats, stops, vet, contact } from './src/content.js';
 import { optimizeImages } from './scripts/images.js';
 
 const name = 'Velík a Polly hledají domov';
-const title = `${name} · koťata zdarma k darování v Praze a okolí`;
+const title = `${name} – koťata zdarma k darování v Praze a okolí`;
 const description = 'Dvě koťata (kluk a holka, 6–7 měsíců) z chorvatského pohoří Velebit hledají domov. Jsou mazlivá, pořád u lidí a nebojí se ani psů. Odčervená, odblešená, po veterinární kontrole. Aktuálně jsou v Praze 6 – zdarma do dobrých rukou (ideálně oba spolu).';
 
 // SITE_URL (in .env or the environment, e.g. SITE_URL=https://velikapolly.cz) turns on everything

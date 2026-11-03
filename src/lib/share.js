@@ -4,7 +4,7 @@ import { cats } from '../content.js';
 
 const names = `${cats[0].name} a ${cats[1].name}`;
 export const title = `${names} hledají domov`;
-export const text = `${names} hledají domov · koťata zdarma k darování v Praze a okolí – nevíte o někom?`;
+export const text = `${names} hledají domov – koťata zdarma k darování v Praze a okolí. Nevíte o někom?`;
 
 const enc = encodeURIComponent;
 // the page itself, without the #section someone happened to be on

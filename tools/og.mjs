@@ -50,7 +50,7 @@ const html = `<!doctype html><meta charset="utf-8">
 </style>
 <div class="words">
   <h1>Velík a&nbsp;Polly hledají domov</h1>
-  <p>zdarma · Praha</p>
+  <p>zdarma v Praze</p>
 </div>
 <figure class="print">
   <span class="tape"></span>
