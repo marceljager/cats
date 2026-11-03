@@ -1,4 +1,5 @@
 <script>
+  // @ts-check
   import Hero from './lib/sections/Hero.svelte';
   import Journey from './lib/sections/journey/Journey.svelte';
   import Family from './lib/sections/Family.svelte';

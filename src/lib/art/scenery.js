@@ -169,6 +169,12 @@ function scatter(r, n, rx, ry) {
 
 // the pieces a place of this kind is drawn from, each { t: piece type, x, y, … } in the place's
 // own units, sorted back to front; the same seed always gives the same place
+/**
+ * @typedef {{ t: string, x?: number, y?: number, z?: number, [field: string]: unknown }} Piece
+ *   one piece of a place: its type (t, the Doodle snippet that draws it), where it stands and the
+ *   rest of what that snippet needs
+ * @param {PlaceKind} kind @param {{ seed?: number, scale?: number }} [options] @returns {Piece[]}
+ */
 export function layoutPlace(kind, { seed = 1, scale = 1 } = {}) {
   const r = rng(seed * 9973 + kind.length * 31);
   const out = [];

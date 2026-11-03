@@ -1,11 +1,13 @@
 // @ts-check
 // a smooth hand-drawn line through waypoints, for the rivers: a centripetal Catmull-Rom
 // spline, which never overshoots into a loop or a hairpin however unevenly the points are spaced
+/** @param {number[][]} pts waypoints, [x, y] @returns {string} path data */
 export function smooth(pts) {
   return `M ${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}` + curve(pts).join('');
 }
 
 // the same spline as a list of pieces, piece i running from point i to point i + 1
+/** @param {number[][]} pts waypoints, [x, y] @returns {string[]} one cubic piece (path data) per gap */
 export function curve(pts) {
   const f = (n) => n.toFixed(1);
   const dist = (a, b) => Math.max(Math.hypot(b[0] - a[0], b[1] - a[1]) ** 0.5, 1e-3);

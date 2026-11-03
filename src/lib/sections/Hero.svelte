@@ -1,4 +1,5 @@
 <script>
+  // @ts-check
   import { onMount } from 'svelte';
   import Text from '../ui/Text.svelte';
   import Icon from '../ui/Icon.svelte';

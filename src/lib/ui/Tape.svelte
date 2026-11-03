@@ -1,7 +1,9 @@
 <script>
+  // @ts-check
   // a cartoon strip of masking tape: inked outline, torn zigzag ends, a cel shade along the bottom and a shine
   //   tilt   its lean in degrees
   //   width  its length in px (it is drawn to that length, so not any other CSS unit)
+  /** @type {{ tilt?: number, width?: number, style?: string, class?: string }} */
   let { tilt = -4, width = 96, style = '', class: cls = '' } = $props();
 
   const H = 26; // strip height

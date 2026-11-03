@@ -1,7 +1,9 @@
 <script>
+  // @ts-check
   // cartoon map scenery: one place (a forest, Prague, the farm…) drawn from its pieces, which
   // scenery.js lays out; the kinds of place are listed there
   import { layoutPlace } from './scenery.js';
+  /** @type {{ kind: import('./scenery.js').PlaceKind, x?: number, y?: number, scale?: number, seed?: number, label?: string, flip?: boolean }} */
   let { kind, x = 0, y = 0, scale = 1, seed = 1, label = '', flip = false } = $props();
   const uid = $props.id(); // keeps clip-path ids apart between doodles
 

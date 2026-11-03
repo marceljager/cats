@@ -5,6 +5,7 @@ import { rng } from './random.js';
 // grass tufts and pebbles scattered over the land, as path data by colour: each tuft a few tapered
 // blades fanning out, its own height and lean, some a darker green, now and then a tiny flower
 // on the tallest blade
+/** @param {number} w @param {number} h @returns {{ light: string, dark: string, flowers: string, hearts: string, pebbles: string }} */
 export function scatterGrass(w, h) {
   const rt = rng(99);
   const f = (n) => n.toFixed(1);
@@ -38,6 +39,7 @@ export function scatterGrass(w, h) {
 }
 
 // clouds drifting high above the map, along its edges: { x, y, w, flip, dur, puffs }
+/** @param {number} w @param {number} h @param {boolean} wide @returns {{ x: number, y: number, w: number, flip: boolean, dur: number, puffs: number[][] }[]} */
 export function driftClouds(w, h, wide) {
   const rc = rng(7);
   const cl = [];

@@ -1,4 +1,5 @@
 <script>
+  // @ts-check
   import LuggageTags from './LuggageTags.svelte';
   import Text from '../../ui/Text.svelte';
   import Photo from '../../ui/Photo.svelte';
@@ -17,6 +18,8 @@
   // under a heart. Each cat's pose is under its id; `act` names the loop its head plays.
   // Each backdrop is one colour in three shades (bg, a lighter `light`, a darker `deep`) with its
   // own pattern: clouds, sunburst rays, little hearts.
+  /** @typedef {{ x: number, y: number, mood: 'happy' | 'cold' | 'calm', tilt: number, look?: number, act?: string }} Pose */
+  /** @type {{ bg: string, light: string, deep: string, pattern: 'clouds' | 'rays' | 'hearts', velik: Pose, polly: Pose, shadows?: boolean, heart?: boolean }[]} */
   const FRAMES = [
     { bg: '#8fbbe0', light: '#b9d6ef', deep: '#6d9dcb', pattern: 'clouds', velik: { x: 58, y: 84, mood: 'happy', tilt: -5, act: 'shake' }, polly: { x: 108, y: 90, mood: 'happy', tilt: 7, act: 'shake later' } },
     { bg: '#f2c94c', light: '#f8dc85', deep: '#dcae2e', pattern: 'rays', velik: { x: 54, y: 84, mood: 'cold', tilt: 3, look: 1, act: 'hop' }, polly: { x: 110, y: 92, mood: 'cold', tilt: -4, look: -1, act: 'hop later' }, shadows: true },

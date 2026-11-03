@@ -1,6 +1,8 @@
 <script>
+  // @ts-check
   // the car: a little cartoon van body on two wheels; the two big heads ride on top
   import CatHead from './CatHead.svelte';
+  /** @type {{ x?: number, y?: number, tilt?: number, bump?: number, km?: number, moving?: boolean }} */
   let { x = 0, y = 0, tilt = 0, bump = 0, km = 0, moving = false } = $props();
 </script>
 

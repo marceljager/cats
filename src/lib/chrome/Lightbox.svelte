@@ -1,4 +1,5 @@
 <script>
+  // @ts-check
   // the page's one lightbox (opened through lightbox.js): the photo itself lifts off the page and
   // springs up into the big frame, then shrinks back into the same spot when closed
   import { onMount, tick } from 'svelte';

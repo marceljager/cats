@@ -1,9 +1,11 @@
 <svelte:options namespace="svg" />
 
 <script>
+  // @ts-check
   // Velík and Polly, small bodies with big bobbling heads, sitting side by side;
   // `cold` adds the forest shiver and breath
   import CatHead from './CatHead.svelte';
+  /** @type {{ cold?: boolean, x?: number, y?: number, scale?: number }} */
   let { cold = false, x = 0, y = 0, scale = 1 } = $props();
 </script>
 

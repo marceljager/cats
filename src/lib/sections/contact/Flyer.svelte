@@ -1,4 +1,5 @@
 <script>
+  // @ts-check
   // a "home wanted" flyer pinned to the living-room wall, the kind with tear-off strips along the
   // bottom; here each strip is a way to send us on to someone who might have room
   import { onMount } from 'svelte';
@@ -47,7 +48,9 @@
       node.style.transform = `translateY(${drop.get()}px) skewX(${bend.get()}deg) scaleY(${stretch.get()})`;
     };
     const offs = [bend, stretch, drop].map((v) => v.on('change', apply));
+    /** @type {import('motion').ValueAnimationTransition} */
     const follow = { type: 'spring', stiffness: 520, damping: 30 };
+    /** @type {import('motion').ValueAnimationTransition} */
     const settle = { type: 'spring', stiffness: 260, damping: 12 };
     let held = false;
     // the hinge is the strip's top centre, where it is joined to the flyer

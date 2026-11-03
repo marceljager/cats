@@ -68,6 +68,7 @@ function joinSway(node, lean, rest) {
 //   use:swing={{ target: '.x' }}    listens on the node, swings a child
 //   use:swing={{ scroll: true }}    also leans while the page scrolls, and swings back when it stops
 // Options are read at every push, so changing them takes effect at once.
+/** @param {HTMLElement} node @param {{ target?: string, scroll?: boolean, scrollScale?: number, base?: number, max?: number, cooldown?: number, stiffness?: number, damping?: number }} [opts] */
 export function swing(node, opts = {}) {
   const target = () => (opts.target && node.querySelector(opts.target)) || node;
   // a swinging element can slide out from under the pointer and back, re-triggering itself;
@@ -116,6 +117,7 @@ export function swing(node, opts = {}) {
 // down), so you can keep a bobblehead going by stroking it. A pointer standing still sends no
 // moves, so the element swinging under it can't set itself off; touch gets one push per tap.
 //   use:rub={{ base, max, lean, stiffness, damping }}
+/** @param {HTMLElement | SVGElement} node @param {{ base?: number, max?: number, lean?: number, stiffness?: number, damping?: number }} [opts] */
 export function rub(node, opts = {}) {
   const rot = motionValue(0);
   const off = rot.on('change', (v) => (node.style.rotate = `${v}deg`));
@@ -164,6 +166,7 @@ export function rub(node, opts = {}) {
 
 // Bouncy control: springs up on hover and squashes on press.
 //   rest / over / down are Motion value maps, e.g. { rotate: -2 }, { rotate: -4, x: 6 }, { scale: 0.95 }
+/** @param {HTMLElement} node @param {{ rest?: object, over?: object, down?: object }} [opts] Motion value maps for each pose */
 export function bouncy(node, opts = {}) {
   let rest, over, down;
   const configure = (o) => {
@@ -200,6 +203,7 @@ export function bouncy(node, opts = {}) {
 // Spring to a state: whenever `to` changes the node springs there. The first value is applied
 // instantly, so the page renders in place without a jump.
 //   use:springTo={{ to: { y: 0, scale: 1 }, bounce: 0.4, duration: 0.5 }}
+/** @param {HTMLElement | SVGElement} node @param {{ to?: object, bounce?: number, duration?: number, [option: string]: unknown }} [params] */
 export function springTo(node, params = {}) {
   let first = true;
   let last = '';
@@ -222,6 +226,7 @@ export function springTo(node, params = {}) {
 }
 
 // One quick spring "pop" on demand, e.g. a spin or a bounce, then back to rest.
+/** @param {Element | null | undefined} el @param {object} keyframes @param {object} [opts] Motion options over the default spring */
 export function pop(el, keyframes, opts = {}) {
   if (!el || reducedMotion()) return;
   return animate(el, keyframes, { type: 'spring', bounce: 0.35, visualDuration: 0.5, ...opts });
@@ -232,6 +237,7 @@ export function pop(el, keyframes, opts = {}) {
 //   use:scrollLinked={{ keyframes: { y: [20, -20] }, offset: ['start end', 'end start'] }}
 // `media` limits it to screens that match (e.g. '(min-width: 760px)'); elsewhere, and with reduced
 // motion, the node just sits in its `rest` pose
+/** @param {HTMLElement} node @param {{ keyframes?: object, offset?: NonNullable<Parameters<typeof scroll>[1]>['offset'], rest?: object, media?: string }} [opts] */
 export function scrollLinked(node, opts = {}) {
   let mq = null;
   let stop;

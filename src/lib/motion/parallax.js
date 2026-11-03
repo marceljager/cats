@@ -12,6 +12,7 @@ import { onScreen, onScrollFrame, reducedMotion } from './viewport.js';
 
 const read = (opts) => (typeof opts === 'number' ? { speed: opts } : opts);
 
+/** @param {HTMLElement | SVGElement} node @param {number | { speed: number, media?: string }} [opts] */
 export function parallax(node, opts = 0.06) {
   let speed;
   let mq;

@@ -1,4 +1,5 @@
 <script>
+  // @ts-check
   // photos pegged on clotheslines; any of them flies up big into the page's lightbox
   import { onMount } from 'svelte';
   import Text from '../ui/Text.svelte';

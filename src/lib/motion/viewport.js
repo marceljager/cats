@@ -7,6 +7,7 @@
 const REDUCE = '(prefers-reduced-motion: reduce)';
 export const reducedMotion = () => matchMedia(REDUCE).matches;
 // call `fn` whenever the setting changes; returns the unsubscribe
+/** @param {() => void} fn */
 export function onReducedMotionChange(fn) {
   const mq = matchMedia(REDUCE);
   mq.addEventListener('change', fn);
@@ -18,6 +19,7 @@ export const WIDE = '(min-width: 760px)';
 export const isWide = () => matchMedia(WIDE).matches;
 
 // whether any part of `el` is inside the viewport, or within `margin` px of it
+/** @param {Element} el @param {number} [margin] */
 export function onScreen(el, margin = 0) {
   const r = el.getBoundingClientRect();
   return r.bottom > -margin && r.top < innerHeight + margin;
@@ -36,6 +38,7 @@ function queue() {
   raf ||= requestAnimationFrame(flush);
 }
 
+/** @param {() => void} fn @returns {() => void} */
 export function onScrollFrame(fn) {
   if (subscribers.size === 0) {
     addEventListener('scroll', queue, { passive: true });

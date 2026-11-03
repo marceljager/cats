@@ -1,4 +1,5 @@
 <script>
+  // @ts-check
   // a cartoon surface: inked outline, flat cel shade along the lower-right edge.
   // Position, size and motion belong to whatever wraps it; inner spacing comes from --card-pad.
   //   variant 'card'   (paper card with a soft ground shadow, e.g. the map stops)
@@ -7,6 +8,7 @@
   //   as      the element to render, e.g. 'blockquote'
   //   class   added to its own classes
   //   --card-bg overrides the background
+  /** @type {{ variant?: 'card' | 'bubble' | 'quote', as?: string, class?: string, children: import('svelte').Snippet, [attr: string]: unknown }} */
   let { variant = 'card', as = 'div', class: cls = '', children, ...rest } = $props();
 </script>
 

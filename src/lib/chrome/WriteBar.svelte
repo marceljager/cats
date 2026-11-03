@@ -1,4 +1,5 @@
 <script>
+  // @ts-check
   // phones: the page is long, so the way to write to us waits at the bottom edge, under the thumb,
   // with the two of them peeking over it. It steps aside while anything marked data-writebar-yields
   // is on screen: the hero and the family section's "write to us" buttons, and the contact section

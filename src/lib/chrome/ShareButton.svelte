@@ -1,4 +1,5 @@
 <script>
+  // @ts-check
   // the little "Sdílet" button in the hero's corner: on a phone it opens the phone's own share
   // sheet; elsewhere it drops a taped paper note with the ways to send us on
   import { onMount, tick } from 'svelte';

@@ -1,4 +1,5 @@
 <script>
+  // @ts-check
   // A live window onto part of the real page: loads the site in an iframe at desktop size,
   // scrolls it to the element and shows just that piece, scaled to fit. Always up to date and still
   // interactive, for drawings that live inside a section instead of in their own component.
@@ -7,6 +8,7 @@
   //   isolate  hide everything else on the page, so the piece stands alone on `bg`
   //   alone    with isolate: show the element itself but not its children (e.g. a background)
   //   scroll   false keeps the page at the top (for the opening scene, whose layers move on scroll)
+  /** @type {{ sel: string, pick?: number, isolate?: boolean, alone?: boolean, scroll?: boolean, bg?: string, pad?: number, layout?: number, view?: number }} */
   let { sel, pick = undefined, isolate = false, alone = false, scroll = true, bg = '#eef2df', pad = 24, layout = 1280, view = 900 } = $props();
 
   let box = $state();

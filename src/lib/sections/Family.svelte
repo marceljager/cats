@@ -1,4 +1,5 @@
 <script>
+  // @ts-check
   import Text from '../ui/Text.svelte';
   import Button from '../ui/Button.svelte';
   import CatHead from '../figures/CatHead.svelte';

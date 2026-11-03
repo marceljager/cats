@@ -7,6 +7,7 @@ import { SCENERY } from './scenery.js';
 /** @typedef {{ kind: import('./scenery.js').PlaceKind, x: number, y: number, scale: number, seed?: number, label?: string }} Place a place on the map, as Doodle props */
 
 // which side of the route each story sits on, alternating from the right
+/** @param {number} i @returns {'left' | 'right'} */
 export const sideOf = (i) => (i % 2 === 0 ? 'right' : 'left');
 
 // the trip starts on the Velebit pin, up in the mountains: the range around it, and the little
@@ -80,8 +81,10 @@ function legRiver({ r, s, w, at, cityRiver }) {
 }
 
 // the border lines on a leg, with any countries driven through on the way
+/** @returns {RoutePlan['borders']} */
 function bordersCrossed({ from, to, s, at }) {
   const lands = [from.country, ...(to.via ?? []), to.country];
+  /** @type {RoutePlan['borders']} */
   const borders = [];
   for (let c = 0; c < lands.length - 1; c++) {
     if (lands[c] === lands[c + 1]) continue;
@@ -157,6 +160,15 @@ function besideStories(geo, w) {
 //            leg crossing the map from side to side
 //   source   the lake the first stream springs from
 // sample(river) measures a river's drawn line (see keepDry).
+/**
+ * @typedef {{ x: number, top: number, bottom: number, pinY: number, exitY: number }} StopGeo
+ *   where the route meets a story on the page
+ * @typedef {(river: number[][]) => number[][]} Sampler points along a river's drawn line
+ * @typedef {{ pts: number[][], marks: { y: number, i: number, pin?: boolean }[], places: Place[],
+ *   borders: { y: number, from: string, to: string, side: 'left' | 'right' }[], streams: number[][][], source: Place }} RoutePlan
+ * @param {{ geo: StopGeo[], stops: import('../../content.js').Stop[], w: number, wide: boolean, sample: Sampler }} input
+ * @returns {RoutePlan}
+ */
 export function planRoute({ geo, stops, w, wide, sample }) {
   const start = startInMountains(geo[0], w, wide);
   const pts = [[geo[0].x, geo[0].pinY]];
@@ -192,6 +204,7 @@ export function planRoute({ geo, stops, w, wide, sample }) {
 // Moves the places (and bends the streams) of a plan in place; planRoute does it before returning.
 // sample(river) gives points along the river's drawn line, every 8 units (the map measures it in
 // an SVG path).
+/** @param {Pick<RoutePlan, 'places' | 'streams'> & { source: Place | null }} plan @param {{ w: number, sample: Sampler }} options */
 export function keepDry({ places, streams, source }, { w, sample }) {
   const box = (place, dx = 0) => {
     const [l, r, t, b] = SCENERY[place.kind].foot;

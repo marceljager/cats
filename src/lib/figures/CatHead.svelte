@@ -1,6 +1,7 @@
 <svelte:options namespace="svg" />
 
 <script>
+  // @ts-check
   // A cat's big caricature head that bobbles on its neck, for use inside any <svg>.
   // Shows the cat's photo (cats[].head in content.js) or a drawn placeholder face until then.
   //   catId 'velik' | 'polly' (cats[].id in content.js)
@@ -12,6 +13,7 @@
   import { rub } from '../motion/springs.js';
   import { photoFile, photoInfo } from '../services/photos.js';
 
+  /** @type {{ catId: string, cx?: number, cy?: number, r?: number, mood?: 'cold' | 'happy' | 'calm', look?: number, tilt?: number, delay?: number, wobble?: boolean }} */
   let { catId, cx = 0, cy = 0, r = 30, mood = 'calm', look = 0, tilt = 0, delay = 0, wobble = true } = $props();
 
   const id = $props.id();

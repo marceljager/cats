@@ -1,4 +1,5 @@
 <script>
+  // @ts-check
   // the trip as a map: the route winds from story to story, the car drives along it as the page
   // scrolls and each story comes up as the car reaches its pin. The geometry is in route.js; this
   // measures where the stories sit on the page, draws the result and moves the car.

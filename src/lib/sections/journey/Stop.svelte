@@ -1,4 +1,5 @@
 <script>
+  // @ts-check
   import Photo from '../../ui/Photo.svelte';
   import Text from '../../ui/Text.svelte';
   import Card from '../../ui/Card.svelte';
@@ -8,6 +9,7 @@
 
   // one stop's story beside the map; it stays dimmed and lowered (upcoming) until the car reaches its
   // pin (reached), then pops open and gets taped down
+  /** @type {{ stop: import('../../../content.js').Stop, side?: 'left' | 'right', reached?: boolean, el?: HTMLElement }} */
   let { stop, side = 'right', reached = false, el = $bindable() } = $props();
   const lean = $derived(side === 'right' ? 0.8 : -0.8);
 </script>

@@ -1,7 +1,9 @@
 <script>
+  // @ts-check
   import { swing } from '../../motion/springs.js';
   import Icon from '../../ui/Icon.svelte';
   // a cat's facts as separate luggage tags: sex, age, who it's named after, and neutering when done
+  /** @type {{ cat: import('../../../content.js').Cat }} */
   let { cat } = $props();
 
   const boy = $derived(cat.sex === 'kluk');

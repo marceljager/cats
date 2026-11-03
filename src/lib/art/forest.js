@@ -7,6 +7,7 @@ import { rng } from './random.js';
 // zigzag silhouette, on a bare tapering trunk. Returns the path data, the trunk to draw first and
 // the tiers from the bottom up. Every tree is a little different (its randomness comes from its
 // position), so the same tree always comes out the same.
+/** @param {number} x @param {number} base @param {number} h @param {number} w @returns {{ trunk: string, tiers: string[] }} */
 export function pine(x, base, h, w) {
   const r = rng(Math.round(x * 13 + base * 7 + h));
   const f = (n) => n.toFixed(1);
@@ -37,6 +38,7 @@ export function pine(x, base, h, w) {
 // little lower, up to 20 units) and between height[0] and height[1] tall; none lands inside a
 // `clear` range, e.g. [[860, 960]] keeps a gap for the moon. The same seed gives the same row.
 //   layer({ seed: 3, count: 26, span: [-40, 1480], base: 760, height: [200, 330], clear: [[860, 960]] })
+/** @param {{ seed: number, count: number, span: [number, number], base: number, height: [number, number], clear?: [number, number][] }} row @returns {{ trunk: string, tiers: string[] }[]} */
 export function layer({ seed, count, span: [from, to], base, height: [hMin, hMax], clear = [] }) {
   const r = rng(seed);
   const out = [];

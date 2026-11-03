@@ -1,4 +1,5 @@
 <script>
+  // @ts-check
   // Review sheet: every general building block of the site, numbered, so changes can be asked
   // for by number ("make C4 like C1"). Real components are rendered as they are; pieces that live
   // inside a section are shown live from the page (Crop), never copied, so they can't drift.
@@ -30,7 +31,10 @@
     ['--ink-soft', 'Inkoust měkký'],
     ['--ink', 'Inkoust'],
   ];
+  /** @type {(keyof typeof import('../lib/ui/Icon.svelte').ICONS)[]} */
   const icons = ['mail', 'instagram', 'pin', 'check', 'heart', 'camera', 'right', 'left', 'down', 'close', 'home', 'cats', 'copy', 'boy', 'girl', 'mountains'];
+  /** @type {('calm' | 'cold' | 'happy')[]} */
+  const MOODS = ['calm', 'cold', 'happy'];
   let copied = $state(false);
 </script>
 
@@ -258,10 +262,10 @@
     <h2><span class="letter">G</span> Postavy</h2>
     <div class="grid">
       {#each ['velik', 'polly'] as cat, c}
-        {#each ['calm', 'cold', 'happy'] as mood, m}
+        {#each MOODS as mood, m}
           <figure class="item">
             <span class="no">G{c * 3 + m + 1}</span>
-            <svg class="head-demo" viewBox="-60 -80 120 140" aria-hidden="true"><CatHead {cat} r={44} {mood} /></svg>
+            <svg class="head-demo" viewBox="-60 -80 120 140" aria-hidden="true"><CatHead catId={cat} r={44} {mood} /></svg>
             <figcaption><b>{cat === 'velik' ? 'Velík' : 'Polly'}</b> · <code>{mood}</code></figcaption>
           </figure>
         {/each}

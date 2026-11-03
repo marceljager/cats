@@ -1,4 +1,5 @@
 <script>
+  // @ts-check
   // the closing scene under the contact postcard; Contact.svelte darkens the room away from its fire
   // (bind:fire is the flames' group)
   import Icon from '../../ui/Icon.svelte';
@@ -6,7 +7,12 @@
   import { parallax } from '../../motion/parallax.js';
   import { layer } from '../../art/forest.js';
 
+  /** @type {{ fire?: SVGGElement }} */
   let { fire = $bindable() } = $props();
+
+  // the bookshelf's books: [x, top, width, colour], each standing on the shelf below its top
+  /** @type {[number, number, number, string][]} */
+  const BOOKS = [[166, 252, 12, '#c94a3c'], [180, 258, 10, '#3a78b0'], [192, 248, 14, '#e7c45a'], [208, 262, 11, '#5cbf5f'], [244, 256, 12, '#d6407a'], [166, 304, 14, '#e7c45a'], [182, 300, 10, '#c94a3c'], [194, 308, 12, '#3a78b0'], [232, 302, 13, '#5cbf5f'], [247, 306, 10, '#f3ead6']];
 
   // the night forest from the opening, seen through the living-room window: a far row and a near one
   const far = layer({ seed: 5, count: 9, span: [330, 600], base: 300, height: [60, 95] });
@@ -93,7 +99,7 @@
   <rect class="wood" x="150" y="226" width="136" height="174" rx="4" />
   <rect class="shelf-back" x="162" y="238" width="112" height="152" />
   <path class="shelf" d="M162 290 H274 M162 342 H274" />
-  {#each [[166, 252, 12, '#c94a3c'], [180, 258, 10, '#3a78b0'], [192, 248, 14, '#e7c45a'], [208, 262, 11, '#5cbf5f'], [244, 256, 12, '#d6407a'], [166, 304, 14, '#e7c45a'], [182, 300, 10, '#c94a3c'], [194, 308, 12, '#3a78b0'], [232, 302, 13, '#5cbf5f'], [247, 306, 10, '#f3ead6']] as [bx, by, bw, c]}
+  {#each BOOKS as [bx, by, bw, c]}
     <rect class="book" x={bx} y={by} width={bw} height={(by < 290 ? 290 : 342) - by} fill={c} />
   {/each}
   <path class="book" d="M222 284 L250 276 L252 282 L224 290 Z" fill="#8a5a3b" />

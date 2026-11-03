@@ -13,6 +13,8 @@
 
   // every icon as a list of blocks: ['part', d, tone, evenodd?] | ['line', d] | ['shine', d] | ['dot', d].
   // Exported, so a drawing that needs an icon's shape in its own styling (the map's pin) uses the same paths.
+  /** @typedef {['part', string, string, boolean?] | ['line' | 'shine' | 'dot', string]} Block */
+  /** @satisfies {Record<string, Block[]>} */
   export const ICONS = {
     mail: [
       ['part', rounded(3, 7, 26, 19, 3.5), 'paper'],
@@ -101,6 +103,7 @@
 </script>
 
 <script>
+  // @ts-check
   // cartoon icons, all built from the same three blocks so they always match:
   //   part(d, tone)  a filled shape: flat colour, a cel shade along its lower-right edge
   //                  (clipped inside the shape, so it never spills over the outline), ink outline on top
@@ -108,6 +111,7 @@
   //   shine(d)       one white highlight stroke, same everywhere
   // Parts are drawn in order, so a later part sits on top of the earlier ones.
   //   tone  recolours every part, e.g. 'paper' on a background of the icon's own colour
+  /** @type {{ name: keyof typeof ICONS, size?: number, label?: string, tone?: string }} */
   let { name, size = 24, label = '', tone: recolour = undefined } = $props();
   const uid = $props.id();
 

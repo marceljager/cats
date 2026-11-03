@@ -1,4 +1,5 @@
 <script>
+  // @ts-check
   // the cartoon button: inked outline, cel shade along the bottom, springy on hover.
   // A link with href, a <button> without one.
   //   variant 'default' | 'arrow' (the right end is a pointed arrow tip, like a signpost)
@@ -9,6 +10,7 @@
   //   class   added to its own classes; el is the rendered element, to bind (e.g. to focus it)
   import { bouncy } from '../motion/springs.js';
 
+  /** @type {{ href?: string, variant?: 'default' | 'arrow' | 'round' | 'link', theme?: 'red' | 'paper', bounce?: { rest?: object, over?: object, down?: object }, class?: string, el?: HTMLElement, children: import('svelte').Snippet, [attr: string]: unknown }} */
   let { href = undefined, variant = 'default', theme = 'red', bounce = {}, class: cls = '', el = $bindable(), children, ...rest } = $props();
 </script>
 

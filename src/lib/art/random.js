@@ -1,5 +1,6 @@
 // @ts-check
 // seeded randomness (mulberry32), so the drawn scenery comes out the same on every visit and resize
+/** @param {number} seed @returns {() => number} numbers in [0, 1) */
 export function rng(seed) {
   return () => {
     seed |= 0;

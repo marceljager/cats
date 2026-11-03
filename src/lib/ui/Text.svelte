@@ -1,4 +1,5 @@
 <script>
+  // @ts-check
   // every piece of text on the page, in one of eight sizes:
   //   display     the hero's big hello
   //   title       one headline per section
@@ -11,6 +12,7 @@
   // `as` picks the element (each size has a sensible default); colour, width and spacing come from
   // the surroundings, so pass a `class` and style it with :global() where the layout needs it.
   const TAG = { display: 'h1', title: 'h2', heading: 'h3', subheading: 'h4', lede: 'p', body: 'p', small: 'p', label: 'span' };
+  /** @type {{ variant?: keyof typeof TAG, as?: string, class?: string, children: import('svelte').Snippet, [attr: string]: unknown }} */
   let { variant = 'body', as = undefined, class: cls = '', children, ...rest } = $props();
 </script>
 
