@@ -44,4 +44,7 @@ same files work there and at the root of the CDN domain in front of it.
 - GitHub → Settings → Secrets and variables → Actions → Variables: `SITE_URL` = the public address
   (the CDN domain, e.g. `https://velikapolly.cz`). It turns on og:image, canonical and ai-catalog.json.
 - CDN: origin `https://marceljager.github.io` with the path `/cats/`, sending the origin's own host
-  name. Cache `index.html` for minutes, everything else for long; purge after replacing a photo.
+  name. Cache `index.html` for minutes, everything else for long.
+- Purge after deploy: Secrets `CDN_PURGE_URL` (the CDN's purge-all API address, resource ID included)
+  and `CDN_API_TOKEN`. With both set, every deploy ends by clearing the CDN cache; without them
+  that step is skipped.
