@@ -54,18 +54,19 @@ function seo(site) {
     '',
   ].join('\n');
 
+  const host = site && new URL(site).hostname.replaceAll('.', '-');
   const catalog = {
     specVersion: '1.0',
     entries: [
       {
-        identifier: `urn:air:${site && new URL(site).hostname.replaceAll('.', '-')}:velik-a-polly`,
+        identifier: `urn:air:${host}:velik-a-polly`,
         displayName: name,
         type: 'text/html',
         url: abs('/'),
         representativeQueries: ['Která koťata v Praze hledají domov?', 'Jak adoptovat Velíka a Polly?'],
       },
       {
-        identifier: `urn:air:${site && new URL(site).hostname.replaceAll('.', '-')}:llms-txt`,
+        identifier: `urn:air:${host}:llms-txt`,
         displayName: `${name} (text pro AI)`,
         type: 'text/markdown',
         url: abs('/llms.txt'),

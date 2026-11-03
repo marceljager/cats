@@ -4,10 +4,10 @@
   // colours as the scenes; if a scene changes, change the matching part here too.
   import { layer } from '../lib/forest.js';
 
-  const far = layer(3, 26, -40, 1480, 760, 200, 330, [[860, 960]]);
-  const mid = layer(9, 14, -60, 1500, 930, 420, 560, [[600, 1000]]);
-  const front = [...layer(21, 3, -80, 260, 1010, 620, 740), ...layer(33, 3, 1180, 1520, 1010, 640, 760)];
-  const outside = layer(5, 9, 150, 440, 330, 70, 120);
+  const far = layer({ seed: 3, count: 26, span: [-40, 1480], base: 760, height: [200, 330], clear: [[860, 960]] });
+  const mid = layer({ seed: 9, count: 14, span: [-60, 1500], base: 930, height: [420, 560], clear: [[600, 1000]] });
+  const front = [...layer({ seed: 21, count: 3, span: [-80, 260], base: 1010, height: [620, 740] }), ...layer({ seed: 33, count: 3, span: [1180, 1520], base: 1010, height: [640, 760] })];
+  const outside = layer({ seed: 5, count: 9, span: [150, 440], base: 330, height: [70, 120] });
   const STARS = [[120, 80, 1.6], [260, 170, 1.2], [420, 60, 1.4], [560, 140, 1], [690, 50, 1.6], [820, 120, 1.2], [980, 70, 1.4], [1090, 180, 1], [1250, 260, 1.3], [1380, 120, 1.5], [340, 260, 1], [760, 230, 1.3], [620, 300, 1], [900, 300, 1.2]];
 
   export const FOREST = [

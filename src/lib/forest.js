@@ -1,21 +1,11 @@
 // shared drawing helpers for the night-forest scenes (hero and the closing section)
+import { rng } from './random.js';
 
-// seeded randomness, so the forest looks the same on every visit
-export function rng(seed) {
-  return () => {
-    seed |= 0;
-    seed = (seed + 0x6d2b79f5) | 0;
-    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-// a simple cartoon spruce: a few triangles nested from the tree's top, each reaching lower and
-// wider, so together they make one zigzag silhouette, on a bare tapering trunk. The tiers are
-// listed bottom to top. Every tree is a little different (its own randomness, from its position).
-//   trunk  the trunk, drawn first
-//   tiers  the tiers, bottom to top
+// a simple cartoon spruce standing at x on the ground line `base`, h tall and w wide: a few
+// triangles nested from the tree's top, each reaching lower and wider, so together they make one
+// zigzag silhouette, on a bare tapering trunk. Returns the path data, the trunk to draw first and
+// the tiers from the bottom up. Every tree is a little different (its randomness comes from its
+// position), so the same tree always comes out the same.
 export function pine(x, base, h, w) {
   const r = rng(Math.round(x * 13 + base * 7 + h));
   const f = (n) => n.toFixed(1);
@@ -42,13 +32,16 @@ export function pine(x, base, h, w) {
   return { trunk, tiers: tiers.reverse() };
 }
 
-// a row of pines between `from` and `to`, skipping any x ranges in keepClear
-export function layer(seed, count, from, to, base, hMin, hMax, keepClear = []) {
+// a row of `count` pines spread across span [from, to], standing on the ground line `base` (each a
+// little lower, up to 20 units) and between height[0] and height[1] tall; none lands inside a
+// `clear` range, e.g. [[860, 960]] keeps a gap for the moon. The same seed gives the same row.
+//   layer({ seed: 3, count: 26, span: [-40, 1480], base: 760, height: [200, 330], clear: [[860, 960]] })
+export function layer({ seed, count, span: [from, to], base, height: [hMin, hMax], clear = [] }) {
   const r = rng(seed);
   const out = [];
   for (let i = 0; i < count; i++) {
     const x = from + ((to - from) * (i + r() * 0.8)) / count;
-    if (keepClear.some(([a, b]) => x > a && x < b)) continue;
+    if (clear.some(([a, b]) => x > a && x < b)) continue;
     const h = hMin + r() * (hMax - hMin);
     out.push(pine(x, base + r() * 20, h, h * (0.42 + r() * 0.1)));
   }

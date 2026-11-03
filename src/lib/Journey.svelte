@@ -7,7 +7,9 @@
   import Drawn from './Drawn.svelte';
   import { drawn } from './drawn.js';
   import { parallax } from './parallax.js';
+  import { rng } from './random.js';
   import { springTo } from './springs.js';
+  import { onScreen, onScrollFrame, reducedMotion } from './viewport.js';
 
   let { stops } = $props();
 
@@ -53,17 +55,6 @@
 
   function sideOf(i) {
     return i % 2 === 0 ? 'right' : 'left';
-  }
-
-  // seeded randomness so the map stays the same on every visit and resize
-  function rng(seed) {
-    return () => {
-      seed |= 0;
-      seed = (seed + 0x6d2b79f5) | 0;
-      let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
-      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-    };
   }
 
   // a smooth hand-drawn line through waypoints, for the rivers: a centripetal Catmull-Rom
@@ -383,8 +374,6 @@
     });
   }
 
-  let reduce = false;
-
   // map the reading line to a length along the route, piecewise between keypoints
   function lengthAt(y) {
     for (let i = 1; i < keys.length; i++) {
@@ -402,7 +391,7 @@
     if (!routeEl || !len) return;
     const rect = root.getBoundingClientRect();
     // off screen (e.g. still up in the hero): nothing to move
-    if (rect.top > window.innerHeight || rect.bottom < 0) return;
+    if (!onScreen(root)) return;
     const target = Math.min(Math.max(window.innerHeight * 0.5 - rect.top, 0), h - 1);
     const L = Math.min(lengthAt(target), len);
     if (L === travelled && target === anchorY) return;
@@ -413,7 +402,7 @@
       x: pt.x,
       y: pt.y,
       tilt: Math.max(-34, Math.min(34, -lean * 0.5)),
-      bump: reduce ? 0 : Math.sin(L / 9) * 1.8,
+      bump: reducedMotion() ? 0 : Math.sin(L / 9) * 1.8,
     };
     travelled = L;
     anchorY = target;
@@ -433,29 +422,25 @@
   }
 
   onMount(() => {
-    reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    let raf = 0;
-    const onScroll = () => {
-      // the odometer shows while the car is moving and fades once scrolling stops
-      const r = root.getBoundingClientRect();
-      if (r.top > window.innerHeight || r.bottom < 0) return;
-      moving = true;
-      clearTimeout(still);
-      still = setTimeout(() => (moving = false), 900);
-      if (raf) return;
-      raf = requestAnimationFrame(() => {
-        raf = 0;
-        update();
-      });
+    let lastY = scrollY;
+    const follow = () => {
+      if (!onScreen(root)) return;
+      // the odometer shows while the car is moving (not on a mere resize) and fades once scrolling stops
+      if (scrollY !== lastY) {
+        lastY = scrollY;
+        moving = true;
+        clearTimeout(still);
+        still = setTimeout(() => (moving = false), 900);
+      }
+      update();
     };
     const ro = new ResizeObserver(() => build());
     ro.observe(root);
-    window.addEventListener('scroll', onScroll, { passive: true });
+    const stop = onScrollFrame(follow);
     build();
     return () => {
       ro.disconnect();
-      window.removeEventListener('scroll', onScroll);
-      cancelAnimationFrame(raf);
+      stop();
       clearTimeout(still);
     };
   });

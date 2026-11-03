@@ -59,8 +59,8 @@
   );
 
   // the night forest from the opening, seen through the living-room window: a far row and a near one
-  const far = layer(5, 9, 330, 600, 300, 60, 95);
-  const near = layer(11, 6, 330, 600, 330, 95, 140);
+  const far = layer({ seed: 5, count: 9, span: [330, 600], base: 300, height: [60, 95] });
+  const near = layer({ seed: 11, count: 6, span: [330, 600], base: 330, height: [95, 140] });
 </script>
 
 <section class="contact" id="domov" aria-labelledby="domov-h" bind:this={room} style={light}>

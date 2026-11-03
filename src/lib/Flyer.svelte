@@ -8,6 +8,7 @@
   import Tape from './Tape.svelte';
   import CatHead from './CatHead.svelte';
   import { options, canShare, shareNative, copyLink } from './share.js';
+  import { reducedMotion } from './viewport.js';
 
   let native = $state(false);
   let list = $state.raw([]);
@@ -32,7 +33,6 @@
   // each strip hangs a touch crooked, as cut paper does
   const TILT = [-1.4, 0.9, -0.5, 1.3, -1];
   const FLYER_TILT = 1.2;
-  const reduce = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // holding a strip: it stays joined to the flyer along its top edge, like real paper, and bends
   // after the pointer. Pointing at it, it only leans a little towards you; pressing grabs it, and
@@ -40,7 +40,7 @@
   // more the further it goes. Only letting go (the click, see tear) tears it off.
   const poses = new WeakMap(); // strip -> { bend, stretch, drop } motion values, read by tear()
   function hold(node) {
-    if (reduce()) return {};
+    if (reducedMotion()) return {};
     // bend: skew in degrees (the top edge stays put, the free end swings); stretch: scaleY from the
     // top; drop: only for the new strip sliding in from under the perforation
     const bend = motionValue(0);
@@ -107,12 +107,12 @@
       gone = { ...gone, [id]: false };
       // back in view (a CSS fade); the next strip down the pad slides in from under the perforation
       el.style.opacity = '';
-      if (reduce() || !pose) return;
+      if (reducedMotion() || !pose) return;
       pose.drop.jump(-18);
       animate(pose.drop, 0, { type: 'spring', stiffness: 320, damping: 15 });
     }, AWAY);
     regrow.add(t);
-    if (reduce()) return;
+    if (reducedMotion()) return;
     const li = el.parentElement.getBoundingClientRect();
     const w = el.offsetWidth;
     const h = el.offsetHeight;

@@ -6,31 +6,18 @@
   import Button from './Button.svelte';
   import Icon from './Icon.svelte';
   import CatHead from './CatHead.svelte';
+  import { onScreen, onScrollFrame } from './viewport.js';
 
   let shown = $state(false);
 
   // looked up fresh each time, so a section that re-renders can't leave a stale answer behind
-  const onScreen = (el) => {
-    const r = el.getBoundingClientRect();
-    return r.bottom > 0 && r.top < innerHeight;
-  };
   function check() {
-    frame = 0;
     const blockers = [document.querySelector('.hero'), document.getElementById('domov'), ...document.querySelectorAll('main a[href="#domov"]')];
     shown = !blockers.some((el) => el && onScreen(el));
   }
-  let frame = 0;
-  const queue = () => (frame ||= requestAnimationFrame(check));
-
   onMount(() => {
     check();
-    addEventListener('scroll', queue, { passive: true });
-    addEventListener('resize', queue);
-    return () => {
-      cancelAnimationFrame(frame);
-      removeEventListener('scroll', queue);
-      removeEventListener('resize', queue);
-    };
+    return onScrollFrame(check);
   });
 </script>
 

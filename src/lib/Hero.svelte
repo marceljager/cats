@@ -24,21 +24,21 @@
   // the scene is drawn for 1440 wide; on screens wider than its proportions the forest carries on to
   // each side (those extra trees sit off screen everywhere else)
   const far = [
-    ...layer(3, 26, -40, 1480, 760, 200, 330, [[860, 960]]),
-    ...layer(4, 14, -800, -40, 760, 200, 330),
-    ...layer(5, 14, 1480, 2240, 760, 200, 330),
+    ...layer({ seed: 3, count: 26, span: [-40, 1480], base: 760, height: [200, 330], clear: [[860, 960]] }),
+    ...layer({ seed: 4, count: 14, span: [-800, -40], base: 760, height: [200, 330] }),
+    ...layer({ seed: 5, count: 14, span: [1480, 2240], base: 760, height: [200, 330] }),
   ];
   const mid = [
-    ...layer(9, 14, -60, 1500, 930, 420, 560, [[600, 1000]]),
-    ...layer(10, 7, -800, -60, 930, 420, 560),
-    ...layer(11, 7, 1500, 2240, 930, 420, 560),
+    ...layer({ seed: 9, count: 14, span: [-60, 1500], base: 930, height: [420, 560], clear: [[600, 1000]] }),
+    ...layer({ seed: 10, count: 7, span: [-800, -60], base: 930, height: [420, 560] }),
+    ...layer({ seed: 11, count: 7, span: [1500, 2240], base: 930, height: [420, 560] }),
   ];
   // the big front trees are rooted well below the frame, so their trunks run down behind the hills
   const front = [
-    ...layer(21, 3, -80, 260, 1010, 620, 740),
-    ...layer(33, 3, 1180, 1520, 1010, 640, 760),
-    ...layer(22, 3, -780, -200, 1010, 620, 760),
-    ...layer(34, 3, 1640, 2220, 1010, 620, 760),
+    ...layer({ seed: 21, count: 3, span: [-80, 260], base: 1010, height: [620, 740] }),
+    ...layer({ seed: 33, count: 3, span: [1180, 1520], base: 1010, height: [640, 760] }),
+    ...layer({ seed: 22, count: 3, span: [-780, -200], base: 1010, height: [620, 760] }),
+    ...layer({ seed: 34, count: 3, span: [1640, 2220], base: 1010, height: [620, 760] }),
   ];
   const STARS = [[120, 80, 1.6], [260, 170, 1.2], [420, 60, 1.4], [560, 140, 1], [690, 50, 1.6], [820, 120, 1.2], [980, 70, 1.4], [1090, 180, 1], [1250, 260, 1.3], [1380, 120, 1.5], [340, 260, 1], [760, 230, 1.3], [620, 300, 1], [900, 300, 1.2],
     [-120, 110, 1.3], [-300, 220, 1], [-480, 70, 1.5], [-640, 190, 1.1], [1560, 90, 1.4], [1720, 230, 1], [1900, 60, 1.3], [2080, 170, 1.2]];

@@ -3,6 +3,7 @@
   //   parts  draw just these pieces instead of a whole kind, e.g. [{ t: 'goat', x: 0, y: 0 }]
   import Drawn from './Drawn.svelte';
   import { drawn } from './drawn.js';
+  import { rng } from './random.js';
   let { kind = 'parts', x = 0, y = 0, scale = 1, seed = 1, label = '', flip = false, parts = null } = $props();
   const uid = $props.id(); // keeps clip-path ids apart between doodles
 
@@ -13,16 +14,6 @@
   const whole = $derived(!parts && drawn(WHOLE[kind]) ? WHOLE[kind] : null);
 
   const TREE = 0.85;
-
-  function rng(s) {
-    return () => {
-      s |= 0;
-      s = (s + 0x6d2b79f5) | 0;
-      let t = Math.imul(s ^ (s >>> 15), 1 | s);
-      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-    };
-  }
 
   // scatter points inside an ellipse, back to front
   function scatter(r, n, rx, ry) {

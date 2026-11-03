@@ -9,7 +9,7 @@
   //   look  -1…1, where the eyes glance (placeholder only)
   //   tilt  resting lean in degrees; delay staggers the bobble
   import { cats } from '../content.js';
-  import { swing } from './springs.js';
+  import { rub } from './springs.js';
   import { pick } from './images.js';
 
   let { cat, cx = 0, cy = 0, r = 30, mood = 'calm', look = 0, tilt = 0, delay = 0, wobble = true } = $props();
@@ -38,7 +38,7 @@
 </script>
 
 <g class="head" transform="translate({cx} {cy}) rotate({tilt})">
-  <g class="nudge" use:swing={{ rub: true, base: 160, max: 280, lean: 18, stiffness: 140, damping: 4.4 }}>
+  <g class="nudge" use:rub={{ base: 160, max: 280, lean: 18, stiffness: 140, damping: 4.4 }}>
   <g class="bob" class:still={!wobble} style="--d:{delay}s">
     {#if photo}
       {#if cutout}

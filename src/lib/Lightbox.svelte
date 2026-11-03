@@ -9,6 +9,7 @@
   import Button from './Button.svelte';
   import { setLightbox } from './lightbox.js';
   import { pick } from './images.js';
+  import { reducedMotion } from './viewport.js';
 
   const SMALL = 'drop-shadow(0 6px 5px rgba(40, 60, 15, 0.3))';
   const BIG = 'drop-shadow(0 30px 34px rgba(20, 30, 15, 0.45))';
@@ -35,7 +36,6 @@
   // what's already on screen of photo i (the print on the line, the stop's photo): shown blurred
   // while the big file loads; a photo not loaded on the page yet gets the smallest file instead
   const previewOf = (i) => source?.(i)?.el?.querySelector('picture img')?.currentSrc || pick(items[i]?.photo, 320, 'webp');
-  const reduce = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   // '4 / 5' → 0.8
   const num = (ratio) => {
     const [w, h] = String(ratio).split('/').map(Number);
@@ -76,7 +76,7 @@
     requestAnimationFrame(() => (lit = true));
     const from = onPage(open);
     lift(from.el);
-    if (reduce()) {
+    if (reducedMotion()) {
       ready = true;
       return;
     }
@@ -112,7 +112,7 @@
     if (busy || open < 0) return;
     ready = false;
     lit = false;
-    if (!reduce()) {
+    if (!reducedMotion()) {
       busy = true;
       const to = onPage(open);
       await animate(
