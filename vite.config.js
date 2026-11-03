@@ -84,6 +84,9 @@ function seo(site) {
         if (!ctx.filename.endsWith('/index.html')) return;
         const meta = (property, content) => ({ tag: 'meta', attrs: { property, content }, injectTo: 'head' });
         return [
+          // kept out of search results until the real e-mail and Instagram are in (contact.placeholder
+          // in content.js); the page stays reachable by its link, it just isn't indexed
+          ...(contact.placeholder ? [{ tag: 'meta', attrs: { name: 'robots', content: 'noindex, nofollow' }, injectTo: 'head' }] : []),
           meta('og:type', 'website'),
           meta('og:locale', 'cs_CZ'),
           meta('og:site_name', name),

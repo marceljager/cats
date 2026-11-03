@@ -2,7 +2,8 @@
 // nastavte photo: '/photos/nazev.jpg'. Zmenšené verze (AVIF, WebP, JPEG) se vyrobí samy při
 // npm run dev / npm run build. Dokud je photo null, ukáže se zástupný rámeček.
 
-// placeholder: true vypne odkaz na Instagram (dokud tam není skutečný účet).
+// placeholder: true vypne odkaz na Instagram (dokud tam není skutečný účet) a schová web před
+// vyhledávači (noindex). Po vyplnění skutečného e-mailu a Instagramu nastavte false.
 // Po vyplnění skutečných údajů nastavte na false.
 export const contact = {
   email: 'kocky.hledaji.domov@example.cz',

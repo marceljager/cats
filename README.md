@@ -12,7 +12,7 @@ npm run build    # static files in dist/
 
 Everything editable lives in `src/content.js`:
 
-- **Contact:** `contact.email`, `contact.instagram`, then set `contact.placeholder` to `false` (this enables the Instagram link). The e-mail button opens a pre-filled message; there is no backend.
+- **Contact:** `contact.email`, `contact.instagram`, then set `contact.placeholder` to `false`. That enables the Instagram link and lets search engines index the page: while it's `true` the page carries `noindex, nofollow`. The e-mail button opens a pre-filled message; there is no backend.
 - **Photos:** put the original files in `photos/` (project root) and set `photo: '/photos/name.jpg'` on the matching cat, stop or gallery entry. Until then a labelled placeholder shows. Stop and cat photos are 4:5 portrait.
   `scripts/images.js` turns each original into several widths (320–1920 px) in AVIF and WebP, plus a JPEG fallback (PNG for cut-outs with transparency), straightened and with metadata such as GPS stripped. The site loads them through `srcset`, so a phone gets a small file and the opened photo (lightbox) a large one, with the small one shown blurred until it arrives. It runs first in `npm run build` (before Vite) and on `npm run dev` (also when you add a photo while it runs), and only re-encodes changed photos; `npm run images` runs it alone. `public/photos/` and `src/photos.json` are generated: don't edit them.
 - **Journey stops:** the `stops` array. Add one object where it belongs in the order; the loopy route, pins, scenery (`doodle`), detours (`detour`), border lines (`country`, `via`) and distance signs redraw automatically. There's a commented-out vet stop to copy.
