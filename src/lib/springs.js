@@ -216,12 +216,28 @@ export function pop(el, keyframes, opts = {}) {
 // Scroll-linked: the node moves through `keyframes` as it travels up through the viewport,
 // from entering at the bottom to leaving at the top, following the scroll both ways.
 //   use:scrollLinked={{ keyframes: { y: [20, -20] }, offset: ['start end', 'end start'] }}
+// `media` limits it to screens that match (e.g. '(min-width: 760px)'); elsewhere, and with reduced
+// motion, the node just sits in its `rest` pose
 export function scrollLinked(node, opts) {
-  const { keyframes, offset = ['start end', 'end start'], rest } = opts;
+  const { keyframes, offset = ['start end', 'end start'], rest, media } = opts;
   if (reduced()) {
     if (rest) animate(node, rest, { duration: 0 });
     return {};
   }
-  const stop = scroll(animate(node, keyframes, { ease: 'linear' }), { target: node, offset });
-  return { destroy: () => stop?.() };
+  const mq = media ? matchMedia(media) : null;
+  let stop;
+  const sync = () => {
+    stop?.();
+    stop = undefined;
+    if (!mq || mq.matches) stop = scroll(animate(node, keyframes, { ease: 'linear' }), { target: node, offset });
+    else animate(node, rest ?? {}, { duration: 0 });
+  };
+  sync();
+  mq?.addEventListener('change', sync);
+  return {
+    destroy: () => {
+      mq?.removeEventListener('change', sync);
+      stop?.();
+    },
+  };
 }

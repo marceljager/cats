@@ -15,11 +15,12 @@
 <section class="section vet" aria-labelledby="vet-h">
   <div class="wrap">
     <!-- a vet's clipboard with the report clipped on -->
-    <!-- the clipboard comes in tilted, straightens as it reaches the middle of the screen, and tilts away again as it leaves -->
+    <!-- on wider screens the clipboard comes in tilted, straightens as it reaches the middle of the
+         screen, and tilts away again as it leaves; on a phone it sits straight and still -->
     <div
       class="board"
       onpointerenter={clack}
-      use:scrollLinked={{ keyframes: { y: [14, 0, -14], rotate: [2.5, 0.8, -2.5] }, rest: { rotate: 0.8 } }}
+      use:scrollLinked={{ keyframes: { y: [14, 0, -14], rotate: [2.5, 0.8, -2.5] }, rest: { y: 0, rotate: 0 }, media: '(min-width: 760px)' }}
     >
       <div class="clip" aria-hidden="true" bind:this={clip}><span></span></div>
       <article class="report">

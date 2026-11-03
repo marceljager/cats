@@ -10,22 +10,34 @@
   import { cats } from '../content.js';
   import { layer } from './forest.js';
 
-  // parallax: each layer of the forest lags the scroll by its own amount
+  // parallax: each layer of the forest is its own element, moved by a transform per scroll frame, so
+  // the phone's GPU slides finished layers instead of repainting the scene. Off screen, the loops stop.
   let hero;
-  let s = $state(0);
+  let idle = $state(false);
   onMount(() => {
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const io = new IntersectionObserver(([e]) => (idle = !e.isIntersecting));
+    io.observe(hero);
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return () => io.disconnect();
+    const layers = [...hero.querySelectorAll('[data-speed]')].map((el) => [el, Number(el.dataset.speed)]);
+    const copy = hero.querySelector('.copy');
     let raf = 0;
+    let last = -1;
+    const frame = () => {
+      raf = 0;
+      const y = Math.min(window.scrollY, hero.offsetHeight * 1.2);
+      if (y === last) return;
+      last = y;
+      for (const [el, k] of layers) el.style.transform = `translate3d(0, ${(y * k).toFixed(1)}px, 0)`;
+      copy.style.transform = `translate3d(0, ${(y * 0.3).toFixed(1)}px, 0)`;
+      copy.style.opacity = String(Math.max(0, 1 - y / 700));
+    };
     const onScroll = () => {
-      if (raf) return;
-      raf = requestAnimationFrame(() => {
-        raf = 0;
-        const y = window.scrollY;
-        if (y < hero.offsetHeight * 1.2) s = y;
-      });
+      if (!raf) raf = requestAnimationFrame(frame);
     };
     window.addEventListener('scroll', onScroll, { passive: true });
+    frame();
     return () => {
+      io.disconnect();
       window.removeEventListener('scroll', onScroll);
       cancelAnimationFrame(raf);
     };
@@ -40,95 +52,85 @@
   ];
 </script>
 
-<header class="hero" bind:this={hero} style="--s:{s}">
-  <!-- the cold forest under Velebit at night; the two of them looking at the one warm window -->
-  <svg class="scene" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-    <defs>
-      <linearGradient id="night" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stop-color="#0b1626" />
-        <stop offset="0.7" stop-color="#18304d" />
-        <stop offset="1" stop-color="#1f3b5c" />
-      </linearGradient>
-      <radialGradient id="warm">
-        <stop offset="0" stop-color="#ffcf5c" stop-opacity="0.8" />
-        <stop offset="1" stop-color="#ffcf5c" stop-opacity="0" />
-      </radialGradient>
-      <!-- depth: the farther a layer, the softer it is -->
-      <filter id="far-blur" x="-5%" y="-5%" width="110%" height="110%"><feGaussianBlur stdDeviation="1.6" /></filter>
-      <filter id="mid-blur" x="-5%" y="-5%" width="110%" height="110%"><feGaussianBlur stdDeviation="0.8" /></filter>
-      <radialGradient id="moonglow">
-        <stop offset="0" stop-color="#f4f1d8" stop-opacity="0.35" />
-        <stop offset="1" stop-color="#f4f1d8" stop-opacity="0" />
-      </radialGradient>
-    </defs>
+<header class="hero" class:idle bind:this={hero}>
+  <!-- the cold forest under Velebit at night; the two of them looking at the one warm window.
+       Every layer is its own SVG (same viewBox, stacked), so it can move and blur as one finished
+       picture; the flicker of the window has a layer of its own -->
+  <div class="scene" aria-hidden="true">
+    <svg class="layer sky" data-speed="0.5" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice">
+      <defs>
+        <radialGradient id="moonglow">
+          <stop offset="0" stop-color="#f4f1d8" stop-opacity="0.35" />
+          <stop offset="1" stop-color="#f4f1d8" stop-opacity="0" />
+        </radialGradient>
+      </defs>
+      <circle cx="1190" cy="150" r="150" fill="url(#moonglow)" />
+      <Drawn id="F1">
+        <g class="stars">
+          {#each [[120, 80, 1.6], [260, 170, 1.2], [420, 60, 1.4], [560, 140, 1], [690, 50, 1.6], [820, 120, 1.2], [980, 70, 1.4], [1090, 180, 1], [1250, 260, 1.3], [1380, 120, 1.5], [340, 260, 1], [760, 230, 1.3], [620, 300, 1], [900, 300, 1.2]] as [sx, sy, sr], i}
+            <circle cx={sx} cy={sy} r={sr * 1.6} style="--d:{(i % 5) * 0.7}s" />
+          {/each}
+        </g>
+        <circle class="moon" cx="1190" cy="150" r="54" />
+        <circle class="crater" cx="1172" cy="138" r="10" />
+        <circle class="crater" cx="1206" cy="170" r="7" />
+        <circle class="crater" cx="1210" cy="128" r="5" />
+      </Drawn>
+    </svg>
 
-    <rect width="1440" height="900" fill="url(#night)" />
-    <!-- each parallax layer can be one hand-drawn picture (F1-F5, see drawn.js); the glows, the
-         fog and the window's flicker stay in code on top -->
-    <g class="layer sky">
-    <circle cx="1190" cy="150" r="150" fill="url(#moonglow)" />
-    <Drawn id="F1">
-    <g class="stars">
-      {#each [[120, 80, 1.6], [260, 170, 1.2], [420, 60, 1.4], [560, 140, 1], [690, 50, 1.6], [820, 120, 1.2], [980, 70, 1.4], [1090, 180, 1], [1250, 260, 1.3], [1380, 120, 1.5], [340, 260, 1], [760, 230, 1.3], [620, 300, 1], [900, 300, 1.2]] as [sx, sy, sr], i}
-        <circle cx={sx} cy={sy} r={sr * 1.6} style="--d:{(i % 5) * 0.7}s" />
-      {/each}
-    </g>
-    <circle class="moon" cx="1190" cy="150" r="54" />
-    <circle class="crater" cx="1172" cy="138" r="10" />
-    <circle class="crater" cx="1206" cy="170" r="7" />
-    <circle class="crater" cx="1210" cy="128" r="5" />
-    </Drawn>
-    </g>
-
-    <g class="layer back">
-    <g filter="url(#far-blur)">
-    {#if drawn('F2')}
-      <!-- the window's glow shows around the house, behind the drawing -->
-      <circle cx="912" cy="700" r="90" fill="url(#warm)" class="glow" />
-      <Drawn id="F2" />
-      <rect class="flame" x="902" y="718" width="20" height="16" rx="1.5" />
+    <!-- the window's glow and the fire in it, flickering together: the flicker is this one small
+         layer's opacity, so nothing else repaints for it -->
+    {#snippet lights()}
+      <svg class="layer lights" data-speed="0.38" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice">
+        <defs>
+          <radialGradient id="warm">
+            <stop offset="0" stop-color="#ffcf5c" stop-opacity="0.8" />
+            <stop offset="1" stop-color="#ffcf5c" stop-opacity="0" />
+          </radialGradient>
+        </defs>
+        <circle cx="912" cy="700" r="90" fill="url(#warm)" />
+        <rect class="flame" x="902" y="718" width="20" height="16" rx="1.5" />
+      </svg>
+    {/snippet}
+    <!-- with a hand-drawn forest the glow shows around the house, behind the drawing -->
+    {#if drawn('F2')}{@render lights()}{/if}
+    <svg class="layer back soft" data-speed="0.38" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice">
+      <Drawn id="F2">
+        <!-- the distant forest floor: one dark mass the far trees grow out of, no hard edge -->
+        <path class="far" d="M-40 1100 V772 C120 762 260 780 420 770 S760 764 900 774 S1240 762 1480 772 V1100 Z" />
+        {#each far as t}<path class="far-trunk" d={t.trunk} /><g class="far-crown">{#each t.tiers as d}<path {d} />{/each}</g>{/each}
+        <!-- the apartment in the distance -->
+        <path class="house" d="M872 760 V706 L912 676 L952 706 V760 Z" />
+        <rect class="lit" x="900" y="716" width="24" height="20" rx="2" />
+        <path class="pane" d="M912 716 V736 M900 726 H924" />
+      </Drawn>
       <ellipse class="fog f1" cx="500" cy="760" rx="520" ry="34" />
-    {:else}
-    <!-- the distant forest floor: one dark mass the far trees grow out of, no hard edge -->
-    <path class="far" d="M-40 1100 V772 C120 762 260 780 420 770 S760 764 900 774 S1240 762 1480 772 V1100 Z" />
-    {#each far as t}<path class="far-trunk" d={t.trunk} /><g class="far-crown">{#each t.tiers as d}<path {d} />{/each}</g>{/each}
+    </svg>
+    {#if !drawn('F2')}{@render lights()}{/if}
 
-    <ellipse class="fog f1" cx="500" cy="760" rx="520" ry="34" />
+    <svg class="layer middle softer" data-speed="0.28" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice">
+      <Drawn id="F3">
+        {#each mid as t}<path class="mid-trunk" d={t.trunk} /><g class="mid">{#each t.tiers as d}<path class="outline" {d} />{/each}{#each t.tiers as d}<path {d} />{/each}</g>{/each}
+      </Drawn>
+    </svg>
 
-    <!-- the apartment in the distance, a fire glowing in its window -->
-    <circle cx="912" cy="700" r="90" fill="url(#warm)" class="glow" />
-    <path class="house" d="M872 760 V706 L912 676 L952 706 V760 Z" />
-    <rect class="lit" x="900" y="716" width="24" height="20" rx="2" />
-    <rect class="flame" x="902" y="718" width="20" height="16" rx="1.5" />
-    <path class="pane" d="M912 716 V736 M900 726 H924" />
-    {/if}
-    </g>
-    </g>
-    <g class="layer middle">
-    <g filter="url(#mid-blur)">
-    <Drawn id="F3">
-      {#each mid as t}<path class="mid-trunk" d={t.trunk} /><g class="mid">{#each t.tiers as d}<path class="outline" {d} />{/each}{#each t.tiers as d}<path {d} />{/each}</g>{/each}
-    </Drawn>
-    </g>
-    </g>
-    <g class="layer near">
+    <svg class="layer near" data-speed="0.2" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice">
+      <!-- the flat forest floor the kittens sit on, running on down behind the hills -->
+      <Drawn id="F4">
+        <path class="ground" d="M-20 1100 V832 C200 812 420 824 640 818 C860 812 1100 826 1460 812 V1100 Z" />
+        <path class="tufts" d="M220 846 l4 -12 l4 12 M236 850 l3 -10 l3 10 M1010 842 l4 -12 l4 12 M1028 846 l3 -9 l3 9 M560 840 l3 -10 l3 10 M1180 846 l4 -11 l4 11" />
+      </Drawn>
+      <!-- the kittens, huddled, looking toward the window -->
+      <Kittens cold />
+      <ellipse class="fog f2" cx="1000" cy="850" rx="560" ry="30" />
+    </svg>
 
-    <!-- the flat forest floor the kittens sit on, running on down behind the hills -->
-    <Drawn id="F4">
-      <path class="ground" d="M-20 1100 V832 C200 812 420 824 640 818 C860 812 1100 826 1460 812 V1100 Z" />
-      <path class="tufts" d="M220 846 l4 -12 l4 12 M236 850 l3 -10 l3 10 M1010 842 l4 -12 l4 12 M1028 846 l3 -9 l3 9 M560 840 l3 -10 l3 10 M1180 846 l4 -11 l4 11" />
-    </Drawn>
-
-    <!-- the kittens, huddled, looking toward the window -->
-    <Kittens cold />
-    <ellipse class="fog f2" cx="1000" cy="850" rx="560" ry="30" />
-    </g>
-    <g class="layer fore">
-    <Drawn id="F5">
-      {#each front as t}<path class="front-trunk" d={t.trunk} /><g class="front">{#each t.tiers as d}<path class="outline" {d} />{/each}{#each t.tiers as d}<path {d} />{/each}</g>{/each}
-    </Drawn>
-    </g>
-  </svg>
+    <svg class="layer fore" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice">
+      <Drawn id="F5">
+        {#each front as t}<path class="front-trunk" d={t.trunk} /><g class="front">{#each t.tiers as d}<path class="outline" {d} />{/each}{#each t.tiers as d}<path {d} />{/each}</g>{/each}
+      </Drawn>
+    </svg>
+  </div>
 
   <ShareButton />
 
@@ -169,31 +171,36 @@
       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 90' preserveAspectRatio='none'%3E%3Cpath d='M-10 52 C120 18 240 14 360 40 C480 66 560 70 700 38 C840 8 960 10 1080 40 C1200 70 1320 64 1450 30 V-10 H-10 Z'/%3E%3C/svg%3E") 0 calc(100% + 1.5px) / 100% var(--hh) no-repeat,
       linear-gradient(#000, #000) 0 0 / 100% calc(100% - var(--hh) + 2px) no-repeat;
   }
-  /* the scene ends where the hills begin, so nothing hides behind them */
+  /* the scene ends where the hills begin, so nothing hides behind them; its layers are stacked
+     SVGs of the same size. The night sky is the box's own background */
   .scene {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: calc(100% - clamp(30px, 4.5vw, 58px));
-    overflow: visible;
+    background: linear-gradient(#0b1626, #18304d 70%, #1f3b5c);
   }
-  /* parallax: every layer sinks a little more than the one in front of it, so things only
-     ever slip behind what is nearer (never lift off); the kittens' clearing sinks under the
-     green hills while the big front trees stay put */
-  .sky,
-  .back,
-  .middle,
-  .near {
+  /* parallax: every layer sinks a little more than the one in front of it (the script sets each
+     one's transform from its data-speed), so things only ever slip behind what is nearer; the big
+     front trees stay put. A layer is moved and blurred as one finished picture, never redrawn */
+  .layer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
     will-change: transform;
   }
-  .sky { transform: translateY(calc(var(--s) * 0.5px)); }
-  .back { transform: translateY(calc(var(--s) * 0.38px)); }
-  .middle { transform: translateY(calc(var(--s) * 0.28px)); }
-  .near { transform: translateY(calc(var(--s) * 0.2px)); }
-  .copy {
-    transform: translateY(calc(var(--s) * 0.3px));
-    opacity: calc(1 - var(--s) / 700);
+  .fore {
+    will-change: auto;
+  }
+  /* depth: the farther a layer, the softer it is */
+  .soft {
+    filter: blur(1.2px);
+  }
+  .softer {
+    filter: blur(0.6px);
   }
   .stars circle {
     fill: #fff;
@@ -260,56 +267,39 @@
     stroke: #05090f;
     stroke-width: 2.5;
   }
-  /* firelight: an uneven orange flicker over the warm window */
+  /* firelight: the glow and the fire flicker unevenly as one, on the lights layer's opacity */
   .flame {
     fill: #ff8a2a;
-    animation: fire 7s ease-in-out infinite;
+    opacity: 0.45;
   }
-  @keyframes fire {
-    0% { opacity: 0.15; }
-    9% { opacity: 0.55; }
-    17% { opacity: 0.25; }
-    29% { opacity: 0.7; }
-    38% { opacity: 0.35; }
-    52% { opacity: 0.6; }
-    61% { opacity: 0.2; }
-    74% { opacity: 0.5; }
-    86% { opacity: 0.3; }
-    100% { opacity: 0.15; }
+  .lights {
+    animation: flicker 7s ease-in-out infinite;
+  }
+  @keyframes flicker {
+    0% { opacity: 0.7; }
+    12% { opacity: 0.95; }
+    22% { opacity: 0.78; }
+    35% { opacity: 1; }
+    48% { opacity: 0.82; }
+    60% { opacity: 0.96; }
+    74% { opacity: 0.74; }
+    88% { opacity: 0.9; }
+    100% { opacity: 0.7; }
   }
   .pane {
     stroke: #8a5a1c;
     stroke-width: 2;
   }
-  .glow {
-    transform-box: fill-box;
-    transform-origin: center;
-    animation: flicker 7s ease-in-out infinite;
-  }
-  @keyframes flicker {
-    0% { opacity: 0.7; scale: 0.94; }
-    12% { opacity: 0.95; scale: 1.03; }
-    22% { opacity: 0.78; scale: 0.97; }
-    35% { opacity: 1; scale: 1.06; }
-    48% { opacity: 0.82; scale: 0.98; }
-    60% { opacity: 0.96; scale: 1.04; }
-    74% { opacity: 0.74; scale: 0.95; }
-    88% { opacity: 0.9; scale: 1.02; }
-    100% { opacity: 0.7; scale: 0.94; }
-  }
   .fog {
     fill: #cfe0f5;
     opacity: 0.12;
-    animation: drift 16s ease-in-out infinite alternate;
   }
   .f2 {
     opacity: 0.1;
-    animation-duration: 21s;
-    animation-direction: alternate-reverse;
   }
-  @keyframes drift {
-    from { translate: -40px 0; }
-    to { translate: 40px 0; }
+  /* scrolled past: every loop in the hero (stars, flicker, the kittens) stops until it's back */
+  .idle :global(*) {
+    animation-play-state: paused !important;
   }
   .ground {
     fill: #10233a;
@@ -454,6 +444,6 @@
     }
   }
   @media (prefers-reduced-motion: reduce) {
-    .stars circle, .glow, .flame, .fog, .story :global(.icon) { animation: none; }
+    .stars circle, .lights, .story :global(.icon) { animation: none; }
   }
 </style>
