@@ -71,8 +71,15 @@ jobs:
         if: env.PURGE_URL != '' && env.API_TOKEN != ''
         run: |
           sleep 30
-          curl --fail-with-body --silent --show-error --retry 3 --retry-all-errors \
-            -X POST "$PURGE_URL" \
-            -H "Authorization: Bearer $API_TOKEN" \
-            -H "Content-Type: application/json" \
-            -o /dev/null -w "purge: HTTP %{http_code}\n"
+          # purge-all takes no body; a paths purge (…/job/purge/paths) gets every path. On an error only
+          # the API's message is printed: the full response names the resource, and the log is public.
+          if [ "${PURGE_URL%purge-all}" = "$PURGE_URL" ]; then
+            set -- -H "Content-Type: application/json" -d '{"paths":["/*"]}'
+          fi
+          code=$(curl --silent --show-error --retry 3 -X POST "$PURGE_URL" \
+            -H "Authorization: Bearer $API_TOKEN" "$@" -o response.json -w "%{http_code}")
+          echo "purge: HTTP $code"
+          if [ "$code" -ge 300 ]; then
+            jq -r '[.message, .detail, (.errors // empty | tostring)] | map(select(. != null)) | join(" ")' response.json 2>/dev/null || true
+            exit 1
+          fi
