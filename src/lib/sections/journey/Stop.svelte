@@ -30,10 +30,7 @@
       {/if}
       <header>
         <h3 id="stop-{stop.id}" class="plaque">{stop.place}</h3>
-        <!-- a sign that already names the country doesn't need the chip repeating it -->
-        {#if !stop.place.startsWith(stop.country)}
-          <span class="chip country"><Icon name="pin" size={18} /><span class="visually-hidden">Země: </span>{stop.country}</span>
-        {/if}
+        <span class="chip country"><Icon name="pin" size={18} /><span class="visually-hidden">Země: </span>{stop.country}</span>
       </header>
       <div class="body">
         <div class="shot">

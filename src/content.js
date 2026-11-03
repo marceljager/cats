@@ -131,7 +131,7 @@ export const stops = [
   },
   {
     id: 'gospic',
-    place: 'Chorvatsko – Gospić',
+    place: 'Gospić',
     country: 'Chorvatsko',
     km: 40,
     title: 'Stetoskop je studený',
@@ -145,7 +145,7 @@ export const stops = [
   },
   {
     id: 'poljana',
-    place: 'Slovinsko – Poljana',
+    place: 'Poljana',
     country: 'Slovinsko',
     km: 330,
     title: 'Pár dní se psy',
