@@ -140,15 +140,21 @@
     ];
   }
 
-  // puts the car `along` the route, leaning into the bend ahead
+  // how far before Prague the car starts straightening up, so it parks there level
+  const LEVEL_OUT = 380;
+
+  // puts the car `along` the route, leaning into the bend ahead; over the last stretch to Prague
+  // the lean eases off, so the two of them arrive sitting upright
   function put(along) {
     const [x, y] = pointAt(along);
     const [ax, ay] = pointAt(along + 6);
     const lean = Math.atan2(ax - x, Math.max(ay - y, 0.01)) * (180 / Math.PI);
+    const t = Math.min(Math.max((pinLens[pinLens.length - 1] - along) / LEVEL_OUT, 0), 1);
+    const upright = t * t * (3 - 2 * t);
     car = {
       x,
       y,
-      tilt: Math.max(-34, Math.min(34, -lean * 0.5)),
+      tilt: Math.max(-34, Math.min(34, -lean * 0.5)) * upright,
       bump: reducedMotion() ? 0 : Math.sin(along / 9) * 1.8,
     };
     travelled = along;
