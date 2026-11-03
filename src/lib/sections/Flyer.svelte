@@ -37,7 +37,6 @@
   // more the further it goes. Only letting go (the click, see tear) tears it off.
   const poses = new WeakMap(); // strip -> { bend, stretch, drop } motion values, read by tear()
   function hold(node) {
-    if (reducedMotion()) return {};
     // bend: skew in degrees (the top edge stays put, the free end swings); stretch: scaleY from the
     // top; drop: only for the new strip sliding in from under the perforation
     const bend = motionValue(0);
@@ -53,6 +52,7 @@
     let held = false;
     // the hinge is the strip's top centre, where it is joined to the flyer
     function towards(e) {
+      if (reducedMotion()) return;
       const r = node.getBoundingClientRect();
       const dx = e.clientX - (r.left + r.width / 2);
       const dy = Math.max(e.clientY - r.top, 8);
@@ -71,7 +71,7 @@
     const down = (e) => {
       held = true;
       node.setPointerCapture?.(e.pointerId);
-      animate(stretch, 1.03, follow);
+      if (!reducedMotion()) animate(stretch, 1.03, follow);
       towards(e);
     };
     const letGo = () => {

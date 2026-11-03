@@ -9,7 +9,7 @@
   import Button from './Button.svelte';
   import { setLightbox } from '../services/lightbox.js';
   import { photoFile } from '../services/images.js';
-  import { reducedMotion } from '../motion/viewport.js';
+  import { isWide, reducedMotion } from '../motion/viewport.js';
 
   const SMALL = 'drop-shadow(0 6px 5px rgba(40, 60, 15, 0.3))';
   const BIG = 'drop-shadow(0 30px 34px rgba(20, 30, 15, 0.45))';
@@ -28,8 +28,8 @@
   const many = $derived(items.length > 1);
   // the frame's width on this screen (see .frame), so srcset fetches a file that fits it, not the page
   const sizes = $derived.by(() => {
-    if (!current || typeof innerWidth === 'undefined') return '100vw';
-    const phone = innerWidth < 760;
+    if (!current || typeof window === 'undefined') return '100vw';
+    const phone = !isWide();
     const w = Math.min(innerWidth * (phone ? 0.86 : 0.74), innerHeight * (phone ? 0.64 : 0.66) * num(current.ratio));
     return `${Math.round(w)}px`;
   });

@@ -3,12 +3,12 @@
   import Text from '../ui/Text.svelte';
   import Card from '../ui/Card.svelte';
   import { vet, catNames } from '../../content.js';
-  import { bouncy, scrollLinked } from '../motion/springs.js';
-  import { animate } from 'motion';
+  import { bouncy, pop, scrollLinked } from '../motion/springs.js';
+  import { WIDE } from '../motion/viewport.js';
 
   // the clipboard's clip snaps shut with a little clack when you point at the report
   let clip;
-  const clack = () => clip && animate(clip, { y: [0, 5, 0], scaleX: [1, 1.06, 1] }, { duration: 0.32, ease: 'easeOut' });
+  const clack = () => pop(clip, { y: [0, 5, 0], scaleX: [1, 1.06, 1] }, { type: 'tween', duration: 0.32, ease: 'easeOut' });
 
 </script>
 
@@ -22,7 +22,7 @@
       class="board"
       role="presentation"
       onpointerenter={clack}
-      use:scrollLinked={{ keyframes: { y: [14, 0, -14], rotate: [2.5, 0.8, -2.5] }, rest: { y: 0, rotate: 0 }, media: '(min-width: 760px)' }}
+      use:scrollLinked={{ keyframes: { y: [14, 0, -14], rotate: [2.5, 0.8, -2.5] }, rest: { y: 0, rotate: 0 }, media: WIDE }}
     >
       <div class="clip" aria-hidden="true" bind:this={clip}><span></span></div>
       <article class="report">

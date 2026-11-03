@@ -15,7 +15,7 @@
   import { kmAt, lengthAt } from '../art/odometer.js';
   import { springTo } from '../motion/springs.js';
   import { stops } from '../../content.js';
-  import { onScreen, onScrollFrame, reducedMotion } from '../motion/viewport.js';
+  import { isWide, onScreen, onScrollFrame, reducedMotion } from '../motion/viewport.js';
 
   let root;
   let routePath = $state();
@@ -85,7 +85,7 @@
   // lays the whole map out again for the stories where they now sit (on mount and on every resize)
   function drawMap() {
     if (!root) return;
-    const wide = innerWidth >= 760;
+    const wide = isWide();
     w = root.clientWidth;
     h = root.offsetHeight;
     geo = measureStops(wide);
@@ -234,7 +234,7 @@
 
       <!-- clouds float above the map and lag behind the scroll, so it reads as seen from up high -->
       {#each clouds as c}
-        <div class="cloud" style="left:{c.x}px; top:{c.y}px; width:{c.w}px; --dur:{c.dur}s" use:parallax={0.22}>
+        <div class="cloud" style="left:{c.x}px; top:{c.y}px; width:{c.w}px; --dur:{c.dur}s" use:parallax={0.28}>
           <svg viewBox="0 0 200 92" aria-hidden="true" style={c.flip ? 'scale: -1 1' : ''}>
               <!-- the outline under everything, so it only shows around the silhouette; then the
                    puffs in shade, and again in light a little smaller and up to the left, so the

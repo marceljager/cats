@@ -49,22 +49,22 @@
 
   <!-- the window to the night forest; it hangs on the wall and drifts a touch behind the
        furniture as you scroll, and the night inside it drifts in layers behind the glass -->
-  <g use:parallax={0.05}>
+  <g use:parallax={0.053}>
   <g clip-path="url(#pane)">
     <rect class="sky" x="330" y="110" width="260" height="230" />
     <!-- depth through the glass: the sky lags the window the most, the far trees less, the
          near ones least, so the forest slides past the frame in layers -->
-    <g use:parallax={0.045}>
+    <g use:parallax={0.047}>
       <circle class="moon" cx="530" cy="164" r="17" />
       <circle class="crater" cx="524" cy="160" r="3.4" /><circle class="crater" cx="536" cy="170" r="2.4" />
       {#each [[372, 150, 1.8], [410, 136, 1.4], [452, 170, 1.6], [486, 140, 1.3], [392, 190, 1.2], [560, 206, 1.4]] as [cx, cy, r]}<circle class="star" {cx} {cy} {r} />{/each}
     </g>
     <!-- the forest, one flat colour a row: the far one paler, the near one darker -->
-    <g use:parallax={0.032}>
+    <g use:parallax={0.033}>
       {#each far as t}<path class="pine far" d={t.trunk} />{#each t.tiers as d}<path class="pine far" {d} />{/each}{/each}
       <path class="snow" d="M330 306 C380 298 430 304 470 300 S550 296 590 304 V370 H330 Z" />
     </g>
-    <g use:parallax={0.02}>
+    <g use:parallax={0.0204}>
       {#each near as t}<path class="pine near" d={t.trunk} />{#each t.tiers as d}<path class="pine near" {d} />{/each}{/each}
     </g>
   </g>

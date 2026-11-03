@@ -2,8 +2,20 @@
 // The window as every moving thing on the page sees it: the reduced-motion setting, whether an
 // element is on screen, and one shared scroll listener.
 
-// asked fresh each time, so switching the system setting takes effect without a reload
-export const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+// Asked fresh each time it matters: every action reads it per event or per frame, never once at
+// mount, so switching the system setting takes effect without a reload.
+const REDUCE = '(prefers-reduced-motion: reduce)';
+export const reducedMotion = () => matchMedia(REDUCE).matches;
+// call `fn` whenever the setting changes; returns the unsubscribe
+export function onReducedMotionChange(fn) {
+  const mq = matchMedia(REDUCE);
+  mq.addEventListener('change', fn);
+  return () => mq.removeEventListener('change', fn);
+}
+
+// where the page switches from its phone layout to the wide one (the CSS uses the same 760px)
+export const WIDE = '(min-width: 760px)';
+export const isWide = () => matchMedia(WIDE).matches;
 
 // whether any part of `el` is inside the viewport, or within `margin` px of it
 export function onScreen(el, margin = 0) {

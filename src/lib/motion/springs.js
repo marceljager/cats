@@ -2,7 +2,7 @@
 // Spring-physics helpers on Motion, shared by every interactive animation on the page,
 // so everything that moves when you touch it moves the same, natural way.
 import { animate, hover, press, scroll, motionValue } from 'motion';
-import { onScrollFrame, reducedMotion } from './viewport.js';
+import { onReducedMotionChange, onScrollFrame, reducedMotion } from './viewport.js';
 
 // how a pendulum swings back to hanging straight; stiffness and damping can be tuned per use
 /** @returns {import('motion').ValueAnimationTransition} */
@@ -141,7 +141,8 @@ export function rub(node, opts = {}) {
   };
   const tap = (e) => {
     if (reducedMotion() || e.pointerType === 'mouse') return;
-    push((e.offsetX < node.getBBox?.().width / 2 ? 1 : -1) * (opts.base ?? 150));
+    const r = node.getBoundingClientRect();
+    push((e.clientX < r.left + r.width / 2 ? 1 : -1) * (opts.base ?? 150));
   };
   const enter = (e) => (fromX = e.clientX);
   node.addEventListener('pointerenter', enter);
@@ -174,19 +175,20 @@ export function bouncy(node, opts = {}) {
   const sp = { type: 'spring', stiffness: 520, damping: 18 };
   configure(opts);
   animate(node, rest, { duration: 0 });
-  if (reducedMotion()) return {};
+  // with reduced motion the control just stays at rest
+  const go = (pose, spring) => animate(node, reducedMotion() ? rest : pose, reducedMotion() ? { duration: 0 } : spring);
   const offHover = hover(node, () => {
-    animate(node, over, sp);
-    return () => animate(node, rest, sp);
+    go(over, sp);
+    return () => go(rest, sp);
   });
   const offPress = press(node, () => {
-    animate(node, down, { type: 'spring', stiffness: 700, damping: 22 });
-    return () => animate(node, node.matches(':hover') ? over : rest, sp);
+    go(down, { type: 'spring', stiffness: 700, damping: 22 });
+    return () => go(node.matches(':hover') ? over : rest, sp);
   });
   return {
     update(o) {
       configure(o ?? {});
-      animate(node, node.matches(':hover') ? over : rest, sp);
+      go(node.matches(':hover') ? over : rest, sp);
     },
     destroy() {
       offHover();
@@ -198,11 +200,11 @@ export function bouncy(node, opts = {}) {
 // Spring to a state: whenever `to` changes the node springs there. The first value is applied
 // instantly, so the page renders in place without a jump.
 //   use:springTo={{ to: { y: 0, scale: 1 }, bounce: 0.4, duration: 0.5 }}
-export function springTo(node, params) {
+export function springTo(node, params = {}) {
   let first = true;
   let last = '';
   function run(p) {
-    const { to, bounce = 0.35, duration = 0.5, ...extra } = p;
+    const { to = {}, bounce = 0.35, duration = 0.5, ...extra } = p ?? {};
     // the same target arrives on every scroll frame; restarting the spring each time would
     // keep it crawling, so only a real change of target starts a new spring
     const key = JSON.stringify(to);
@@ -230,14 +232,14 @@ export function pop(el, keyframes, opts = {}) {
 //   use:scrollLinked={{ keyframes: { y: [20, -20] }, offset: ['start end', 'end start'] }}
 // `media` limits it to screens that match (e.g. '(min-width: 760px)'); elsewhere, and with reduced
 // motion, the node just sits in its `rest` pose
-export function scrollLinked(node, opts) {
+export function scrollLinked(node, opts = {}) {
   let mq = null;
   let stop;
   const sync = () => {
     stop?.();
     stop = undefined;
     const { keyframes, offset = ['start end', 'end start'], rest } = opts;
-    if (!mq || mq.matches) stop = scroll(animate(node, keyframes, { ease: 'linear' }), { target: node, offset });
+    if (!reducedMotion() && (!mq || mq.matches)) stop = scroll(animate(node, keyframes, { ease: 'linear' }), { target: node, offset });
     else animate(node, rest ?? {}, { duration: 0 });
   };
   const configure = () => {
@@ -246,18 +248,16 @@ export function scrollLinked(node, opts) {
     mq?.addEventListener('change', sync);
     sync();
   };
-  if (reducedMotion()) {
-    if (opts.rest) animate(node, opts.rest, { duration: 0 });
-    return {};
-  }
+  const offReduced = onReducedMotionChange(sync);
   configure();
   return {
     update(o) {
-      opts = o;
+      opts = o ?? {};
       configure();
     },
     destroy() {
       mq?.removeEventListener('change', sync);
+      offReduced();
       stop?.();
     },
   };

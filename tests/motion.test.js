@@ -46,23 +46,39 @@ describe('viewport', () => {
 });
 
 describe('parallax', () => {
-  const node = (top) => ({ style: {}, getBoundingClientRect: () => ({ top, bottom: top + 100, height: 100 }) });
-  test('drifts by its share of the distance from the middle of the screen', async () => {
+  // like a real element, its box includes its own translate
+  const node = (top) => {
+    const el = { style: {} };
+    el.getBoundingClientRect = () => {
+      const shift = parseFloat((el.style.translate ?? '').split(' ')[1]) || 0;
+      return { top: top + shift, bottom: top + shift + 100, height: 100 };
+    };
+    return el;
+  };
+  test('drifts by its share of the distance from the middle of the screen, however often it is placed', async () => {
     const { parallax } = await import('../src/lib/motion/parallax.js');
     const el = node(550); // centre 600, 200 below the middle
     const action = parallax(el, 0.1);
     expect(el.style.translate).toBe('0 20.0px');
+    fire('scroll');
+    nextFrame();
+    expect(el.style.translate).toBe('0 20.0px'); // its own drift doesn't feed back
     action.update({ speed: -0.05 });
     expect(el.style.translate).toBe('0 -10.0px');
     action.destroy();
     expect(el.style.translate).toBe('');
   });
-  test('stays put with reduced motion', async () => {
+  test('stays put with reduced motion, and starts moving once it is switched off', async () => {
     reduce = true;
     const { parallax } = await import('../src/lib/motion/parallax.js');
     const el = node(550);
-    expect(parallax(el, 0.1)).toEqual({});
-    expect(el.style.translate).toBeUndefined();
+    const action = parallax(el, 0.1);
+    expect(el.style.translate).toBe('');
+    reduce = false;
+    fire('scroll');
+    nextFrame();
+    expect(el.style.translate).toBe('0 20.0px');
+    action.destroy();
   });
 });
 

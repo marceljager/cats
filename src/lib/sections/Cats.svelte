@@ -6,9 +6,9 @@
   import Card from '../ui/Card.svelte';
   import CatHead from '../art/CatHead.svelte';
   import Icon from '../ui/Icon.svelte';
-  import { animate } from 'motion';
   import { cats } from '../../content.js';
-  import { bouncy } from '../motion/springs.js';
+  import { bouncy, pop } from '../motion/springs.js';
+  import { reducedMotion } from '../motion/viewport.js';
   import { zoomPhoto } from '../services/lightbox.js';
 
   // photo-booth frames: the two of them pulling a different face in each shot
@@ -43,14 +43,26 @@
     requestAnimationFrame(() => (meow[id] = true));
   }
 
-  // the bubble pops out on a spring, hangs a moment, then floats up and fades
+  // the bubble pops out on a spring, hangs a moment, then floats up and fades (with reduced motion
+  // it just shows for the same moment). A newer bubble replaces this one, so a bubble that was
+  // replaced leaves the newer one alone when its own time is up.
   function meowPop(node, id) {
-    node.style.opacity = '0';
+    let replaced = false;
     (async () => {
-      await animate(node, { opacity: [0, 1], scale: [0.4, 1], y: [12, 0], rotate: [-10, 0] }, { type: 'spring', bounce: 0.55, visualDuration: 0.32, opacity: { duration: 0.12 } });
-      await animate(node, { opacity: 0, y: -16 }, { duration: 0.45, delay: 0.55, ease: 'easeIn' });
-      meow[id] = false;
+      if (reducedMotion()) {
+        await new Promise((r) => setTimeout(r, 1300));
+      } else {
+        node.style.opacity = '0';
+        await pop(node, { opacity: [0, 1], scale: [0.4, 1], y: [12, 0], rotate: [-10, 0] }, { bounce: 0.55, visualDuration: 0.32, opacity: { duration: 0.12 } });
+        await pop(node, { opacity: 0, y: -16 }, { type: 'tween', duration: 0.45, delay: 0.55, ease: 'easeIn' });
+      }
+      if (!replaced) meow[id] = false;
     })();
+    return {
+      destroy() {
+        replaced = true;
+      },
+    };
   }
 
   // a click opens the photo big (the cat already said hello on hover); with no photo yet, it meows
