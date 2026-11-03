@@ -86,7 +86,11 @@
     {/snippet}
     <!-- with a hand-drawn forest the glow shows around the house, behind the drawing -->
     {#if drawn('F2')}{@render lights()}{/if}
-    <svg class="layer back soft" style="--k:0.38" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice">
+    <svg class="layer back" style="--k:0.38" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice">
+      <defs>
+        <filter id="hero-far-blur" filterUnits="userSpaceOnUse" x="-900" y="0" width="3240" height="1200"><feGaussianBlur stdDeviation="1.2" /></filter>
+      </defs>
+      <g class="soft">
       <Drawn id="F2">
         <!-- the distant forest floor: one dark mass the far trees grow out of, no hard edge -->
         <path class="far" d="M-820 1100 V770 C-600 760 -300 778 -40 772 C120 762 260 780 420 770 S760 764 900 774 S1240 762 1480 772 C1760 778 2000 764 2260 772 V1100 Z" />
@@ -97,13 +101,19 @@
         <path class="pane" d="M912 716 V736 M900 726 H924" />
       </Drawn>
       <ellipse class="fog f1" cx="500" cy="760" rx="520" ry="34" />
+      </g>
     </svg>
     {#if !drawn('F2')}{@render lights()}{/if}
 
-    <svg class="layer middle softer" style="--k:0.28" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice">
+    <svg class="layer middle" style="--k:0.28" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice">
+      <defs>
+        <filter id="hero-mid-blur" filterUnits="userSpaceOnUse" x="-900" y="0" width="3240" height="1200"><feGaussianBlur stdDeviation="0.6" /></filter>
+      </defs>
+      <g class="softer">
       <Drawn id="F3">
         {#each mid as t}<path class="mid-trunk" d={t.trunk} /><g class="mid">{#each t.tiers as d}<path class="outline" {d} />{/each}{#each t.tiers as d}<path {d} />{/each}</g>{/each}
       </Drawn>
+      </g>
     </svg>
 
     <svg class="layer near" style="--k:0.2" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice">
@@ -222,13 +232,15 @@
     to { transform: translate3d(0, 210px, 0); opacity: 0; }
   }
   /* depth: the farther a layer, the softer it is. Only with a mouse on a wide screen: Safari blurs
-     on the CPU, and at phone size the softening barely shows */
+     on the CPU, and at phone size the softening barely shows. The blur is an SVG filter inside the
+     layer, so it's painted into the layer once; a CSS filter on the moving layer itself would make
+     the GPU blur the whole screen-sized layer again on every scroll frame */
   @media (min-width: 760px) and (hover: hover) {
     .soft {
-      filter: blur(1.2px);
+      filter: url(#hero-far-blur);
     }
     .softer {
-      filter: blur(0.6px);
+      filter: url(#hero-mid-blur);
     }
   }
   .stars circle {
