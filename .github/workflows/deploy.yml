@@ -71,15 +71,15 @@ jobs:
         if: env.PURGE_URL != '' && env.API_TOKEN != ''
         run: |
           sleep 30
-          # purge-all takes no body; a paths purge (…/job/purge/paths) gets every path. On an error only
-          # the API's message is printed: the full response names the resource, and the log is public.
-          if [ "${PURGE_URL%purge-all}" = "$PURGE_URL" ]; then
-            set -- -H "Content-Type: application/json" -d '{"paths":["/*"]}'
-          fi
-          code=$(curl --silent --show-error --retry 3 -X POST "$PURGE_URL" \
-            -H "Authorization: Bearer $API_TOKEN" "$@" -o response.json -w "%{http_code}")
+          # always the purge-everything endpoint, whichever purge address the secret holds
+          # (…/job/purge, …/job/purge/paths or …/job/purge-all)
+          url="${PURGE_URL%%/job/*}/job/purge-all"
+          code=$(curl --silent --show-error --retry 3 -X POST "$url" \
+            -H "Authorization: Bearer $API_TOKEN" -o response.json -w "%{http_code}")
           echo "purge: HTTP $code"
           if [ "$code" -ge 300 ]; then
-            jq -r '[.message, .detail, (.errors // empty | tostring)] | map(select(. != null)) | join(" ")' response.json 2>/dev/null || true
+            # the log is public and the API's messages name the resource: long numbers are blanked out
+            jq -r '[.message, .detail, (.errors // empty | tostring)] | map(select(. != null)) | join(" ")' response.json 2>/dev/null \
+              | sed -E 's/[0-9]{5,}/<id>/g' || true
             exit 1
           fi
