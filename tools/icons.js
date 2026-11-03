@@ -1,5 +1,5 @@
 // public/apple-touch-icon.png (iOS home screen, which doesn't take SVG) from public/favicon.svg
-//   node tools/icons.mjs
+//   npm run icons
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 

@@ -1,16 +1,16 @@
 // public/og.png, the picture a shared link shows (Facebook, WhatsApp, Messenger…): a polaroid of the two
 // of them taped onto the night-blue of the page's first screen, beside one line in the site's own font.
 // Drawn as an HTML page and photographed by headless Chrome at 1200×630, so the type is real Nunito.
-//   node tools/og.mjs
+//   npm run og
 import { writeFile, rm, readFile } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import sharp from 'sharp';
+import { CHROME } from './chrome.js';
 
 const root = new URL('../', import.meta.url);
-const CHROME = process.env.CHROME ?? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const PHOTO = 'photos/kotata-na-dece.jpg';
 // a square of the (portrait) photo centred between the two faces, so neither cat gets more of it
 const CROP = { left: 250, top: 760, width: 800, height: 800 };
@@ -61,7 +61,11 @@ const page = join(tmpdir(), `og-${process.pid}.html`);
 const shot = join(tmpdir(), `og-${process.pid}.png`);
 await writeFile(page, html);
 try {
-  execFileSync(CHROME, ['--headless=new', '--disable-gpu', '--hide-scrollbars', '--force-device-scale-factor=1', '--window-size=1200,630', '--virtual-time-budget=3000', `--screenshot=${shot}`, `file://${page}`], { stdio: 'ignore' });
+  try {
+    execFileSync(CHROME, ['--headless=new', '--disable-gpu', '--hide-scrollbars', '--force-device-scale-factor=1', '--window-size=1200,630', '--virtual-time-budget=3000', `--screenshot=${shot}`, `file://${page}`], { stdio: ['ignore', 'ignore', 'pipe'] });
+  } catch (err) {
+    throw new Error(`og: Chrome couldn't take the screenshot (${CHROME})\n${err.stderr ?? err.message}`);
+  }
   const out = fileURLToPath(new URL('public/og.png', root));
   // Chrome adds no bottom bar in headless, but trim to the exact size anyway, then squeeze the PNG
   await sharp(await readFile(shot)).extract({ left: 0, top: 0, width: 1200, height: 630 }).png({ compressionLevel: 9, palette: true, quality: 90 }).toFile(out);

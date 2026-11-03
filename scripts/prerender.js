@@ -1,6 +1,6 @@
 // after `vite build`: renders the page with the server build and writes the HTML into dist/index.html,
 // so the story is readable without JavaScript (crawlers, link previews); the browser then hydrates it
-import { readFile, writeFile, rm } from 'node:fs/promises';
+import { readdir, readFile, writeFile, rm } from 'node:fs/promises';
 
 const ssrDir = new URL('../.ssr/', import.meta.url);
 const indexFile = new URL('../dist/index.html', import.meta.url);
@@ -16,7 +16,6 @@ await rm(ssrDir, { recursive: true });
 
 // the site is the landing page alone: no other page (the dev-only kit.html / drawings.html
 // review pages included) may end up in the upload
-const { readdir } = await import('node:fs/promises');
 const pages = (await readdir(new URL('../dist/', import.meta.url), { recursive: true })).filter((f) => /\.html?$/i.test(f));
 if (pages.join() !== 'index.html') throw new Error(`dist/ must hold only index.html, found: ${pages.join(', ')}`);
 console.log('prerendered dist/index.html');

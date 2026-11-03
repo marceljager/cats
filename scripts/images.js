@@ -1,7 +1,8 @@
 // photos/ (the originals) → public/photos/ (what the site loads): every photo resized to a few widths
 // in AVIF, WebP and a JPEG fallback (PNG for cut-outs with transparency), plus src/photos.json, which
-// tells Photo.svelte which widths exist so the browser can pick the smallest one that looks sharp.
-// Runs on its own (`npm run images`) and from vite.config.js before every dev start and build.
+// src/lib/images.js reads to tell the browser which widths exist, so it can pick the smallest one
+// that looks sharp. Runs on its own (`npm run images`), first in `npm run build` (package.json), and
+// in the dev server at start and whenever a photo changes (the images plugin, scripts/vite-plugins.js).
 // Only photos that are new or changed get encoded again; outputs of deleted photos are removed.
 import { readdir, mkdir, rm, writeFile, readFile, access } from 'node:fs/promises';
 import { createHash } from 'node:crypto';

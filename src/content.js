@@ -2,6 +2,20 @@
 // nastavte photo: '/photos/nazev.jpg'. Zmenšené verze (AVIF, WebP, JPEG) se vyrobí samy při
 // npm run dev / npm run build. Dokud je photo null, ukáže se zástupný rámeček.
 
+// Jak web vidí vyhledávače a náhledy sdílených odkazů. title a description mají délku pro výsledek
+// vyhledávání (asi 60 a 155 znaků); story je delší verze pro strojová shrnutí (JSON-LD, llms.txt);
+// share je text zprávy, když nás někdo pošle dál (WhatsApp, e-mail, sdílení z telefonu).
+export const site = {
+  name: 'Velík a Polly hledají domov',
+  title: 'Velík a Polly – koťata zdarma k adopci v Praze',
+  description: 'Dvě koťata (kluk a holka, 6–7 měsíců) zachráněná v Chorvatsku hledají domov v Praze a okolí. Mazlivá, zvyklá na psy, odčervená, zdarma do dobrých rukou.',
+  story: 'Dvě koťata (kluk a holka, 6–7 měsíců) z chorvatského pohoří Velebit hledají domov. Jsou mazlivá, pořád u lidí a nebojí se ani psů. Odčervená, odblešená, po veterinární kontrole, kocourek je vykastrovaný. Aktuálně jsou v Praze 6 – zdarma do dobrých rukou (ideálně oba spolu).',
+  share: {
+    text: 'Velík a Polly hledají domov – koťata zdarma k darování v Praze a okolí. Nevíte o někom?',
+    subject: 'Víte o domově pro dvě koťata?',
+  },
+};
+
 // placeholder: true vypne odkaz na Instagram (dokud tam není skutečný účet) a schová web před
 // vyhledávači (noindex). Po vyplnění skutečného e-mailu a Instagramu nastavte false.
 // Po vyplnění skutečných údajů nastavte na false.
