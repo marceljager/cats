@@ -435,6 +435,15 @@
       /* the cats' row under the chips stays free, however long the text gets */
       padding-bottom: 22svh;
     }
+    /* wider screens have room beside the moon: the story runs in longer lines, fewer of them */
+    .copy :global(.hero-sub) {
+      max-width: 42ch;
+    }
+  }
+  @media (min-width: 1100px) {
+    .copy :global(.hero-sub) {
+      max-width: 50ch;
+    }
   }
   /* phones: room for the cats under the words, so a longer text grows the hero instead of
      running into them (the cats sit in the scene's bottom fifth) */
