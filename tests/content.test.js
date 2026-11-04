@@ -1,7 +1,7 @@
 // content.js is edited by hand: what the rest of the site takes for granted about it
 import { existsSync } from 'node:fs';
 import { describe, expect, test } from 'vitest';
-import { cats, catNames, contact, gallery, site, stops, vet } from '../src/content.js';
+import { cats, catNames, contact, contactFrom, gallery, site, stops, vet } from '../src/content.js';
 import { KINDS } from '../src/lib/art/scenery.js';
 
 // '/photos/velik.jpg' → the original in photos/
@@ -68,6 +68,13 @@ test('gallery photos have a known shape and are in photos/', () => {
 test('the vet report has a verdict and what was done at each visit', () => {
   expect(vet.verdict).toBeTruthy();
   for (const v of vet.visits) expect(v.done.length, v.title).toBeGreaterThan(0);
+});
+
+test('the contact comes from the build: e-mail on the site’s domain, Instagram without the @', () => {
+  const c = contactFrom({ SITE_URL: 'https://example.cz/', SITE_INSTAGRAM: '@kocky' });
+  expect(c).toMatchObject({ email: 'domov@example.cz', instagram: 'kocky', placeholder: false });
+  expect(contactFrom({ SITE_URL: 'https://example.cz' }).placeholder).toBe(true);
+  expect(contactFrom({}).placeholder).toBe(true);
 });
 
 test('contact has an address and a pre-filled message', () => {

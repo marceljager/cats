@@ -124,7 +124,7 @@
           </Button>
           <Button
             theme="paper"
-            href={contact.placeholder ? '#domov' : `https://instagram.com/${contact.instagram}`}
+            href={contact.placeholder ? '#domov' : `https://www.instagram.com/${contact.instagram}`}
             target={contact.placeholder ? undefined : '_blank'}
             rel="noopener"
             data-track={contact.placeholder ? undefined : 'instagram'}

@@ -46,19 +46,31 @@ export const site = {
   },
 };
 
-// placeholder: true vypne odkaz na Instagram (dokud tam není skutečný účet) a schová web před
-// vyhledávači (noindex). Po vyplnění skutečného e-mailu a Instagramu nastavte false.
-// Po vyplnění skutečných údajů nastavte na false.
+// Kontakt. Doména a Instagram nejsou v repozitáři: dává je build z proměnných prostředí
+// (GitHub → Settings → Secrets and variables → Actions → Variables, lokálně soubor .env):
+//   SITE_URL        adresa webu, např. https://domena.cz; e-mail je pak domov@domena.cz
+//   SITE_INSTAGRAM  účet na Instagramu (bez @)
+// Bez nich je kontakt zástupný (placeholder): odkaz na Instagram nevede nikam a web má noindex.
 // mail = předvyplněný e-mail, který se otevře po kliknutí na tlačítko.
-export const contact = {
-  email: 'kocky.hledaji.domov@example.cz',
-  instagram: 'kocky.z.velebitu',
-  placeholder: true,
-  mail: {
-    subject: 'Domov pro Velíka a Polly',
-    body: 'Ahoj Velíku a Polly,\n\nrádi bychom vám dali domov (oběma / jednomu z vás).\n\nKde bydlíme:\nKdo u nás žije (lidi i zvířata):\nNěco o nás:\n\n',
-  },
-};
+/** @param {{ SITE_URL?: string, SITE_INSTAGRAM?: string }} env */
+export function contactFrom(env) {
+  const host = env.SITE_URL ? new URL(env.SITE_URL).hostname : '';
+  const instagram = (env.SITE_INSTAGRAM ?? '').replace(/^@/, '');
+  return {
+    email: `domov@${host || 'example.cz'}`,
+    instagram: instagram || 'kocky.z.velebitu',
+    placeholder: !host || !instagram,
+    mail: {
+      subject: 'Domov pro Velíka a Polly',
+      body: 'Ahoj Velíku a Polly,\n\nrádi bychom vám dali domov (oběma / jednomu z vás).\n\nKde bydlíme:\nKdo u nás žije (lidi i zvířata):\nNěco o nás:\n\n',
+    },
+  };
+}
+
+// import.meta.env: in the browser and server builds, Vite fills in the SITE_ variables (envPrefix in
+// vite.config.js); in plain Node (vite.config.js loading this file) there is none, and vite/seo.js
+// calls contactFrom itself
+export const contact = contactFrom(import.meta.env ?? {});
 
 /** @type {Cat[]} */
 export const cats = [

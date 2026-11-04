@@ -1,14 +1,19 @@
 // What search engines, link previews and AI assistants get, all from content.js (wired up in
 // vite.config.js): the title and description (put into index.html), Open Graph tags, JSON-LD,
 // llms.txt and robots.txt, and with the site's address also the canonical link, og:image,
-// ai-catalog.json and sitemap.xml. siteUrl (SITE_URL in .env or the environment, e.g.
-// https://velikapolly.cz) turns on everything that needs an absolute address.
-import { site, cats, stops, vet, contact } from '../src/content.js';
+// ai-catalog.json and sitemap.xml. env is the build's SITE_ variables: SITE_URL (the site's address)
+// turns on everything that needs an absolute address, and with SITE_INSTAGRAM it makes the contact.
+import { site, cats, stops, vet, contactFrom } from '../src/content.js';
 
 const { name, title, description, story } = site;
 
+// SITE_URL without a trailing slash, or '' when there is none
+const urlOf = (env) => (env.SITE_URL ?? '').replace(/\/$/, '');
+
 // the files served beside the page: { path: [content type, content] }
-export function seoFiles(siteUrl) {
+export function seoFiles(env = {}) {
+  const siteUrl = urlOf(env);
+  const contact = contactFrom(env);
   const abs = (path) => siteUrl + path;
   const llms = [
     `# ${name}`,
@@ -34,7 +39,7 @@ export function seoFiles(siteUrl) {
     '## Kontakt',
     '',
     `- E-mail: ${contact.email}`,
-    ...(contact.placeholder ? [] : [`- Instagram: https://instagram.com/${contact.instagram}`]),
+    ...(contact.placeholder ? [] : [`- Instagram: https://www.instagram.com/${contact.instagram}`]),
     ...(siteUrl ? ['', '## Stránky', '', `- [${name}](${abs('/')}): celý příběh, fotky a kontakt`] : []),
     '',
   ].join('\n');
@@ -81,7 +86,9 @@ export function seoFiles(siteUrl) {
 }
 
 // the tags the head of index.html gets
-export function headTags(siteUrl) {
+export function headTags(env = {}) {
+  const siteUrl = urlOf(env);
+  const contact = contactFrom(env);
   const abs = (path) => siteUrl + path;
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -121,14 +128,15 @@ export function headTags(siteUrl) {
   ];
 }
 
-export function seo(siteUrl) {
-  const files = seoFiles(siteUrl);
+export function seo(env) {
+  const siteUrl = urlOf(env);
+  const files = seoFiles(env);
   return {
     name: 'seo',
     transformIndexHtml: {
       order: 'pre',
       handler(html, ctx) {
-        if (ctx.filename.endsWith('/index.html')) return headTags(siteUrl);
+        if (ctx.filename.endsWith('/index.html')) return headTags(env);
       },
     },
     configureServer(server) {
@@ -141,7 +149,8 @@ export function seo(siteUrl) {
     },
     generateBundle() {
       if (this.environment.config.build.ssr) return;
-      if (!siteUrl) this.warn('SITE_URL is not set: no canonical, og:url, og:image, ai-catalog.json or sitemap.xml in this build');
+      if (!siteUrl) this.warn('SITE_URL is not set: no canonical, og:url, og:image, ai-catalog.json or sitemap.xml, and a placeholder contact in this build');
+      else if (contactFrom(env).placeholder) this.warn('SITE_INSTAGRAM is not set: a placeholder contact and noindex in this build');
       for (const [fileName, [, source]] of Object.entries(files)) this.emitFile({ type: 'asset', fileName, source });
     },
   };

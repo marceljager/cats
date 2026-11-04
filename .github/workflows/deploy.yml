@@ -1,7 +1,8 @@
 # every push to main: build the site and publish dist/ on GitHub Pages
-# (https://marceljager.github.io/cats/). Settings → Pages → Source must be "GitHub Actions".
-# The public address (the CDN domain) goes in Settings → Secrets and variables → Actions →
-# Variables as SITE_URL; without it the build has no og:image, canonical or ai-catalog.json.
+# (https://marceljager.github.io/cats/), served to visitors on the CDN's domain.
+# Settings → Pages → Source must be "GitHub Actions". The site's address and Instagram account aren't
+# in the repo: they're the variables SITE_URL and SITE_INSTAGRAM (Settings → Secrets and variables →
+# Actions → Variables). Without them the build has no og:image or canonical, and a placeholder contact.
 # Secrets CDN_PURGE_URL (purge-all API address, resource ID included) and CDN_API_TOKEN, in the
 # "production" environment, make every deploy end by clearing the CDN's cache; they stay out of
 # the repo and are masked in the logs.
@@ -42,6 +43,7 @@ jobs:
       - run: npm run build
         env:
           SITE_URL: ${{ vars.SITE_URL }}
+          SITE_INSTAGRAM: ${{ vars.SITE_INSTAGRAM }}
       # nothing is published unless the types check and the tests pass (content.js, the map's
       # geometry, sharing, and every photo file the page asks for)
       - run: npm run check

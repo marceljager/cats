@@ -14,7 +14,12 @@ npm run check    # type checking (svelte-check)
 
 The facts and data live in `src/content.js`; each section's own words (its title, intro and captions) sit in its component in `src/lib/sections/`, next to the drawing they go with. In `src/content.js`:
 
-- **Contact:** `contact.email`, `contact.instagram`, then set `contact.placeholder` to `false`. That enables the Instagram link and lets search engines index the page: while it's `true` the page carries `noindex, nofollow`. The e-mail button opens a pre-filled message; there is no backend.
+- **Contact:** the domain and the Instagram account aren't in the repo. The build takes them from
+  `SITE_URL` (e.g. `https://domena.cz`) and `SITE_INSTAGRAM` (the handle, without `@`): GitHub
+  Actions variables for the published site, a `.env` file (git-ignored) locally. The e-mail is
+  `domov@` + the domain (every address on the domain is forwarded to a personal inbox); the
+  pre-filled message and the rest are `contactFrom` in `src/content.js`. Without both variables the
+  contact is a placeholder and the page carries `noindex, nofollow`. The e-mail button opens a pre-filled message; there is no backend.
 - **Photos:** put the original files in `photos/` (project root) and set `photo: '/photos/name.jpg'` on the matching cat, stop or gallery entry. Until then a labelled placeholder shows. Stop and cat photos are 4:5 portrait.
   `scripts/encode-photos.js` turns each original into several widths (320–1920 px) in AVIF and WebP, plus a JPEG fallback (PNG for cut-outs with transparency), straightened and with metadata such as GPS stripped. The site loads them through `srcset`, so a phone gets a small file and the opened photo (lightbox) a large one, with the small one shown blurred until it arrives. It runs first in `npm run build` (before Vite) and on `npm run dev` (also when you add a photo while it runs), and only re-encodes changed photos; `npm run photos` runs it alone. `public/photos/` and `src/photos.json` are generated: don't edit them.
 - **Journey stops:** the `stops` array. Add one object where it belongs in the order; the loopy route, pins, scenery (`doodle`), detours (`detour`), border lines (`country`, `via`) and distance signs redraw automatically. There's a commented-out vet stop to copy.
@@ -33,12 +38,15 @@ The facts and data live in `src/content.js`; each section's own words (its title
 ## Publishing
 
 Every push to `main` builds the site on GitHub Actions (`.github/workflows/deploy.yml`) and publishes
-`dist/` to GitHub Pages at https://marceljager.github.io/cats/. The build uses relative URLs, so the
-same files work there and at the root of the CDN domain in front of it.
+`dist/` to GitHub Pages at https://marceljager.github.io/cats/; visitors get it on the CDN's
+domain in front. The build uses relative URLs, so the same files
+work in both places.
 
 - GitHub → Settings → Pages → Source: **GitHub Actions** (once).
 - GitHub → Settings → Secrets and variables → Actions → Variables: `SITE_URL` = the public address
-  (the CDN domain, e.g. `https://velikapolly.cz`). It turns on og:image, canonical and ai-catalog.json.
+  (the CDN domain) and `SITE_INSTAGRAM` = the Instagram handle. `SITE_URL` makes the absolute links
+  a shared link's preview needs (og:image, og:url, canonical, sitemap.xml, ai-catalog.json); together
+  they make the contact and let search engines index the page.
 - CDN: origin `https://marceljager.github.io` with the path `/cats/`, sending the origin's own host
   name. Cache `index.html` for minutes, everything else for long.
 - Visits: GoatCounter at https://marceljager.goatcounter.com (the script in `index.html`, no cookies, so

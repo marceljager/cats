@@ -6,7 +6,7 @@ import { site } from '../src/content.js';
 let counted;
 beforeEach(() => {
   counted = [];
-  vi.stubGlobal('location', { href: 'https://velikapolly.cz/#cesta' });
+  vi.stubGlobal('location', { href: 'https://example.cz/#cesta' });
   vi.stubGlobal('window', { goatcounter: { count: (e) => counted.push(e.path) } });
   vi.stubGlobal('navigator', {});
 });
@@ -20,7 +20,7 @@ describe('options', () => {
   });
   test('links to the page itself, without the section it was on', () => {
     const whatsapp = options().find((o) => o.id === 'whatsapp');
-    expect(decodeURIComponent(whatsapp.href)).toContain(`${site.share.text} https://velikapolly.cz/`);
+    expect(decodeURIComponent(whatsapp.href)).toContain(`${site.share.text} https://example.cz/`);
     expect(whatsapp.href).not.toContain('cesta');
   });
   test('each option says what it does, and a link names its event and where it opens', () => {
@@ -77,7 +77,7 @@ describe('copyLink', () => {
   test('counts a link that made it to the clipboard', async () => {
     navigator.clipboard = { writeText: vi.fn().mockResolvedValue(undefined) };
     expect(await copyLink()).toBe(true);
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith('https://velikapolly.cz/');
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith('https://example.cz/');
     expect(counted).toEqual(['sdilet-odkaz']);
   });
   test('reports a copy that failed both ways, and counts nothing', async () => {
