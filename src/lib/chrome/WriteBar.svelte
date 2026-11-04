@@ -37,8 +37,9 @@
     left: 12px;
     right: 12px;
     /* clear of the very bottom edge: Safari 26 tints its floating bottom bar with the colour of a
-       fixed element sitting on that edge, which painted the whole bottom of the screen red */
-    bottom: calc(28px + env(safe-area-inset-bottom));
+       fixed element sitting on that edge, which painted the whole bottom of the screen red (it did at
+       10px; 18px keeps it low under the thumb and still clear) */
+    bottom: calc(18px + env(safe-area-inset-bottom));
     display: none;
     translate: 0 calc(100% + 60px);
     visibility: hidden;
