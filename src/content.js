@@ -203,6 +203,7 @@ export const gallery = [
   { photo: '/photos/vecer-spolu.jpg', orientation: 'portrait', caption: 'Večer spolu', hint: 'oba spolu' },
   { photo: '/photos/kotata-u-veterinare.jpg', orientation: 'portrait', caption: 'U veterináře v Praze', hint: 'koťata v přepravce u veterináře' },
   { photo: '/photos/velik-s-limcem.jpg', orientation: 'portrait', caption: 'Astronaut po kastraci', hint: 'Velík s ochranným límcem v náručí' },
+  { photo: '/photos/velik-v-kresle.jpg', orientation: 'portrait', caption: 'Velík jako preclík', hint: 'Velík stočený do klubíčka v oranžovém křesle' },
   { photo: '/photos/kotata-u-okna.jpg', orientation: 'portrait', caption: 'Koukáme z okna', hint: 'koťata na parapetu u okna' },
   { photo: '/photos/kotata-v-kresle.jpg', orientation: 'landscape', caption: 'Křeslo pro dva', hint: 'koťata stočená v křesle' },
 ];
