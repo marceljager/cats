@@ -73,6 +73,7 @@ test('the vet report has a verdict and what was done at each visit', () => {
 test('the contact comes from the build: e-mail on the site’s domain, Instagram without the @', () => {
   const c = contactFrom({ SITE_URL: 'https://example.cz/', SITE_INSTAGRAM: '@kocky' });
   expect(c).toMatchObject({ email: 'domov@example.cz', instagram: 'kocky', placeholder: false });
+  expect(contactFrom({ SITE_URL: 'https://www.example.cz', SITE_INSTAGRAM: 'kocky' }).email).toBe('domov@example.cz');
   expect(contactFrom({ SITE_URL: 'https://example.cz' }).placeholder).toBe(true);
   expect(contactFrom({}).placeholder).toBe(true);
 });

@@ -15,9 +15,9 @@ npm run check    # type checking (svelte-check)
 The facts and data live in `src/content.js`; each section's own words (its title, intro and captions) sit in its component in `src/lib/sections/`, next to the drawing they go with. In `src/content.js`:
 
 - **Contact:** the domain and the Instagram account aren't in the repo. The build takes them from
-  `SITE_URL` (e.g. `https://domena.cz`) and `SITE_INSTAGRAM` (the handle, without `@`): GitHub
+  `SITE_URL` (e.g. `https://www.domena.cz`) and `SITE_INSTAGRAM` (the handle, without `@`): GitHub
   Actions variables for the published site, a `.env` file (git-ignored) locally. The e-mail is
-  `domov@` + the domain (every address on the domain is forwarded to a personal inbox); the
+  `domov@` + the domain without `www.` (every address on the domain is forwarded to a personal inbox); the
   pre-filled message and the rest are `contactFrom` in `src/content.js`. Without both variables the
   contact is a placeholder and the page carries `noindex, nofollow`. The e-mail button opens a pre-filled message; there is no backend.
 - **Photos:** put the original files in `photos/` (project root) and set `photo: '/photos/name.jpg'` on the matching cat, stop or gallery entry. Until then a labelled placeholder shows. Stop and cat photos are 4:5 portrait.

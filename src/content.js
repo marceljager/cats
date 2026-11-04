@@ -48,13 +48,14 @@ export const site = {
 
 // Kontakt. Doména a Instagram nejsou v repozitáři: dává je build z proměnných prostředí
 // (GitHub → Settings → Secrets and variables → Actions → Variables, lokálně soubor .env):
-//   SITE_URL        adresa webu, např. https://domena.cz; e-mail je pak domov@domena.cz
+//   SITE_URL        adresa webu, např. https://www.domena.cz; e-mail je pak domov@domena.cz (bez www)
 //   SITE_INSTAGRAM  účet na Instagramu (bez @)
 // Bez nich je kontakt zástupný (placeholder): odkaz na Instagram nevede nikam a web má noindex.
 // mail = předvyplněný e-mail, který se otevře po kliknutí na tlačítko.
 /** @param {{ SITE_URL?: string, SITE_INSTAGRAM?: string }} env */
 export function contactFrom(env) {
-  const host = env.SITE_URL ? new URL(env.SITE_URL).hostname : '';
+  // the mail domain is the site's without its www.
+  const host = env.SITE_URL ? new URL(env.SITE_URL).hostname.replace(/^www\./, '') : '';
   const instagram = (env.SITE_INSTAGRAM ?? '').replace(/^@/, '');
   return {
     email: `domov@${host || 'example.cz'}`,
