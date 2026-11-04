@@ -19,7 +19,7 @@
 {#snippet roundTree(it)}
   {@const s = it.s}
   {@const puffs = [[-4.6, -13.4, 6.4], [4.4, -12.8, 6.8], [0, -19, 7.2]].map(([px, py, pr]) => [px * s, py * s, pr * s])}
-  <g class="plant" class:sway={it.sway} style="--d:{it.delay}s" transform="translate({it.x} {it.y})">
+  <g class="plant" transform="translate({it.x} {it.y})">
     <ellipse class="shadow" cx={3 * s} cy="0" rx={10 * s} ry={3.2 * s} />
     <path class="trunk" d="M {-1.4 * s} {-9 * s} L {-1.6 * s} {-1.4 * s} Q {-1.8 * s} 0 {-3 * s} 0 H {3 * s} Q {1.8 * s} 0 {1.6 * s} {-1.4 * s} L {1.4 * s} {-9 * s} Z" />
     {#each puffs as [cx, cy, r]}<circle class="crown-line" {cx} {cy} {r} />{/each}
@@ -42,22 +42,11 @@
       shade: `M 0 ${top} Q ${w * 0.45} ${y - (y - top) * 0.4} ${w} ${y} Q ${w * 0.5} ${y - 1.3 * s} 0 ${y - 1.3 * s} Z`, // the first half of the lower edge, exactly
     };
   })}
-  <g class="plant" class:sway={it.sway} style="--d:{it.delay}s" transform="translate({it.x} {it.y})">
+  <g class="plant" transform="translate({it.x} {it.y})">
     <ellipse class="shadow" cx={3 * s} cy="0" rx={8 * s} ry={2.8 * s} />
     <rect class="trunk" x={-1.3 * s} y={-5.5 * s} width={2.6 * s} height={5.5 * s} />
     {#each tiers as t}<path class="needles-line" d={t.d} />{/each}
     {#each tiers as t}<path class="needles" d={t.d} /><path class="needles-shade" d={t.shade} />{/each}
-  </g>
-{/snippet}
-
-<!-- chimney smoke, puffing -->
-{#snippet smoke(it)}
-  {@const s = it.s}
-  {@const w = 16 * s}
-  {@const top = -11 * s - 8 * s - 6 * s * 0.6}
-  <g class="smoke" style="--d:{it.delay}s" transform="translate({it.x - w / 2} {it.y})">
-    <circle cx={w / 2 + 7.2 * s + 1.5 * s} cy={top - 6 * s} r={2.6 * s} />
-    <circle cx={w / 2 + 7.2 * s + 4 * s} cy={top - 11 * s} r={3.4 * s} />
   </g>
 {/snippet}
 
@@ -127,7 +116,7 @@
 {/snippet}
 
 {#snippet farmhouse(it)}
-  <!-- a small whitewashed farmhouse from the front, its chimney smoking -->
+  <!-- a small whitewashed farmhouse from the front -->
   <g transform="translate({it.x} {it.y})">
     <rect class="chimney" x="6.5" y="-24" width="3.5" height="12" />
     <path class="wall" d="M -9 0 V -11 H 9 V 0 Z" />
@@ -137,7 +126,6 @@
     <path class="roof r0" d="M -11.5 -10.5 L 0 -21 L 11.5 -10.5 Z" />
     <path class="farm-shade" d="M 0 -21 L 11.5 -10.5 H 0 Z" />
   </g>
-  {@render smoke(it)}
 {/snippet}
 
 {#snippet fence(it)}
@@ -457,17 +445,6 @@
   .needles-shade {
     fill: #215f37;
   }
-  .plant {
-    transform-box: fill-box;
-    transform-origin: 50% 100%;
-  }
-  .sway {
-    animation: sway 3.6s ease-in-out var(--d) infinite alternate;
-  }
-  @keyframes sway {
-    from { rotate: -2.5deg; }
-    to { rotate: 2.5deg; }
-  }
   .wall {
     fill: #f7e9cd;
     stroke: var(--ink);
@@ -503,21 +480,6 @@
     fill: #a63c27;
     stroke: var(--ink);
     stroke-width: 1;
-  }
-  .smoke circle {
-    fill: rgba(255, 255, 255, 0.85);
-    stroke: rgba(22, 19, 17, 0.35);
-    stroke-width: 0.8;
-  }
-  .smoke {
-    transform-box: fill-box;
-    transform-origin: 0 100%;
-    animation: puff 3.2s ease-out var(--d) infinite;
-  }
-  @keyframes puff {
-    0% { opacity: 0; translate: 0 4px; scale: 0.6; }
-    30% { opacity: 1; }
-    100% { opacity: 0; translate: 4px -10px; scale: 1.3; }
   }
   .spire {
     fill: #4b6f6b;
@@ -906,8 +868,5 @@
     font-style: normal;
     font-weight: 800;
     letter-spacing: 0.04em;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .sway, .smoke { animation: none; }
   }
 </style>

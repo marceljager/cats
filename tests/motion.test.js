@@ -129,9 +129,21 @@ describe('springs', () => {
     action.update({ to: { y: 0 } });
     expect(animate).toHaveBeenCalledTimes(1);
     action.update({ to: { y: 10 }, bounce: 0.5 });
-    expect(animate.mock.calls[1][1]).toEqual({ y: 10 });
+    // as one transform, so Motion can run the spring on the compositor
+    expect(animate.mock.calls[1][1]).toEqual({ transform: 'translateX(0px) translateY(10px) scale(1) rotate(0deg)' });
     expect(animate.mock.calls[1][2]).toMatchObject({ type: 'spring', bounce: 0.5 });
     vi.doUnmock('motion');
+  });
+  test('asTransform folds x / y / scale / rotate into one transform, keyframes too, and leaves SVG and other keys alone', async () => {
+    const { asTransform } = await import('../src/lib/motion/springs.js');
+    expect(asTransform({ opacity: [0, 1], scale: [0.5, 1] })).toEqual({ opacity: [0, 1], transform: ['translateX(0px) translateY(0px) scale(0.5) rotate(0deg)', 'translateX(0px) translateY(0px) scale(1) rotate(0deg)'] });
+    expect(asTransform({ y: [0, 5, 0], scaleX: [1, 1.06, 1] })).toEqual({ y: [0, 5, 0], scaleX: [1, 1.06, 1] });
+    expect(asTransform({ x: [0, 1], y: [0, 1, 2] })).toEqual({ x: [0, 1], y: [0, 1, 2] });
+    expect(asTransform({ opacity: 0 })).toEqual({ opacity: 0 });
+    class SVGElement {}
+    vi.stubGlobal('SVGElement', SVGElement);
+    expect(asTransform({ y: 4 }, /** @type {any} */ (new SVGElement()))).toEqual({ y: 4 });
+    vi.unstubAllGlobals();
   });
   test('scrollLinked follows the scroll only where its media query matches, and rests elsewhere', async () => {
     const { animate, scroll } = motion();
@@ -139,10 +151,12 @@ describe('springs', () => {
     const opts = { keyframes: { y: [10, -10] }, rest: { y: 0 } };
     scrollLinked(element(), { ...opts, media: '(min-width: 760px)' }); // matchMedia matches here
     expect(scroll).toHaveBeenCalledOnce();
+    // as transforms, so the scroll-linked animation can run on the browser's own scroll timeline
+    expect(animate.mock.calls[0][1]).toEqual({ transform: ['translateX(0px) translateY(10px) scale(1) rotate(0deg)', 'translateX(0px) translateY(-10px) scale(1) rotate(0deg)'] });
     vi.stubGlobal('matchMedia', () => ({ matches: false, addEventListener() {}, removeEventListener() {} }));
     scrollLinked(element(), { ...opts, media: '(min-width: 760px)' });
     expect(scroll).toHaveBeenCalledOnce();
-    expect(animate).toHaveBeenLastCalledWith(expect.anything(), { y: 0 }, { duration: 0 });
+    expect(animate).toHaveBeenLastCalledWith(expect.anything(), { transform: 'translateX(0px) translateY(0px) scale(1) rotate(0deg)' }, { duration: 0 });
     vi.doUnmock('motion');
   });
   test('rub pushes on a tap, but not further once it leans past its limit', async () => {

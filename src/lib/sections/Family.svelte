@@ -7,7 +7,7 @@
   import Card from '../ui/Card.svelte';
   import Tape from '../ui/Tape.svelte';
   import { animate } from 'motion';
-  import { pop } from '../motion/springs.js';
+  import { asTransform, pop } from '../motion/springs.js';
   import { reducedMotion } from '../motion/viewport.js';
 
   // the two of us talking it over (\u00a0 keeps a one-letter word on the next one's line;
@@ -48,7 +48,7 @@
         const wait = 240 - (performance.now() - last);
         if (wait > 0) await new Promise((r) => setTimeout(r, wait));
         last = performance.now();
-        animate(li, { opacity: [0, 1], scale: [0.6, 1], y: [-10, 0] }, { type: 'spring', bounce: 0.4, visualDuration: 0.26, opacity: { duration: 0.08 } });
+        animate(li, asTransform({ opacity: [0, 1], scale: [0.6, 1], y: [-10, 0] }, li), { type: 'spring', bounce: 0.4, visualDuration: 0.26, opacity: { duration: 0.08 } });
         setTimeout(() => delete li.dataset.wait, 120);
         if ('dogs' in li.dataset) setTimeout(startle, 150);
       });

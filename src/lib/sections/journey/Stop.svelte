@@ -131,6 +131,12 @@
   .card :global(.surface > *) {
     transition: opacity 0.14s ease-out, filter 0.14s ease-out;
   }
+  /* the header and the story on layers of their own, so their fade runs on the compositor instead of
+     repainting the whole story on every frame of it */
+  header,
+  .body {
+    will-change: opacity, filter;
+  }
   .upcoming .card {
     outline: 3px dashed rgba(22, 19, 17, 0.55);
     outline-offset: 8px;

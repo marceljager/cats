@@ -170,9 +170,12 @@ export function rub(node, opts = {}) {
 export function bouncy(node, opts = {}) {
   let rest, over, down;
   const configure = (o) => {
-    rest = { scale: 1, rotate: 0, x: 0, y: 0, ...o.rest };
-    over = { ...rest, scale: 1.04, rotate: (rest.rotate ?? 0) - 1.5, y: -2, ...o.over };
-    down = { ...over, scale: 0.95, y: 1, ...o.down };
+    const r = { scale: 1, rotate: 0, x: 0, y: 0, ...o.rest };
+    const v = { ...r, scale: 1.04, rotate: (r.rotate ?? 0) - 1.5, y: -2, ...o.over };
+    // as transforms, so the springs run on the compositor (see asTransform)
+    rest = asTransform(r, node);
+    over = asTransform(v, node);
+    down = asTransform({ ...v, scale: 0.95, y: 1, ...o.down }, node);
   };
   /** @type {import('motion').AnimationOptions} */
   const sp = { type: 'spring', stiffness: 520, damping: 18 };
@@ -200,6 +203,31 @@ export function bouncy(node, opts = {}) {
   };
 }
 
+// A pose (or keyframes) of x / y / scale / rotate as one `transform`, always listed in the same
+// order, so the animation between two poses moves each part on its own. Motion runs `transform` (and
+// opacity) as a browser animation, on the compositor (a spring too, and a scroll-linked one on the
+// browser's own scroll timeline), where x / y / scale / rotate are each set from script on every
+// frame. A pose with anything else in it (scaleX, say) is left as it is.
+const PARTS = { x: (v) => `translateX(${v}px)`, y: (v) => `translateY(${v}px)`, scale: (v) => `scale(${v})`, rotate: (v) => `rotate(${v}deg)` };
+/** @param {Record<string, any>} pose @param {Element} [el] the element it is for @returns {Record<string, any>} */
+export function asTransform(pose, el) {
+  // an SVG element is left to Motion, which gives it the transform box x / y / scale / rotate expect
+  if (typeof SVGElement !== 'undefined' && el instanceof SVGElement) return pose;
+  const keys = Object.keys(pose);
+  const parts = keys.filter((k) => k in PARTS);
+  if (!parts.length || !keys.every((k) => k in PARTS || k === 'opacity')) return pose;
+  const lengths = new Set(parts.filter((k) => Array.isArray(pose[k])).map((k) => pose[k].length));
+  if (lengths.size > 1) return pose; // keyframe lists of different lengths don't line up
+  const n = lengths.size ? [...lengths][0] : 0;
+  const at = (k, i) => {
+    const v = pose[k] ?? (k === 'scale' ? 1 : 0);
+    return Array.isArray(v) ? v[i] : v;
+  };
+  const one = (i) => Object.entries(PARTS).map(([k, part]) => part(at(k, i))).join(' ');
+  const { opacity } = pose;
+  return { ...(opacity !== undefined && { opacity }), transform: n ? Array.from({ length: n }, (_, i) => one(i)) : one(0) };
+}
+
 // Spring to a state: whenever `to` changes the node springs there. The first value is applied
 // instantly, so the page renders in place without a jump.
 //   use:springTo={{ to: { y: 0, scale: 1 }, bounce: 0.4, duration: 0.5 }}
@@ -208,7 +236,8 @@ export function springTo(node, params = {}) {
   let first = true;
   let last = '';
   function run(p) {
-    const { to = {}, bounce = 0.35, duration = 0.5, ...extra } = p ?? {};
+    const { to: pose = {}, bounce = 0.35, duration = 0.5, ...extra } = p ?? {};
+    const to = asTransform(pose, node);
     // the same target arrives on every scroll frame; restarting the spring each time would
     // keep it crawling, so only a real change of target starts a new spring
     const key = JSON.stringify(to);
@@ -229,7 +258,7 @@ export function springTo(node, params = {}) {
 /** @param {Element | null | undefined} el @param {object} keyframes @param {object} [opts] Motion options over the default spring */
 export function pop(el, keyframes, opts = {}) {
   if (!el || reducedMotion()) return;
-  return animate(el, keyframes, { type: 'spring', bounce: 0.35, visualDuration: 0.5, ...opts });
+  return animate(el, asTransform(keyframes, el), { type: 'spring', bounce: 0.35, visualDuration: 0.5, ...opts });
 }
 
 // Scroll-linked: the node moves through `keyframes` as it travels up through the viewport,
@@ -245,8 +274,9 @@ export function scrollLinked(node, opts = {}) {
     stop?.();
     stop = undefined;
     const { keyframes, offset = ['start end', 'end start'], rest } = opts;
-    if (!reducedMotion() && (!mq || mq.matches)) stop = scroll(animate(node, keyframes, { ease: 'linear' }), { target: node, offset });
-    else animate(node, rest ?? {}, { duration: 0 });
+    // as a transform it runs on the browser's own scroll timeline, off the main thread
+    if (!reducedMotion() && (!mq || mq.matches)) stop = scroll(animate(node, asTransform(keyframes, node), { ease: 'linear' }), { target: node, offset });
+    else animate(node, asTransform(rest ?? {}, node), { duration: 0 });
   };
   const configure = () => {
     mq?.removeEventListener('change', sync);

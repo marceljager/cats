@@ -66,7 +66,7 @@ export const SCENERY = {
       out.push({ t: 'fence', from: -14, to: 72, y: 5, z: 2 });
       out.push({ t: 'silo', x: -18, y: 4, z: 3 });
       out.push({ t: 'barn', x: -42, y: 6, z: 4 });
-      out.push({ t: 'farmhouse', x: 64, y: 9, s: 1, smoke: true, delay: 1, z: 4 });
+      out.push({ t: 'farmhouse', x: 64, y: 9, s: 1, z: 4 });
       out.push({ t: 'hay', x: -74, y: 10, z: 5 });
       out.push({ t: 'hay', x: -64, y: 13, z: 5 });
       tree({ x: 86, y: 8, z: 3 });
@@ -179,8 +179,13 @@ export function layoutPlace(kind, { seed = 1, scale = 1 } = {}) {
   const r = rng(seed * 9973 + kind.length * 31);
   const out = [];
   // every tree on the map is the same size on screen, whatever the scale of the place it stands in
-  const tree = (p) =>
-    out.push({ t: r() < 0.45 ? 'pine' : 'tree', x: p.x, y: p.y, s: TREE / scale, sway: r() < 0.35, delay: r() * 3, ...(p.z !== undefined && { z: p.z }) });
+  const tree = (p) => {
+    const t = r() < 0.45 ? 'pine' : 'tree';
+    // two draws that once set a sway the map no longer has, kept so every place stays laid out as before
+    r();
+    r();
+    out.push({ t, x: p.x, y: p.y, s: TREE / scale, ...(p.z !== undefined && { z: p.z }) });
+  };
 
   SCENERY[kind].layout({ r, out, tree, scale });
   return out.sort((a, b) => (a.z ?? a.y ?? -999) - (b.z ?? b.y ?? -999));

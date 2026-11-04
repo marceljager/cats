@@ -29,7 +29,13 @@
   let h = $state(0);
   let routeD = $state(''); // the route's path data
   let len = $state(0);
-  let travelled = $state(0);
+  let travelled = 0; // how far along the route the car is now
+  // the route as drawn so far, in pieces (one per bend of the spline), each { d, start, len }: as the
+  // car drives only the piece it is on is redrawn, so a frame repaints a few hundred pixels of route
+  // instead of all of it
+  let legs = $state.raw([]);
+  let legEls = [];
+  let legDrawn = []; // how much of each piece is drawn now, so a frame only touches the one that changed
   let car = $state({ x: 0, y: 0, tilt: 0, bump: 0 });
   // the car stays hidden until it has been put on the route, so it never shows at the map's corner
   let placed = $state(false);
@@ -52,8 +58,10 @@
 
   const total = $derived(stops[stops.length - 1].km);
 
-  // a story comes up once the car has reached its pin
-  const reached = $derived(stops.map((_, i) => placed && i < pinLens.length && travelled >= pinLens[i] - 1));
+  // a story comes up once the car has reached its pin: how many pins it has reached, a plain number,
+  // so the stories and pins only hear about it when it changes, not on every frame the car moves
+  let passed = $state(0);
+  const reached = $derived(stops.map((_, i) => placed && i < passed));
 
   function lengthOf(path) {
     measurePath.setAttribute('d', path);
@@ -103,10 +111,19 @@
     const { pts, marks } = plan;
     const start = `M ${pts[0][0]} ${pts[0][1]}`;
     const pieces = curve(pts);
-    const lenAt = (i) => lengthOf(start + pieces.slice(0, i).join(''));
-    keypoints = [{ y: geo[0].pinY, len: 0 }, ...marks.map((m) => ({ y: m.y, len: lenAt(m.i) }))];
-    pinLens = [0, ...marks.filter((m) => m.pin).map((m) => lenAt(m.i))];
+    // each piece measured on its own; where the route reaches piece i is the sum of those before it
+    const at = [0];
+    const nextLegs = pieces.map((piece, i) => {
+      const d = `M ${pts[i][0].toFixed(1)} ${pts[i][1].toFixed(1)}${piece}`;
+      const leg = { d, start: at[i], len: lengthOf(d) };
+      at.push(at[i] + leg.len);
+      return leg;
+    });
+    keypoints = [{ y: geo[0].pinY, len: 0 }, ...marks.map((m) => ({ y: m.y, len: at[m.i] }))];
+    pinLens = [0, ...marks.filter((m) => m.pin).map((m) => at[m.i])];
     routeD = start + pieces.join('');
+    legs = nextLegs;
+    legDrawn = [];
     pins = geo.map((g) => ({ x: g.x, y: g.pinY }));
     places = plan.places;
     borders = plan.borders;
@@ -159,6 +176,46 @@
     };
     travelled = along;
     km = kmAt(along, pinLens, stops);
+    let n = 0;
+    while (n < pinLens.length && along >= pinLens[n] - 1) n++;
+    passed = n;
+    drawRoute(along);
+  }
+
+  // the driven route's dashes: 16 on, 11 off, running on unbroken from one piece to the next
+  const DASH = 16;
+  const GAP = 11;
+  // a dash pattern for a piece that starts `start` along the route, drawn only for its first `drawn`
+  function partDash(start, drawn, len) {
+    const out = [];
+    let p = start % (DASH + GAP); // where in the pattern the piece begins
+    let left = drawn;
+    // a dash array starts with a dash: if the piece begins inside a gap, that is a dash of 0
+    if (p >= DASH) out.push(0);
+    while (left > 0) {
+      const on = p < DASH;
+      const seg = Math.min((on ? DASH : DASH + GAP) - p, left);
+      out.push(+seg.toFixed(2));
+      left -= seg;
+      p = on ? DASH : 0;
+    }
+    // the dashes alternate on and off, so the list ends on a gap: the rest of the piece
+    if (out.length % 2) out.push(len + 1);
+    else out[out.length - 1] += len + 1;
+    return out.join(' ');
+  }
+  function drawRoute(along) {
+    for (let i = 0; i < legs.length; i++) {
+      const { start, len } = legs[i];
+      const drawn = Math.min(Math.max(along - start, 0), len);
+      if (legDrawn[i] === drawn) continue;
+      legDrawn[i] = drawn;
+      const el = legEls[i];
+      if (!el) continue;
+      el.style.visibility = drawn > 0 ? '' : 'hidden';
+      el.style.strokeDasharray = drawn >= len ? `${DASH} ${GAP}` : partDash(start, drawn, len);
+      el.style.strokeDashoffset = drawn >= len ? `${start % (DASH + GAP)}` : '0';
+    }
   }
 
   // the car heads for where the route crosses the middle of the screen; the first time (and with
@@ -238,6 +295,7 @@
     <div class="route" bind:this={root}>
       <svg class="map" width={w} height={h} viewBox="0 0 {w} {h}" aria-hidden="true">
         <path d="" bind:this={measurePath} class="measure" />
+        <path d={routeD} bind:this={routePath} class="measure" />
         {#each paths.rivers as rv}
           <path class="river-bank" d={rv} />
           <path class="river" d={rv} />
@@ -265,21 +323,12 @@
         <path class="ahead" d={routeD} />
       </svg>
       <!-- the driven route and the pins on a layer of their own: the route grows on every frame the
-           car moves, and redrawing it shouldn't mean redrawing the whole meadow under it -->
+           car moves, and redrawing it shouldn't mean redrawing the meadow under it. It is drawn in
+           short pieces, so a frame only repaints the piece under the car (see drawRoute) -->
       <svg class="map driven" width={w} height={h} viewBox="0 0 {w} {h}" aria-hidden="true">
-        <defs>
-          <mask id="driven" maskUnits="userSpaceOnUse">
-            <path
-              d={routeD}
-              fill="none"
-              stroke="#fff"
-              stroke-width="16"
-              stroke-linecap="round"
-              style="stroke-dasharray: {len} {len}; stroke-dashoffset: {len - travelled};"
-            />
-          </mask>
-        </defs>
-        <path class="done" bind:this={routePath} d={routeD} mask="url(#driven)" />
+        {#each legs as leg, i}
+          <path class="done" d={leg.d} bind:this={legEls[i]} style="visibility: hidden" />
+        {/each}
 
         {#each pins as pin, i}
           <!-- the site's pin icon (Icon.svelte) at map size, tip on the route: a cream outline
@@ -345,8 +394,8 @@
     overflow: visible;
     pointer-events: none;
   }
-  /* the meadow and the driven route each get a layer of their own: the meadow is painted once and
-     only slides with the page, the car moves over both, and only the route is redrawn as it grows */
+  /* the meadow and the driven route each get a layer of their own: the meadow is static, painted
+     once and only slides with the page; the car moves over both, and only the route is redrawn as it grows */
   .map {
     will-change: transform;
   }
@@ -371,7 +420,7 @@
     stroke-width: 6;
     stroke-dasharray: 16 11;
   }
-  /* the rivers are outlined in ink like everything else on the map, with a light current drifting slowly downstream */
+  /* the rivers are outlined in ink like everything else on the map, with a few light glints of current */
   .river-bank {
     fill: none;
     stroke: var(--ink);
@@ -392,10 +441,6 @@
     /* uneven glints, so it never reads as road markings */
     stroke-dasharray: 4 22 14 36;
     opacity: 0.85;
-    animation: flow 7s linear infinite;
-  }
-  @keyframes flow {
-    to { stroke-dashoffset: -76; }
   }
   .grass {
     fill: #6c9c45;
@@ -524,7 +569,7 @@
     to { transform: translateX(18px); }
   }
   @media (prefers-reduced-motion: reduce) {
-    .cloud, .river-current { animation: none; }
+    .cloud { animation: none; }
   }
   .stops {
     --gap: clamp(280px, 48vh, 440px);
