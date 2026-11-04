@@ -25,8 +25,8 @@
 export const site = {
   name: 'Velík a Polly hledají domov',
   title: 'Velík a Polly – koťata zdarma k adopci v Praze',
-  description: 'Dvě koťata (kluk a holka, 6–7 měsíců) zachráněná v Chorvatsku hledají domov v Praze a okolí. Mazlivá, zvyklá na psy, odčervená, zdarma do dobrých rukou.',
-  story: 'Dvě koťata (kluk a holka, 6–7 měsíců) z chorvatského pohoří Velebit hledají domov. Jsou mazlivá, pořád u lidí a nebojí se ani psů. Odčervená, odblešená, po veterinární kontrole, kocourek je vykastrovaný. Aktuálně jsou v Praze 6 – zdarma do dobrých rukou (ideálně oba spolu).',
+  description: 'Dvě koťata (kluk a holka, 7–9 měsíců) zachráněná v Chorvatsku hledají domov v Praze a okolí. Mazlivá, zvyklá na psy, odčervená, zdarma do dobrých rukou.',
+  story: 'Dvě koťata (kluk a holka, 7–9 měsíců) z chorvatského pohoří Velebit hledají domov. Jsou mazlivá, pořád u lidí a nebojí se ani psů. Odčervená, odblešená, po veterinární kontrole, kocourek je vykastrovaný. Aktuálně jsou v Praze 6 – zdarma do dobrých rukou (ideálně oba spolu).',
   // llms.txt: jak web shrne strojům (úvod a věta pod koťaty); ai-catalog.json: otázky, na které web odpovídá
   llms: {
     intro: 'Jednostránkový web, kde dvě zachráněná koťata (sourozenci, kluk a holka) hledají nový domov v Česku. Vyprávějí sama za sebe.',
@@ -78,7 +78,7 @@ export const cats = [
     id: 'velik',
     name: 'Velík',
     sex: 'kluk',
-    age: '6–7 měsíců',
+    age: '7–9 měsíců',
     // na visačce „Jméno po“: krátký text a ikonka (mountains | pin)
     namedAfter: 'Velebit',
     namedIcon: 'mountains',
@@ -94,13 +94,13 @@ export const cats = [
     //   ratio = šířka / výška celé fotky
     head: '/photos/velik-hlava-3.webp',
     headFrame: { x: 0.5, y: 0.67, w: 0.88, ratio: 582 / 633 },
-    says: 'Jsem Velík, celým jménem Velebit, podle hor, kde nás lidi našli. Jsem kocourek, je mi 6–7 měsíců, jsem ten silnější a průbojnější brácha. Polly je moje menší ségra. Nejradši jsem u lidí – na klíně, u nohou, prostě všude, kde jsou. Jsem moc hravý, hrajeme si často se ségrou, ale nejradši mám, když si se mnou hrajou lidi. Jo, a psů se nebojím.',
+    says: 'Jsem Velík, celým jménem Velebit, podle hor, kde nás lidi našli. Jsem kocourek, je mi 7–9 měsíců, jsem ten silnější a průbojnější brácha. Polly je moje menší ségra. Nejradši jsem u lidí – na klíně, u nohou, prostě všude, kde jsou. Jsem moc hravý, hrajeme si často se ségrou, ale nejradši mám, když si se mnou hrajou lidi. Jo, a psů se nebojím.',
   },
   {
     id: 'polly',
     name: 'Polly',
     sex: 'holka',
-    age: '6–7 měsíců',
+    age: '7–9 měsíců',
     namedAfter: 'Poljana',
     namedIcon: 'pin',
     photo: '/photos/polly.jpg',
@@ -109,7 +109,7 @@ export const cats = [
     headFrame: { x: 0.53, y: 0.58, w: 0.76, ratio: 645 / 669 },
     // barva srsti nakreslené hlavy, dokud není fotka (jinak bílá)
     fur: '#f3ead6',
-    says: 'Já jsem Polly, podle místa Poljana ve Slovinsku, kde jsme si na cestě poprvé protáhli tlapky. Jsem kočka a je mi taky 6–7 měsíců. Velík je můj bratr. Ale nenechte se zmást, já jsem ta chytřejší. Kam jdou lidi, tam jdu já, ale radši svět pozoruji z bezpečné vzdálenosti nebo z okna. Lidi se mnou začali trénovat i různé triky a to mě moc baví. Jsem sice malá, ale statečná – ani psi si na mě nedovolí.',
+    says: 'Já jsem Polly, podle místa Poljana ve Slovinsku, kde jsme si na cestě poprvé protáhli tlapky. Jsem kočka a je mi taky 7–9 měsíců. Velík je můj bratr. Ale nenechte se zmást, já jsem ta chytřejší. Kam jdou lidi, tam jdu já, ale radši svět pozoruji z bezpečné vzdálenosti nebo z okna. Lidi se mnou začali trénovat i různé triky a to mě moc baví. Jsem sice malá, ale statečná – ani psi si na mě nedovolí.',
   },
 ];
 
@@ -202,7 +202,7 @@ export const stops = [
 ];
 
 // Fotogalerie (fotky na šňůře). orientation: 'portrait' | 'landscape' | 'square'.
-// Fotku dejte do photos/ a nastavte photo: '/photos/nazev.jpg'. Popisky jsou zatím zástupné.
+// Fotku dejte do photos/ a nastavte photo: '/photos/nazev.jpg'.
 /** @type {GalleryPhoto[]} */
 export const gallery = [
   { photo: '/photos/kotata-na-terase.jpg', orientation: 'portrait', caption: 'Na terase pod Velebitem', hint: 'koťata u apartmánu' },
@@ -210,8 +210,6 @@ export const gallery = [
   { photo: '/photos/polly-za-oknem.jpg', orientation: 'portrait', caption: 'Tady jsme Polly našli', hint: 'Polly' },
   { photo: '/photos/prvni-cesta-autem.jpg', orientation: 'portrait', caption: 'První cesta autem', hint: 'koťata v autě' },
   { photo: '/photos/spolu-na-polstari.jpg', orientation: 'portrait', caption: 'Spolu na polštáři', hint: 'koťata spí' },
-  { photo: null, orientation: 'landscape', caption: 'Přestávka ve Slovinsku', hint: 'Koťata na zastávce' },
-  { photo: null, orientation: 'square', caption: 'Velík zblízka', hint: 'Velík' },
   { photo: '/photos/vecer-spolu.jpg', orientation: 'portrait', caption: 'Večer spolu', hint: 'oba spolu' },
   { photo: '/photos/kotata-u-veterinare.jpg', orientation: 'portrait', caption: 'U veterináře v Praze', hint: 'koťata v přepravce u veterináře' },
   { photo: '/photos/velik-s-limcem.jpg', orientation: 'portrait', caption: 'Astronaut po kastraci', hint: 'Velík s ochranným límcem v náručí' },

@@ -63,7 +63,7 @@
     <div class="copy">
       <Text variant="title" id="domov-h" class="lit-title">Hledáme rodinu</Text>
       <Text variant="lede" class="contact-lede">
-        Z&nbsp;Chorvatska jsme dojeli až sem. Teď hledáme lidi, ke kterým budeme patřit. Budeme u&nbsp;vás pořád a&nbsp;moc toho nepotřebujeme. Když máte gauč na spaní a&nbsp;okno, ze kterého se dá koukat ven, úplně nám to stačí. Zbytek dodají lidi, co nás zachránili. Jsme k&nbsp;darování zadarmo, ideálně oba společně do jednoho domova.
+        Z&nbsp;Chorvatska jsme dojeli až sem. Teď bydlíme v&nbsp;bytě, takže už umíme chodit na kočičí záchod. Hledáme lidi, ke kterým budeme patřit. Budeme u&nbsp;vás pořád a&nbsp;moc toho nepotřebujeme. Když máte gauč na spaní a&nbsp;okno, ze kterého se dá koukat ven, úplně nám to stačí. Zbytek dodají lidi, co nás zachránili. Jsme k&nbsp;darování zadarmo, ideálně oba společně do jednoho domova.
       </Text>
       <Text variant="subheading" as="p" class="free">Naši lidi za nás nic nechtějí, ani korunu. Jen <span class="mark">dobrý domov</span> pro nás dva.</Text>
     </div>

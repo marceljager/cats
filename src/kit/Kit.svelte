@@ -165,7 +165,7 @@
     <div class="grid">
       <div class="item">
         <span class="no">D1</span>
-        <div class="row"><span class="chip"><Icon name="check" size={18} /> Odčervení</span><span class="chip">6–7 měsíců</span></div>
+        <div class="row"><span class="chip"><Icon name="check" size={18} /> Odčervení</span><span class="chip">7–9 měsíců</span></div>
         <small class="src">.chip · app.css (úvod, mapa)</small>
       </div>
       <div class="item">
@@ -219,7 +219,7 @@
         <span class="no">E4</span>
         <div class="says">
           <Card variant="bubble">
-            <p>Jsem Polly, holka, je mi 6–7 měsíců a&nbsp;jmenuju se po Poljaně.</p>
+            <p>Jsem Polly, holka, je mi 7–9 měsíců a&nbsp;jmenuju se po Poljaně.</p>
           </Card>
         </div>
         <small class="src">Card.svelte variant="bubble" · Sourozenci na cestě</small>

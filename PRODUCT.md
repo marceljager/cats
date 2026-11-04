@@ -24,7 +24,7 @@ Not an adoption listing. The cats narrate their own road trip in first person, s
 
 ## Operating Context
 
-- The cats: siblings, a boy and a girl, about 6–7 months old (autumn 2026).
+- The cats: siblings, a boy and a girl, about 7–9 months old (autumn 2026).
 - Names (chosen after the trip): boy **Velebit** ("Velík"), girl **Poljana** ("Polly").
 - Found in the forest of the Velebit mountains, Croatia, at the family's Airbnb apartment: cold nights, hungry, they came to the door. The host believes someone dumped them there. The family were the last guests of the season and the host doesn't live there, so nobody would have looked after them.
 - Route: Velebit (HR) → stop around Poljana (SI) → Prague (CZ). More stops (e.g. a vet visit) must be easy to add.
